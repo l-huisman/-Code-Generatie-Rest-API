@@ -30,3 +30,40 @@ hs_err_pid*
 # Datasource local storage ignored files
 /dataSources/
 /dataSources.local.xml
+
+# IntelliJ
+out/
+.idea/
+*.iml
+*.ipr
+*.iws
+*.idea
+
+# NetBeans
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+build/
+
+# VS Code
+.vscode/
+
+# Eclipse
+.classpath
+.project
+.settings/
+bin/
+
+# Maven
+target/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+dependency-reduced-pom.xml
+buildNumber.properties
+.mvn/timing.properties
+
