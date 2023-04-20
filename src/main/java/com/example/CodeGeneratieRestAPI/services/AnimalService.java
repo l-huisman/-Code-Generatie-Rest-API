@@ -1,6 +1,6 @@
-package nl.inholland.les1demo.services;
+package com.example.CodeGeneratieRestAPI.services;
 
-import nl.inholland.les1demo.models.Animal;
+import com.example.CodeGeneratieRestAPI.models.Animal;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;

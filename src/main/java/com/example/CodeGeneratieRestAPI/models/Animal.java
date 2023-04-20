@@ -1,4 +1,4 @@
-package nl.inholland.les1demo.models;
+package com.example.CodeGeneratieRestAPI.models;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

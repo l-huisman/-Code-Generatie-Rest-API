@@ -1,10 +1,10 @@
-package nl.inholland.les1demo;
+package com.example.CodeGeneratieRestAPI;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class Les1demoApplicationTests {
+class CodeGeneratieRestApiApplicationTests {
 
 	@Test
 	void contextLoads() {

@@ -1,7 +1,8 @@
-package nl.inholland.les1demo.controllers;
+package com.example.CodeGeneratieRestAPI.controllers;
 
-import nl.inholland.les1demo.models.Animal;
-import nl.inholland.les1demo.services.AnimalService;
+
+import com.example.CodeGeneratieRestAPI.models.Animal;
+import com.example.CodeGeneratieRestAPI.services.AnimalService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;

@@ -8,10 +8,10 @@
 		<version>3.0.5</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
-	<groupId>nl.inholland</groupId>
-	<artifactId>les1demo</artifactId>
+	<groupId>com.example</groupId>
+	<artifactId>Code-Generatie-Rest-API</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>les1demo</name>
+	<name>Code-Generatie-Rest-API</name>
 	<description>Demo project for Spring Boot</description>
 	<properties>
 		<java.version>17</java.version>

@@ -1,3 +1,8 @@
+# Read Me First
+The following was discovered as part of building this project:
+
+* The original package name 'com.example.Code-Generatie-Rest-API' is invalid and this project uses 'com.example.CodeGeneratieRestAPI' instead.
+
 # Getting Started
 
 ### Reference Documentation
