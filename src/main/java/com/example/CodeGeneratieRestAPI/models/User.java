@@ -1,17 +1,19 @@
 package com.example.CodeGeneratieRestAPI.models;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
-import lombok.Getter;
+import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
-@Getter
-@Setter
+@Entity
+@Data
 
 @AllArgsConstructor
 @NoArgsConstructor
 
-public class User {
+@Table(name = "\"users\"")
+public class User extends BaseEntity {
     private int id;
     private String first_name;
     private String last_name;
