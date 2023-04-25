@@ -1,27 +1,35 @@
 package com.example.CodeGeneratieRestAPI.services;
 
 import com.example.CodeGeneratieRestAPI.models.User;
+import com.example.CodeGeneratieRestAPI.repositories.UserRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
 public class UserService {
-    List<User> users = new ArrayList<>();
 
-    public UserService() {
-        users.add(new User(1, "Devon", "van Wichen", "devon", "devon", "650122@student.inholland.nl", "2020-01-01"));
-        users.add(new User(2, "Luke", "Huisman", "luke", "luke", "684651@student.inholland.nl", "2020-01-01"));
-        users.add(new User(3, "Dewi", "Cabret", "dewi", "dewi", "647824@student.inholland.nl", "2020-01-01"));
-    }
+    @Autowired
+    private UserRepository userRepository;
 
     public List<User> getAll() {
-        return users;
+        return (List<User>) userRepository.findAll();
     }
 
-    public User add(User u) {
-        users.add(u);
-        return u;
+    public User add(User user) {
+        return userRepository.save(user);
+    }
+
+    public User update(User user) {
+        return userRepository.save(user);
+    }
+
+    public User getById(long id) {
+        return userRepository.findById(id).get();
+    }
+
+    public void delete(long id) {
+        userRepository.deleteById(id);
     }
 }
