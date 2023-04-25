@@ -14,7 +14,6 @@ import lombok.NoArgsConstructor;
 
 @Table(name = "\"users\"")
 public class User extends BaseEntity {
-    private int id;
     private String first_name;
     private String last_name;
     private String username;
