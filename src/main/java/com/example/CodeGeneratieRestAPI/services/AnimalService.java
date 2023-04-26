@@ -9,7 +9,7 @@ import java.util.List;
 @Service
 public class AnimalService {
 
-    private List<Animal> animals = new ArrayList<>();
+    private final List<Animal> animals = new ArrayList<>();
 
     public AnimalService() {
         animals.add(new Animal(1, "Harambe", "Gorilla"));
