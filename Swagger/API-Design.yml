@@ -1,0 +1,873 @@
+openapi: 3.0.0
+servers:
+  # Added by API Auto Mocking Plugin
+  - description: SwaggerHub API Auto Mocking
+    url: https://virtserver.swaggerhub.com/684651_1/Mr.Banky/1.0.0
+info:
+  description: This is a simple API
+  version: "1.0.0"
+  title: Simple Inventory API
+  contact:
+    email: you@your-company.com
+  license:
+    name: Apache 2.0
+    url: "http://www.apache.org/licenses/LICENSE-2.0.html"
+tags:
+  - name: User
+    description: Operations about user
+  - name: Transaction
+    description: Operations about transaction
+security:
+  - bearerAuth: []  
+paths:
+  /users:
+    get:
+      tags:
+        - User
+      summary: Get all users
+      description: Retrieve all users
+      operationId: getAllUsers
+      responses:
+        "200":
+          description: The requested users
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/User"
+        "400":
+          description: "Invalid data given"
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Error"
+        "401":
+          description: You are unauthorized
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Error"
+        "409":
+          description: Something went wrong
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Error"
+    post:
+      tags:
+        - User
+      summary: Create a new user
+      description: Create a new user
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/User"
+      responses:
+        "201":
+          description: User created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "400":
+          description: "Invalid data given"
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Error"
+        "401":
+          description: You are unauthorized
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Error"
+        "409":
+          description: Something went wrong
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Error"
+  /users/{user_id}:
+    get:
+      tags:
+        - User
+      summary: Get user by id
+      description: Retrieve a user by id
+      operationId: getUserById
+      parameters:
+        - name: user_id
+          in: path
+          description: "The id that needs to be fetched. Use 1 for testing. "
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "200":
+          description: The requested user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "400":
+          description: "Invalid data given"
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Error"
+        "401":
+          description: You are unauthorized
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Error"
+        "409":
+          description: Something went wrong
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Error"
+    put:
+      tags:
+        - User
+      summary: Update user
+      description: Update user
+      operationId: updateUser
+      parameters:
+        - name: user_id
+          in: path
+          description: "The id that needs to be fetched. Use 1 for testing. "
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/User"
+      responses:
+        "200":
+          description: User updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "400":
+          description: "Invalid data given"
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Error"
+        "401":
+          description: You are unauthorized
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Error"
+        "409":
+          description: Something went wrong
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Error"
+    delete:
+      tags:
+        - User
+      summary: Delete user
+      description: Delete user
+      operationId: deleteUser
+      parameters:
+        - name: user_id
+          in: path
+          description: "The id that needs to be fetched. Use 1 for testing. "
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "200":
+          description: User deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "400":
+          description: "Invalid data given"
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Error"
+        "401":
+          description: You are unauthorized
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Error"
+        "409":
+          description: Something went wrong
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Error"
+  /users/login:
+    post:
+      security: []
+      tags:
+        - User
+      summary: Logs user into the system
+      description: Logs user into the system
+      operationId: loginUser
+      parameters:
+        - name: email
+          in: query
+          description: The email for login
+          required: true
+          schema:
+            type: string
+        - name: password
+          in: query
+          description: The password for login in clear text
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: User logged in
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "400":
+          description: "Invalid data given"
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Error"
+        "401":
+          description: You are unauthorized
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Error"
+        "405":
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Error"
+        "409":
+          description: Something went wrong
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Error"
+  /accounts:
+    get:
+      tags:
+        - Admin
+        - Employee
+      summary: Get all accounts
+      description: this can only be done by admins and employees
+      operationId: getAllAccounts
+      responses:
+        "200":
+          description: accounts succesfully retrieved
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Account"
+        "400":
+          description: "No accounts found"
+    post:
+      tags:
+        - Admin
+        - Employee
+        - Customer
+      summary: Add new account
+      description: Add a new account to an existing user
+      operationId: addAccount
+      responses:
+        '201':
+          description: Account created
+        '400':
+          description: 'Invalid input given'
+        '409':
+          description: This account already exists
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Account'
+        description: Account to add
+  /accounts/{accountId}:
+    get:
+      tags:
+        - Admin
+        - Employee
+        - Customer
+      summary: Get account by id
+      description: Get the account by a supplied id
+      operationId: getAccountInfo
+      parameters:
+        - name: accountId
+          in: path
+          description: "The id that needs to be fetched. Use 1 for testing. "
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "200":
+          description: account succesfully retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                items:
+                  $ref: "#/components/schemas/Account"
+        "400":
+          description: "No account found"
+    put:
+      tags:
+        - Admin
+        - Employee
+        - Customer
+      summary: Update account details
+      description: Update the information of the account
+      operationId: updateAccount
+      parameters:
+        - name: accountId
+          in: path
+          description: "The id that needs to be fetched. Use 1 for testing. "
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "201":
+          description: Account updated
+        "400":
+          description: "Invalid data given"
+        "409":
+          description: This account does not exist
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Account"
+        description: Account to update
+    delete:
+      tags:
+        - Admin
+        - Employee
+      summary: Delete account
+      operationId: deleteAccount
+      parameters:
+        - name: accountId
+          in: path
+          description: "The id that needs to be fetched. Use 1 for testing. "
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "201":
+          description: Account deleted
+        "400":
+          description: "Invalid data given"
+        "409":
+          description: This account does not exist
+  /transactions:
+    get:
+      tags:
+        - Transaction
+      summary: Get all transactions
+      description: Retrieve all transactions for all accounts
+      parameters:
+        - in: query
+          name: fromDate
+          schema:
+            type: string
+            format: date-time
+          description: The from date to filter transactions
+        - in: query
+          name: toDate
+          schema:
+            type: string
+            format: date-time
+          description: The to date to filter transactions
+        - in: query
+          name: iban
+          schema:
+            type: string
+          description: The IBAN to search for
+        - in: query
+          name: relation
+          schema:
+            type: integer
+            format: int64
+          description: The relation to filter balances for
+        - in: query
+          name: balance
+          schema:
+            type: string
+          description: The balance to filter for
+      responses:
+        "200":
+          description: The requested transactions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Transaction"
+        "401":
+          description: You are unauthorized
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Error"
+        "409":
+          description: Something went wrong
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Error"
+  /transactions/{id}:
+    get:
+      tags:
+        - Transaction
+      summary: Retrieve a specific transactions
+      description: Retrieve a specific transaction by id
+      parameters:
+        - name: id
+          in: path
+          description: "The id that needs to be fetched. Use 1 for testing. "
+          required: true
+          schema:
+            type: integer
+            format: int64
+          examples:
+            one:
+              value: 1
+              summary: A sample transaction id
+      responses:
+        "200":
+          description: The requested transaction
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Transaction"
+        "401":
+          description: You are unauthorized
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Error"
+        "409":
+          description: Something went wrong
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Error"
+  /transactions/deposit/{accountId}:
+    post:
+        tags:
+          - Transaction
+        summary: Create a deposit transaction
+        description: Create a withdraw transaction
+        parameters:
+        - name: accountId
+          in: path
+          description: "The id of the account to deposit the money on"
+          required: true
+          schema:
+            type: integer
+            format: int64
+          examples:
+            one:
+              value: 1
+              summary: A sample account id
+        requestBody:
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  amount:    
+                    type: number
+                required:
+                  - amount
+        responses:
+          "200":
+            description: The transaction was successful
+            content:
+              application/json:
+                schema:
+                  type: array
+                  items:
+                    $ref: "#/components/schemas/Transaction"
+          "401":
+            description: You are unauthorized
+            content:
+              application/json:
+                schema:
+                  type: array
+                  items:
+                    $ref: "#/components/schemas/Error"
+          "409":
+            description: Something went wrong
+            content:
+              application/json:
+                schema:
+                  type: array
+                  items:
+                    $ref: "#/components/schemas/Error"
+  /transactions/transfer/{accountId}:
+    post:
+        tags:
+          - Transaction
+        summary: Create a transfer transaction
+        description: Create a transfer transaction
+        parameters:
+        - name: accountId
+          in: path
+          description: "The id of the account to transfer the money from"
+          required: true
+          schema:
+            type: integer
+            format: int64
+          examples:
+            one:
+              value: 1
+              summary: A sample account id
+        requestBody:
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  amount:    
+                    type: number
+                  to_account_id:
+                    type: number
+                required:
+                  - amount
+        responses:
+          "200":
+            description: The transaction was successful
+            content:
+              application/json:
+                schema:
+                  type: array
+                  items:
+                    $ref: "#/components/schemas/Transaction"
+          "401":
+            description: You are unauthorized
+            content:
+              application/json:
+                schema:
+                  type: array
+                  items:
+                    $ref: "#/components/schemas/Error"
+          "409":
+            description: Something went wrong
+            content:
+              application/json:
+                schema:
+                  type: array
+                  items:
+                    $ref: "#/components/schemas/Error"
+  /transactions/withdraw/{accountId}:
+    post:
+        tags:
+          - Transaction
+        summary: Create a withdraw transaction
+        description: Create a withdraw transaction
+        parameters:
+        - name: accountId
+          in: path
+          description: "The id of the account to withdraw the money from"
+          required: true
+          schema:
+            type: integer
+            format: int64
+          examples:
+            one:
+              value: 1
+              summary: A sample account id
+        requestBody:
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  amount:    
+                    type: number
+                required:
+                  - amount
+        responses:
+          "200":
+            description: The transaction was successful
+            content:
+              application/json:
+                schema:
+                  type: array
+                  items:
+                    $ref: "#/components/schemas/Transaction"
+          "401":
+            description: You are unauthorized
+            content:
+              application/json:
+                schema:
+                  type: array
+                  items:
+                    $ref: "#/components/schemas/Error"
+          "409":
+            description: Something went wrong
+            content:
+              application/json:
+                schema:
+                  type: array
+                  items:
+                    $ref: "#/components/schemas/Error"
+  /transactions/account/{accountId}:
+    get:
+      tags:
+        - Transaction
+      summary: Retrieve all transactions for account
+      description: Retrieve all transactions for account by id
+      parameters:
+        - name: accountId
+          in: path
+          description: "The id that needs to be fetched. Use 1 for testing. "
+          required: true
+          schema:
+            type: integer
+            format: int64
+          examples:
+            one:
+              value: 1
+              summary: A sample account id
+      responses:
+        "200":
+          description: The requested transactions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Transaction"
+        "401":
+          description: You are unauthorized
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Error"
+        "409":
+          description: Something went wrong
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Error"
+components:
+  schemas:
+    User:
+      type: object
+      required:
+        - id
+        - first_name
+        - last_name
+        - username
+        - password
+        - email
+        - created_at
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 1
+        first_name:
+          type: string
+          example: Luke
+        last_name:
+          type: string
+          example: Huisman
+        username:
+          type: string
+          example: luke
+        password:
+          type: string
+          example: password
+        email:
+          type: string
+          example: 684651@student.inholland.nl
+        created_at:
+          type: string
+          format: date-time
+          example: "2019-10-10T12:00:00Z"
+    Transaction:
+      type: object
+      required:
+        - id
+        - user_id
+        - from_account_id
+        - to_account_id
+        - amount
+        - balance_before
+        - created_at
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 1
+        user_id:
+          type: integer
+          format: int64
+          example: 1
+        from_account_id:
+          type: integer
+          format: int64
+          example: 1
+        to_account_id:
+          type: integer
+          format: int64
+          example: 2
+        amount:
+          type: number
+          example: 20.00
+        transaction_type_id:
+          type: integer
+          format: int64
+          example: 1
+        balance_before:
+          type: number
+          example: 312.69
+        description:
+          type: string
+          example: "Betaling voor broodje kaas"
+        created_at:
+          type: string
+          format: date-time
+          example: "2023-08-29T09:12:33.001Z"
+    Account:
+      type: object
+      required:
+        - id
+        - user_id
+        - iban_number
+        - account_name
+        - daily_limit
+        - transaction_limit
+        - absolute_limit
+        - account_type_id
+        - created_at
+        - balance
+        - is_active
+      properties:
+        id:
+          type: integer
+          example: 435
+        user_id:
+          type: integer
+          example: 3457
+        iban_number:
+          type: string
+          example: "MRBANKIE-4132-6745-3452"
+        account_name:
+          type: string
+          example: "Saving for car"
+        daily_limit:
+          type: number
+          example: 1200
+        transaction_limit:
+          type: number
+          example: 1500
+        absolute_limit:
+          type: number
+          example: 2000
+        account_type_id:
+          type: integer
+          example: 2
+        created_at:
+          type: string
+          example: "2019-06-22T03:12:35.001Z"
+        balance:
+          type: number
+          example: 40000
+        is_active:
+          type: boolean
+          example: true
+    Error:
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: integer
+          format: int32
+        message:
+          type: string
+  securitySchemes:
+    bearerAuth:            
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
