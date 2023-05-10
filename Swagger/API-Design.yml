@@ -563,7 +563,7 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/Error"
-  /transactions/{accountId}:
+  /transactions/accounts/{accountId}:
     get:
       tags:
         - Transaction
