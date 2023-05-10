@@ -56,6 +56,10 @@ build/
 .settings/
 bin/
 
+# DS_Store
+.DS_store
+
+
 # Maven
 target/
 pom.xml.tag
