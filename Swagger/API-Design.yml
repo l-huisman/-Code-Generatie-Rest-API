@@ -27,6 +27,19 @@ paths:
       summary: Get all users
       description: Retrieve all users
       operationId: getAllUsers
+      parameters:
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            format: int64
+          description: The limit for the max amount of accounts
+        - in: query
+          name: offset
+          schema:
+            type: integer
+            format: int64
+          description: The offset for the amount of accounts
       responses:
         "200":
           description: The requested users
@@ -63,8 +76,14 @@ paths:
     post:
       tags:
         - User
-      summary: Create a new user
-      description: Create a new user
+      summary: Create a new user or login
+      description: Create a new user or login
+      parameters:
+        - in: query
+          name: login
+          schema:
+              type: boolean
+          description: If true, the user will be logged in
       requestBody:
         content:
           application/json:
@@ -311,6 +330,19 @@ paths:
       summary: Get all accounts
       description: this can only be done by admins and employees
       operationId: getAllAccounts
+      parameters:
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            format: int64
+          description: The limit for the max amount of accounts
+        - in: query
+          name: offset
+          schema:
+            type: integer
+            format: int64
+          description: The offset for the amount of accounts
       responses:
         "200":
           description: accounts succesfully retrieved
@@ -433,13 +465,13 @@ paths:
       description: Retrieve all transactions for all accounts
       parameters:
         - in: query
-          name: fromDate
+          name: from_date
           schema:
             type: string
             format: date-time
           description: The from date to filter transactions
         - in: query
-          name: toDate
+          name: to_date
           schema:
             type: string
             format: date-time
@@ -450,16 +482,28 @@ paths:
             type: string
           description: The IBAN to search for
         - in: query
-          name: relation
+          name: transaction_type_id
           schema:
             type: integer
             format: int64
-          description: The relation to filter balances for
+          description: The transaction_type_id to filter transactions for
         - in: query
           name: balance
           schema:
             type: string
           description: The balance to filter for
+        - in: query
+          name: limit
+          schema:
+              type: integer
+              format: int64
+          description: The limit for the max amount of transactions
+        - in: query
+          name: offset
+          schema:
+            type: integer
+            format: int64
+          description: The offset for the amount of transactions
       responses:
         "200":
           description: The requested transactions
@@ -615,8 +659,8 @@ components:
         - first_name
         - last_name
         - username
-        - password
         - email
+        - user_type_id
         - created_at
       properties:
         id:
@@ -632,12 +676,13 @@ components:
         username:
           type: string
           example: luke
-        password:
-          type: string
-          example: password
         email:
           type: string
           example: 684651@student.inholland.nl
+        user_type_id:
+          type: integer
+          format: int64
+          example: 1
         created_at:
           type: string
           format: date-time
@@ -650,6 +695,7 @@ components:
         - username
         - password
         - email
+        - user_type_id
         - created_at
       properties:
         id:
@@ -671,6 +717,10 @@ components:
         email:
           type: string
           example: 684651@student.inholland.nl
+        user_type_id:
+          type: integer
+          format: int64
+          example: 1
         created_at:
           type: string
           format: date-time
