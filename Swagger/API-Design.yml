@@ -725,7 +725,7 @@ components:
       required:
         - user_id
         - from_account_id
-        - to_account_id
+        - to_iban
         - amount
         - transaction_type_id
         - balance_before
@@ -743,7 +743,7 @@ components:
           type: integer
           format: int64
           example: 1
-        to_account_id:
+        to_iban:
           type: integer
           format: int64
           example: 2
