@@ -24,7 +24,7 @@ public class Transaction extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="FROM_ACCOUNT_ID", nullable=true)
-    private Account from_account;
+    private Account fromAccount;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="TO_ACCOUNT_ID", nullable=true)
