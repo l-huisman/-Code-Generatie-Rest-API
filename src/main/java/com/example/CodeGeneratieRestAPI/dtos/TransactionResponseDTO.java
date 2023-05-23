@@ -1,10 +1,9 @@
 package com.example.CodeGeneratieRestAPI.dtos;
 
 import com.example.CodeGeneratieRestAPI.models.TransactionType;
-import lombok.Data;
 
-@Data
-public class TransactionRequestDTO {
+public class TransactionResponseDTO {
+    private long id;
     private long fromAccountIban;
     private long toAccountIban;
     private TransactionType transactionType;
