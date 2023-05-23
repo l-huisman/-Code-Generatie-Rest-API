@@ -29,9 +29,9 @@ public class UserController {
         return userService.add(user);
     }
 
-    @DeleteMapping("/{id}")
-    public void delete(@PathVariable long id) {
-        userService.delete(id);
+    @PostMapping("/login")
+    public User login(@RequestBody User user) {
+        return userService.login(user);
     }
 
     @PutMapping("/{id}")
@@ -40,4 +40,8 @@ public class UserController {
         return userService.update(user);
     }
 
+    @DeleteMapping("/{id}")
+    public void delete(@PathVariable long id) {
+        userService.delete(id);
+    }
 }
