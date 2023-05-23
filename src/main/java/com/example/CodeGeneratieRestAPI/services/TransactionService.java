@@ -3,11 +3,14 @@ package com.example.CodeGeneratieRestAPI.services;
 import com.example.CodeGeneratieRestAPI.dtos.TransactionRequestDTO;
 import com.example.CodeGeneratieRestAPI.models.Account;
 import com.example.CodeGeneratieRestAPI.models.Transaction;
+import com.example.CodeGeneratieRestAPI.models.TransactionType;
 import com.example.CodeGeneratieRestAPI.repositories.AccountRepository;
 import com.example.CodeGeneratieRestAPI.repositories.TransactionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
+import org.springframework.web.bind.annotation.RequestBody;
+import org.modelmapper.ModelMapper;
+import org.modelmapper.config.Configuration;
 import java.util.List;
 
 @Service
@@ -23,22 +26,40 @@ public class TransactionService {
         return (List<Transaction>) transactionRepository.findAll();
     }
 
-    public Transaction add(TransactionRequestDTO transaction) {
-        Account fromAccount = accountRepository.findById(transaction.getFromAccountId()).get();
+    public Transaction add(Transaction transaction) {
+        Account fromAccount = accountRepository.findByIban(transaction.getFromAccountIban());
 
-        if (fromAccount.getBalance() < transaction.getAmount()) {
+        if (fromAccount.getBalance() + fromAccount.getAbsolute_limit() < transaction.getAmount()) {
             throw new RuntimeException("This account does not have enough balance to complete this transaction.");
+        }
+
+        //Check negative amount
+        if (transaction.getAmount() < 0) {
+            throw new RuntimeException("The transaction amount can not be negative.");
         }
 
         //Check if the user owns this account or is an admin
 
-        //Check if the account is a savings account and if the transaction is not a deposit
+        //Check if the account is a savings account and if the transaction is a deposit
+        if (fromAccount.getIs_savings() && transaction.getTransactionType() != TransactionType.WITHDRAW) {
+            throw new RuntimeException("A savings account can not be used for withdraws.");
+        }
 
         //Check if the transaction is a transfer and if there is a toAccountId
+        if (transaction.getTransactionType() == TransactionType.TRANSFER && transaction.getToAccountIban() == null) {
+            throw new RuntimeException("A transfer transaction requires a toAccountId.");
+        }
 
         //Check if the transaction amount didn't exceed the transaction limit
+        if (fromAccount.getTransaction_limit() < transaction.getAmount()) {
+            throw new RuntimeException("The daily limit for this account has been exceeded.");
+        }
 
         //Check if the transaction amount didn't exceed the total limit
+//        if (fromAccount.getDaily_limit() < transaction.getAmount()) {
+//            throw new RuntimeException("This account does not have enough balance to complete this transaction.");
+//        }
+
 
         Transaction out = new Transaction();
 
@@ -49,7 +70,7 @@ public class TransactionService {
         return transactionRepository.findById(id).get();
     }
 
-    public Transaction getByAccountId(long accountId) {
-        return transactionRepository.findByFromAccountId(accountId);
+    public List<Transaction> getAllByAccountIban(String iban) {
+        return transactionRepository.findAllByFromAccountIban(iban);
     }
 }

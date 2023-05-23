@@ -14,21 +14,15 @@ import org.springframework.data.annotation.Id;
 
 @Table(name = "\"transactions\"")
 public class Transaction extends BaseEntity {
-    @Id
-    @GeneratedValue(strategy=GenerationType.TABLE)
-    private Integer id;
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="USER_ID", nullable=true)
     private User user;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name="FROM_ACCOUNT_ID", nullable=true)
-    private Account fromAccount;
+    @Column(name="from_account_iban")
+    private String fromAccountIban;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name="TO_ACCOUNT_ID", nullable=true)
-    private Account to_account;
+    @Column(name="to_account_iban")
+    private String toAccountIban;
 
     @Enumerated(EnumType.STRING)
     @Column(name="transactionType")
@@ -38,5 +32,7 @@ public class Transaction extends BaseEntity {
     private String description;
     private Float amount;
     private Float balance_before;
-    private String created_at;
+
+    @Column(name="created_at")
+    private String createdAt;
 }
