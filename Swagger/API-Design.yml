@@ -378,7 +378,6 @@ paths:
   /accounts/{accountId}:
     get:
       tags:
-        - Admin
         - Employee
         - Customer
         - Account
@@ -406,7 +405,6 @@ paths:
           description: "No account found"
     put:
       tags:
-        - Admin
         - Employee
         - Customer
         - Account
