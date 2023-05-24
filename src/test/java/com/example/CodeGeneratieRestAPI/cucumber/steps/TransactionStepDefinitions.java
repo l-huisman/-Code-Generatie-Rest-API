@@ -45,9 +45,12 @@ public class TransactionStepDefinitions extends BaseStepDefinitions {
 
     @When("^I retrieve all transactions$")
     public void iRetrieveAllTransactions() {
+        response = restTemplate.exchange(restTemplate.getRootUri() + "/transactions", HttpMethod.GET, new HttpEntity<>(null, new HttpHeaders()), String.class);
     }
 
     @Then("^I should receive all transactions$")
     public void iShouldReceiveAllTransactions() {
+        int actual = JsonPath.read(response.getBody(), "$.size()");
+        Assertions.assertEquals(1, actual);
     }
 }
