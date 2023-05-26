@@ -3,24 +3,22 @@ package com.example.CodeGeneratieRestAPI.controllers;
 import com.example.CodeGeneratieRestAPI.dtos.TransactionRequestDTO;
 import com.example.CodeGeneratieRestAPI.dtos.TransactionResponseDTO;
 import com.example.CodeGeneratieRestAPI.models.Transaction;
-import com.example.CodeGeneratieRestAPI.models.User;
 import com.example.CodeGeneratieRestAPI.services.TransactionService;
-import com.example.CodeGeneratieRestAPI.services.UserService;
+import org.modelmapper.ModelMapper;
+import org.modelmapper.config.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Arrays;
 import java.util.List;
-import org.modelmapper.ModelMapper;
-import org.modelmapper.config.Configuration;
+
 @RestController
 @RequestMapping("/transactions")
 public class TransactionController {
 
+    ModelMapper modelMapper;
     @Autowired
     private TransactionService transactionService;
-
-    ModelMapper modelMapper;
 
     public TransactionController() {
         modelMapper = new ModelMapper();

@@ -1,5 +1,7 @@
 package com.example.CodeGeneratieRestAPI.controllers;
 
+import com.example.CodeGeneratieRestAPI.dtos.LoginRequestDTO;
+import com.example.CodeGeneratieRestAPI.dtos.LoginResponseDTO;
 import com.example.CodeGeneratieRestAPI.models.User;
 import com.example.CodeGeneratieRestAPI.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,12 +32,12 @@ public class UserController {
     }
 
     @PostMapping("/login")
-    public User login(@RequestBody User user) {
-        return userService.login(user);
+    public LoginResponseDTO login(@RequestBody LoginRequestDTO request) {
+        return userService.login(request);
     }
 
     @PutMapping("/{id}")
-    public User update(@PathVariable long id, @RequestBody User user) {
+    public User update(@PathVariable Integer id, @RequestBody User user) {
         user.setId(id);
         return userService.update(user);
     }
