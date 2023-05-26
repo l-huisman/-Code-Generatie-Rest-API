@@ -1,9 +1,6 @@
 package com.example.CodeGeneratieRestAPI.cucumber.steps;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.jayway.jsonpath.JsonPath;
-import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
@@ -19,15 +16,14 @@ import java.util.Arrays;
 import java.util.List;
 
 public class TransactionStepDefinitions extends BaseStepDefinitions {
+    private final HttpHeaders httpHeaders = new HttpHeaders();
     @Autowired
     private TestRestTemplate restTemplate;
-
-    private final HttpHeaders httpHeaders = new HttpHeaders();
-
     private ResponseEntity<String> response;
 
     @Autowired
     private ObjectMapper mapper;
+
     @Given("The endpoint for {string} is available for method {string}")
     public void theEndpointForIsAvailableForMethod(String endpoint, String method) throws Throwable {
         response = restTemplate
