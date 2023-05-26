@@ -4,7 +4,6 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.data.annotation.Id;
 
 import java.util.List;
 
@@ -15,13 +14,13 @@ import java.util.List;
 @NoArgsConstructor
 
 @Table(name = "\"accounts\"")
-public class Account extends BaseEntity {
+public class Account {
     @Id
-    @GeneratedValue(strategy=GenerationType.TABLE)
+    @GeneratedValue(strategy = GenerationType.TABLE)
     private Integer id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name="USER_ID", nullable=true)
+    @JoinColumn(name = "USER_ID", nullable = true)
     private User user;
 
     private String iban;
@@ -34,6 +33,6 @@ public class Account extends BaseEntity {
     private String created_at;
     private Boolean is_active;
 
-    @OneToMany(cascade=CascadeType.ALL, mappedBy="Account")
-    private List<Transaction> transactions ;
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "Account")
+    private List<Transaction> transactions;
 }

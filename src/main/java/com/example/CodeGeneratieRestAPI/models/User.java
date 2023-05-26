@@ -4,7 +4,6 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.data.annotation.Id;
 
 import java.util.List;
 
@@ -15,9 +14,9 @@ import java.util.List;
 @NoArgsConstructor
 
 @Table(name = "\"users\"")
-public class User extends BaseEntity {
+public class User {
     @Id
-    @GeneratedValue(strategy=GenerationType.TABLE)
+    @GeneratedValue(strategy = GenerationType.TABLE)
     private Integer id;
 
     private String first_name;
@@ -26,15 +25,17 @@ public class User extends BaseEntity {
     private String password;
     private String email;
 
+
     @Enumerated(EnumType.STRING)
-    @Column(name="userType")
-    private UserType userType;
+    @Column(name = "userType")
+    @ElementCollection(fetch = FetchType.EAGER)
+    private List<UserType> userType;
 
     private String created_at;
 
-    @OneToMany(cascade= CascadeType.ALL, mappedBy="User")
-    private List<Account> accounts ;
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "User")
+    private List<Account> accounts;
 
-    @OneToMany(cascade= CascadeType.ALL, mappedBy="User")
-    private List<Transaction> transactions ;
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "User")
+    private List<Transaction> transactions;
 }
