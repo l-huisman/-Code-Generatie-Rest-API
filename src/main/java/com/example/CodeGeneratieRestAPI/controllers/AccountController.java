@@ -2,7 +2,6 @@ package com.example.CodeGeneratieRestAPI.controllers;
 
 import com.example.CodeGeneratieRestAPI.dtos.AccountRequestDTO;
 import com.example.CodeGeneratieRestAPI.dtos.AccountResponseDTO;
-import com.example.CodeGeneratieRestAPI.models.Account;
 import com.example.CodeGeneratieRestAPI.services.AccountService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -16,9 +15,10 @@ import org.springframework.web.bind.annotation.RestController;
 public class AccountController {
     @Autowired
     private AccountService accountService;
+
     @PostMapping
     public AccountResponseDTO add(@RequestBody AccountRequestDTO account) {
-        try{
+        try {
             return accountService.add(account);
         } catch (Exception e) {
             //TODO: handle exception
@@ -26,10 +26,11 @@ public class AccountController {
             return null;
         }
     }
+
     //  Get the balance of all active accounts combined
     @GetMapping
     public Float getAllActiveAccountsBalanceByUserId(@RequestBody Long userId) {
-        try{
+        try {
             return accountService.getAllActiveAccountsBalanceByUserId(userId);
         } catch (Exception e) {
             //TODO: handle exception
@@ -37,10 +38,11 @@ public class AccountController {
             return null;
         }
     }
+
     //  Get the balance of all active AND non-active accounts combined
     @GetMapping
     public Float getAllAccountsBalanceByUserId(@RequestBody Long userId) {
-        try{
+        try {
             return accountService.getAllAccountsBalanceByUserId(userId);
         } catch (Exception e) {
             //TODO: handle exception
@@ -48,6 +50,7 @@ public class AccountController {
             return null;
         }
     }
+
     @GetMapping
     public Float getBalance(@RequestBody String iban) {
         try {

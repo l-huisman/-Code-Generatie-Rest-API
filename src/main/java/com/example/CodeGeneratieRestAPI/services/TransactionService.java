@@ -24,7 +24,7 @@ public class TransactionService {
     }
 
     public Transaction add(Transaction transaction) {
-        Account fromAccount = accountRepository.findByIban(transaction.getFromAccountIban());
+        Account fromAccount = accountRepository.findByIban(transaction.getFromAccount().getIban());
 
         if (fromAccount.getBalance() + fromAccount.getAbsoluteLimit() < transaction.getAmount()) {
             throw new RuntimeException("This account does not have enough balance to complete this transaction.");
@@ -43,7 +43,7 @@ public class TransactionService {
         }
 
         //Check if the transaction is a transfer and if there is a toAccountId
-        if (transaction.getTransactionType() == TransactionType.TRANSFER && transaction.getToAccountIban() == null) {
+        if (transaction.getTransactionType() == TransactionType.TRANSFER && transaction.getToAccount().getIban() == null) {
             throw new RuntimeException("A transfer transaction requires a toAccountId.");
         }
 

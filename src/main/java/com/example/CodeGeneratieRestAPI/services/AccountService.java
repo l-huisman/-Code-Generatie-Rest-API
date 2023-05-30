@@ -3,13 +3,11 @@ package com.example.CodeGeneratieRestAPI.services;
 import com.example.CodeGeneratieRestAPI.dtos.AccountRequestDTO;
 import com.example.CodeGeneratieRestAPI.dtos.AccountResponseDTO;
 import com.example.CodeGeneratieRestAPI.helpers.ServiceHelper;
-import com.example.CodeGeneratieRestAPI.interfaces.IRepositoryModel;
 import com.example.CodeGeneratieRestAPI.models.Account;
 import com.example.CodeGeneratieRestAPI.models.User;
 import com.example.CodeGeneratieRestAPI.repositories.AccountRepository;
 import com.example.CodeGeneratieRestAPI.repositories.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
-import org.hibernate.ObjectNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -46,6 +44,7 @@ public class AccountService {
         ZoneId zone = ZoneId.of("Europe/Amsterdam");
         return LocalDateTime.now(zone).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
     }
+
     private Boolean checkIfAccountRequestDTOIsValid(AccountRequestDTO accountRequestDTO) {
         if (accountRequestDTO == null) {
             throw new IllegalArgumentException("AccountRequest object is null");
@@ -82,15 +81,17 @@ public class AccountService {
         //  If the user has no accounts, return 0
         return allActiveAccountsBalance != null ? allActiveAccountsBalance : 0;
     }
-    public Float getAllAccountsBalanceByUserId(Long userId){
-        if (!ServiceHelper.checkIfObjectExistsByIdentifier(userId, User.class)){
+
+    public Float getAllAccountsBalanceByUserId(Long userId) {
+        if (!ServiceHelper.checkIfObjectExistsByIdentifier(userId, User.class)) {
             throw new EntityNotFoundException("User with id " + userId + " does not exist");
         }
         Float balance = accountRepository.getAllAccountsBalanceByUserId(userId);
-        return  balance != null ? balance : 0;
+        return balance != null ? balance : 0;
     }
-    public Float getBalance(String iban){
-        if (!ServiceHelper.checkIfObjectExistsByIdentifier(iban, Account.class)){
+
+    public Float getBalance(String iban) {
+        if (!ServiceHelper.checkIfObjectExistsByIdentifier(iban, Account.class)) {
             throw new EntityNotFoundException("Account with IBAN " + iban + " does not exist");
         }
         Float balance = accountRepository.getBalance(iban);

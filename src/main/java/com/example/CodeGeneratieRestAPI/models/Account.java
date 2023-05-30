@@ -1,19 +1,10 @@
 package com.example.CodeGeneratieRestAPI.models;
 
 import com.example.CodeGeneratieRestAPI.dtos.AccountRequestDTO;
-import com.example.CodeGeneratieRestAPI.interfaces.IRepositoryModel;
-import com.example.CodeGeneratieRestAPI.repositories.AccountRepository;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.Getter;
 import lombok.NoArgsConstructor;
-
-import lombok.Setter;
-import org.springframework.context.annotation.Primary;
-import org.springframework.data.annotation.Id;
-
-
 
 import java.util.List;
 
@@ -24,24 +15,18 @@ import java.util.List;
 
 @Table(name = "\"accounts\"")
 
-public class Account  {
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+public class Account {
+    @Id
+    @GeneratedValue(strategy = GenerationType.TABLE)
+    private Integer id;
+    @Column(unique = true)
     private String iban;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "USER_ID", nullable = true)
     private User user;
     // The User object can optionally be filled, but the userId is always filled
+    @Column(name = "USER_ID", nullable = true, insertable = false, updatable = false)
     private Integer userId;
-    public Integer getUserId() {
-        if (user != null) {
-            return user.getId();
-        }
-        return userId;
-    }
-    public void setUserId(Integer userId) {
-        this.userId = userId;
-    }
-
     private String name;
     private Float dailyLimit;
     private Float transactionLimit;
@@ -50,10 +35,10 @@ public class Account  {
     private Boolean isSavings;
     private String createdAt;
     private Boolean isActive;
-
-    @OneToMany(cascade=CascadeType.ALL, mappedBy="Account")
-    private List<Transaction> transactions ;
-
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "fromAccount")
+    private List<Transaction> sentTransactions;
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "fromAccount")
+    private List<Transaction> receivedTransactions;
     // A constructor for Account that takes an AccountRequestDTO
     public Account(AccountRequestDTO accountRequestDTO) {
         this.userId = accountRequestDTO.getUserId();
@@ -79,5 +64,16 @@ public class Account  {
         this.isSavings = accountRequestDTO.getIsSavings();
         this.isActive = accountRequestDTO.getIsActive();
         this.user = user;
+    }
+
+    public Integer getUserId() {
+        if (user != null) {
+            return user.getId();
+        }
+        return userId;
+    }
+
+    public void setUserId(Integer userId) {
+        this.userId = userId;
     }
 }
