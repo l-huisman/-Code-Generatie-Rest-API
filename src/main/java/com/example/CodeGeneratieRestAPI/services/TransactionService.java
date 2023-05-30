@@ -1,6 +1,5 @@
 package com.example.CodeGeneratieRestAPI.services;
 
-import com.example.CodeGeneratieRestAPI.dtos.TransactionRequestDTO;
 import com.example.CodeGeneratieRestAPI.models.Account;
 import com.example.CodeGeneratieRestAPI.models.Transaction;
 import com.example.CodeGeneratieRestAPI.models.TransactionType;
@@ -8,9 +7,7 @@ import com.example.CodeGeneratieRestAPI.repositories.AccountRepository;
 import com.example.CodeGeneratieRestAPI.repositories.TransactionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.modelmapper.ModelMapper;
-import org.modelmapper.config.Configuration;
+
 import java.util.List;
 
 @Service

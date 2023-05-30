@@ -8,9 +8,12 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+
 import lombok.Setter;
 import org.springframework.context.annotation.Primary;
 import org.springframework.data.annotation.Id;
+
+
 
 import java.util.List;
 
@@ -20,11 +23,12 @@ import java.util.List;
 @NoArgsConstructor
 
 @Table(name = "\"accounts\"")
-public class Account extends BaseEntity {
+
+public class Account  {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private String iban;
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name="USER_ID", nullable=true)
+    @JoinColumn(name = "USER_ID", nullable = true)
     private User user;
     // The User object can optionally be filled, but the userId is always filled
     private Integer userId;
