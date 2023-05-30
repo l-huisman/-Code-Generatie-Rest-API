@@ -18,7 +18,7 @@ tags:
   - name: Transaction
     description: Operations about transaction
 security:
-  - bearerAuth: []  
+  - bearerAuth: []
 paths:
   /users:
     get:
@@ -82,7 +82,7 @@ paths:
         - in: query
           name: login
           schema:
-              type: boolean
+            type: boolean
           description: If true, the user will be logged in
       requestBody:
         content:
@@ -233,10 +233,6 @@ paths:
       responses:
         "200":
           description: User deleted
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/UserResponse"
         "400":
           description: "Invalid data given"
           content:
@@ -324,7 +320,6 @@ paths:
   /accounts:
     get:
       tags:
-        - Admin
         - Employee
         - Account
       summary: Get all accounts
@@ -343,6 +338,11 @@ paths:
             type: integer
             format: int64
           description: The offset for the amount of accounts
+        - in: query
+          name: search
+          schema:
+            type: string
+          description: Search
       responses:
         "200":
           description: accounts succesfully retrieved
@@ -356,7 +356,6 @@ paths:
           description: "No accounts found"
     post:
       tags:
-        - Admin
         - Employee
         - Customer
         - Account
@@ -379,7 +378,6 @@ paths:
   /accounts/{accountId}:
     get:
       tags:
-        - Admin
         - Employee
         - Customer
         - Account
@@ -407,7 +405,6 @@ paths:
           description: "No account found"
     put:
       tags:
-        - Admin
         - Employee
         - Customer
         - Account
@@ -437,7 +434,6 @@ paths:
         description: Account to update
     delete:
       tags:
-        - Admin
         - Employee
         - Account
       summary: Delete account
@@ -451,7 +447,7 @@ paths:
             type: integer
             format: int64
       responses:
-        "201":
+        "200":
           description: Account deleted
         "400":
           description: "Invalid data given"
@@ -495,8 +491,8 @@ paths:
         - in: query
           name: limit
           schema:
-              type: integer
-              format: int64
+            type: integer
+            format: int64
           description: The limit for the max amount of transactions
         - in: query
           name: offset
@@ -530,40 +526,48 @@ paths:
                 items:
                   $ref: "#/components/schemas/Error"
     post:
-        tags:
-          - Transaction
-        summary: Create a transaction
-        description: Create a transaction
-        requestBody:
+      tags:
+        - Transaction
+      summary: Create a transaction
+      description: Create a transaction
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TransactionRequest"
+      responses:
+        "200":
+          description: The transaction was successful
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/TransactionRequest"
-        responses:
-          "200":
-            description: The transaction was successful
-            content:
-              application/json:
-                schema:
-                  type: array
-                  items:
-                    $ref: "#/components/schemas/TransactionResponse"
-          "401":
-            description: You are unauthorized
-            content:
-              application/json:
-                schema:
-                  type: array
-                  items:
-                    $ref: "#/components/schemas/Error"
-          "409":
-            description: Something went wrong
-            content:
-              application/json:
-                schema:
-                  type: array
-                  items:
-                    $ref: "#/components/schemas/Error"
+                type: array
+                items:
+                  $ref: "#/components/schemas/TransactionResponse"
+        "401":
+          description: You are unauthorized
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Error"
+        "409":
+          description: Something went wrong
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Error"
+        "400":
+          description: Bad input parameter
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Error"
   /transactions/{id}:
     get:
       tags:
@@ -607,16 +611,16 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/Error"
-  /transactions/accounts/{accountId}:
+  /transactions/accounts/{iban}:
     get:
       tags:
         - Transaction
       summary: Retrieve all transactions for account
       description: Retrieve all transactions for account by id
       parameters:
-        - name: accountId
+        - name: iban
           in: path
-          description: "The id that needs to be fetched. Use 1 for testing. "
+          description: "The iban that needs to be fetched. Use 1 for testing. "
           required: true
           schema:
             type: integer
@@ -696,7 +700,6 @@ components:
         - password
         - email
         - user_type_id
-        - created_at
       properties:
         id:
           type: integer
@@ -728,7 +731,6 @@ components:
     TransactionResponse:
       type: object
       required:
-        - id
         - user_id
         - from_account_id
         - to_account_id
@@ -817,7 +819,6 @@ components:
     AccountResponse:
       type: object
       required:
-        - id
         - user_id
         - iban_number
         - account_name
@@ -921,7 +922,7 @@ components:
         message:
           type: string
   securitySchemes:
-    bearerAuth:            
+    bearerAuth:
       type: http
       scheme: bearer
       bearerFormat: JWT
