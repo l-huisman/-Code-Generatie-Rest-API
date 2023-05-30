@@ -18,7 +18,7 @@ tags:
   - name: Transaction
     description: Operations about transaction
 security:
-  - bearerAuth: []
+  - bearerAuth: [ ]
 paths:
   /users:
     get:

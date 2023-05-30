@@ -1,6 +1,5 @@
 package com.example.CodeGeneratieRestAPI.configuration;
 
-import com.example.CodeGeneratieRestAPI.models.Transaction;
 import com.example.CodeGeneratieRestAPI.services.TransactionService;
 import com.example.CodeGeneratieRestAPI.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;

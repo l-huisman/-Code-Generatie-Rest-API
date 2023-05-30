@@ -57,8 +57,7 @@ build/
 bin/
 
 # DS_Store
-.DS_store
-
+.DS_Store
 
 # Maven
 target/
@@ -70,4 +69,3 @@ release.properties
 dependency-reduced-pom.xml
 buildNumber.properties
 .mvn/timing.properties
-.DS_Store
