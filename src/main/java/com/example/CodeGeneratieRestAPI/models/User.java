@@ -1,5 +1,6 @@
 package com.example.CodeGeneratieRestAPI.models;
 
+import com.example.CodeGeneratieRestAPI.interfaces.IRepositoryModel;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -15,7 +16,7 @@ import java.util.List;
 @NoArgsConstructor
 
 @Table(name = "\"users\"")
-public class User extends BaseEntity {
+public class User extends BaseEntity implements IRepositoryModel {
     @Id
     @GeneratedValue(strategy=GenerationType.TABLE)
     private Integer id;
@@ -37,4 +38,10 @@ public class User extends BaseEntity {
 
     @OneToMany(cascade= CascadeType.ALL, mappedBy="User")
     private List<Transaction> transactions ;
+
+    @Override
+    public <Integer> boolean checkIfObjectExistsByIdentifier(Integer object) {
+        //TODO: Implement this
+        return false;
+    }
 }

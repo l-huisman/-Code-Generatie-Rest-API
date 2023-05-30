@@ -18,11 +18,13 @@ public class Transaction extends BaseEntity {
     @JoinColumn(name="USER_ID", nullable=true)
     private User user;
 
-    @Column(name="from_account_iban")
-    private String fromAccountIban;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name="iban", nullable=false)
+    private Account fromAccount;
 
-    @Column(name="to_account_iban")
-    private String toAccountIban;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name="iban", nullable=true)
+    private Account toAccount;
 
     @Enumerated(EnumType.STRING)
     @Column(name="transactionType")

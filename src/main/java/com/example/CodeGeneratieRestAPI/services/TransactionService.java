@@ -29,7 +29,7 @@ public class TransactionService {
     public Transaction add(Transaction transaction) {
         Account fromAccount = accountRepository.findByIban(transaction.getFromAccountIban());
 
-        if (fromAccount.getBalance() + fromAccount.getAbsolute_limit() < transaction.getAmount()) {
+        if (fromAccount.getBalance() + fromAccount.getAbsoluteLimit() < transaction.getAmount()) {
             throw new RuntimeException("This account does not have enough balance to complete this transaction.");
         }
 
@@ -41,7 +41,7 @@ public class TransactionService {
         //Check if the user owns this account or is an admin
 
         //Check if the account is a savings account and if the transaction is a deposit
-        if (fromAccount.getIs_savings() && transaction.getTransactionType() != TransactionType.WITHDRAW) {
+        if (fromAccount.getIsSavings() && transaction.getTransactionType() != TransactionType.WITHDRAW) {
             throw new RuntimeException("A savings account can not be used for withdraws.");
         }
 
@@ -51,7 +51,7 @@ public class TransactionService {
         }
 
         //Check if the transaction amount didn't exceed the transaction limit
-        if (fromAccount.getTransaction_limit() < transaction.getAmount()) {
+        if (fromAccount.getTransactionLimit() < transaction.getAmount()) {
             throw new RuntimeException("The daily limit for this account has been exceeded.");
         }
 
