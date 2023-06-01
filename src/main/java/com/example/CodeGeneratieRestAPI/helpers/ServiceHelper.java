@@ -14,7 +14,7 @@ public class ServiceHelper {
     @Autowired
     private static UserRepository userRepository;
     @Autowired
-    private TransactionRepository transactionRepository;
+    private static TransactionRepository transactionRepository;
 
     public static <T, U> boolean checkIfObjectExistsByIdentifier(T identifier, U objectDataType) {
         switch (objectDataType.getClass().getSimpleName()) {
@@ -22,6 +22,8 @@ public class ServiceHelper {
                 return accountRepository.checkIfIbanIsValid((String) identifier);
             case "User":
                 return userRepository.existsById((Long) identifier);
+            case "Transaction":
+                return transactionRepository.existsById((Long) identifier);
             default:
                 throw new IllegalArgumentException("Object type is not valid");
         }

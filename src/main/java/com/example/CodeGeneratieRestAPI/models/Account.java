@@ -6,6 +6,11 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 @Entity
@@ -75,5 +80,65 @@ public class Account {
 
     public void setUserId(Integer userId) {
         this.userId = userId;
+    }
+
+    public Float updateBalance(Float amount) {
+        try{
+            if (this.balance == null ) {
+                throw new IllegalStateException("Account balance is not set");
+            }
+             if (checkIfAmountIsHigherThanLimits(amount)){
+                 this.balance = this.balance + amount;
+             }
+
+            return this.balance;
+        } catch (ParseException e) {
+            throw new IllegalStateException("Invalid date format");
+        } catch (Exception e) {
+            throw e;
+        }
+
+    }
+    private boolean checkIfAmountIsHigherThanLimits(Float amount) throws ParseException {
+        // Check if the amount is higher than the transaction limit
+        if (amount > this.transactionLimit){
+            throw new IllegalArgumentException("Transaction amount exceeds the transaction limit, the limit is: " + this.transactionLimit);
+        }
+        // Check if the amount is higher than or exceeds the daily limit (including the amount already spent today)
+        if (amount > this.dailyLimit || (getAmountSpentToday() + amount) > this.dailyLimit){
+            throw new IllegalArgumentException("Transaction amount exceeds the daily limit, the limit is: " + this.dailyLimit);
+        }
+        // Check if the amount change exceeds the absolute limit
+        if ((this.balance - amount) < this.absoluteLimit){
+            throw new IllegalArgumentException("Transaction amount exceeds the absolute limit, the limit is: " + this.absoluteLimit + " the current balance is: " + this.balance);
+        }
+
+        return true;
+    }
+    private Float getAmountSpentToday() throws ParseException {
+        List<Transaction> allTransactions = this.getAllTransactions();
+
+        Float amountSpentToday = 0.0f;
+
+        // Create a date format to compare the dates
+        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+
+        // Get the current date
+        Date currentDate = new Date();
+
+        // Loop through all the transactions and check if the date is the same as the current date
+        for (Transaction transaction : allTransactions) {
+            if (currentDate.compareTo(dateFormat.parse(transaction.getCreatedAt())) == 0) {
+                amountSpentToday += transaction.getAmount();
+            }
+
+        }
+        return amountSpentToday;
+    }
+    private List<Transaction> getAllTransactions() {
+        List<Transaction> allTransactions = new ArrayList<>();
+        allTransactions.addAll(this.sentTransactions);
+        allTransactions.addAll(this.receivedTransactions);
+        return allTransactions;
     }
 }
