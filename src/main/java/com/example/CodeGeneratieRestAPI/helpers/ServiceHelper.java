@@ -18,7 +18,7 @@ public class ServiceHelper {
     public static <T, U> boolean checkIfObjectExistsByIdentifier(T identifier, U objectDataType) {
         switch (objectDataType.getClass().getSimpleName()) {
             case "Account":
-                return accountRepository.checkIban((String) identifier);
+                return accountRepository.existsByIban((String) identifier);
             case "User":
                 return userRepository.existsById((Long) identifier);
             default:

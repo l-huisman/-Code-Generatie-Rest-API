@@ -4,7 +4,11 @@ import com.example.CodeGeneratieRestAPI.dtos.AccountRequestDTO;
 import com.example.CodeGeneratieRestAPI.dtos.AccountResponseDTO;
 import com.example.CodeGeneratieRestAPI.services.AccountService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/accounts")
@@ -24,7 +28,7 @@ public class AccountController {
     }
 
     //  Get the balance of all active accounts combined
-    @GetMapping
+    @GetMapping("/active")
     public Float getAllActiveAccountsBalanceByUserId(@RequestBody Long userId) {
         try {
             return accountService.getAllActiveAccountsBalanceByUserId(userId);
@@ -36,7 +40,7 @@ public class AccountController {
     }
 
     //  Get the balance of all active AND non-active accounts combined
-    @GetMapping
+    @GetMapping("/all")
     public Float getAllAccountsBalanceByUserId(@RequestBody Long userId) {
         try {
             return accountService.getAllAccountsBalanceByUserId(userId);
@@ -47,7 +51,7 @@ public class AccountController {
         }
     }
 
-    @GetMapping
+    @GetMapping("/balance")
     public Float getBalance(@RequestBody String iban) {
         try {
             return accountService.getBalance(iban);

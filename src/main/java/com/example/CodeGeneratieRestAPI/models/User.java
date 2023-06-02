@@ -23,7 +23,12 @@ public class User {
     private String first_name;
     private String last_name;
     private String username;
+
+    @Embedded
+    @AttributeOverride(name = "hash", column = @Column(name = "password_hash"))
+    @AttributeOverride(name = "salt", column = @Column(name = "password_salt"))
     private HashedPassword password;
+
     private String email;
 
     @Enumerated(EnumType.STRING)
@@ -39,12 +44,13 @@ public class User {
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "user")
     private List<Transaction> transactions;
 
-    public String getPassword() {
-        return new String(Base64.getDecoder().decode(this.hash));
-    }
 
     public boolean validatePassword(String password) {
         HashedPassword hashedPassword = new HashedPassword(password);
         return hashedPassword.validatePassword(password);
+    }
+
+    public String getPassword() {
+        return password.getPassword();
     }
 }

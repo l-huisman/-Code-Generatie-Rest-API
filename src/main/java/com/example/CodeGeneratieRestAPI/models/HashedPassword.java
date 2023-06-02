@@ -5,18 +5,24 @@ import lombok.Data;
 
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
+
+import jakarta.persistence.Lob;
+
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.KeySpec;
 import java.util.Arrays;
+import java.util.Base64;
 
 @Data
 
 @AllArgsConstructor
 public class HashedPassword {
 
+    @Lob
     private final byte[] hash;
+    @Lob
     private final byte[] salt;
 
     public HashedPassword(String password) {
@@ -25,7 +31,6 @@ public class HashedPassword {
         random.nextBytes(salt);
         this.hash = hashPasswordWithSalt(password, salt);
     }
-
 
     public boolean validatePassword(String password) {
         byte[] hashedPassword = hashPasswordWithSalt(password, salt);
@@ -42,5 +47,11 @@ public class HashedPassword {
             throw new RuntimeException(e);
         }
         return hashedPassword;
+    }
+
+    public String getPassword() {
+        String encodedHash = Base64.getEncoder().encodeToString(hash);
+        String encodedSalt = Base64.getEncoder().encodeToString(salt);
+        return encodedHash + ":" + encodedSalt;
     }
 }
