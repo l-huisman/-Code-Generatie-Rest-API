@@ -1,10 +1,20 @@
 package com.example.CodeGeneratieRestAPI.models;
 
-import jakarta.persistence.*;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.ElementCollection;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.data.annotation.Id;
 
 import java.util.List;
 
@@ -15,9 +25,9 @@ import java.util.List;
 @NoArgsConstructor
 
 @Table(name = "\"users\"")
-public class User extends BaseEntity {
+public class User {
     @Id
-    @GeneratedValue(strategy=GenerationType.TABLE)
+    @GeneratedValue(strategy = GenerationType.TABLE)
     private Integer id;
 
     private String first_name;
@@ -26,15 +36,18 @@ public class User extends BaseEntity {
     private String password;
     private String email;
 
+
     @Enumerated(EnumType.STRING)
-    @Column(name="userType")
-    private UserType userType;
+    @Column(name = "userType")
+    @ElementCollection(fetch = FetchType.EAGER)
+    private List<UserType> userType;
 
     private String created_at;
 
-    @OneToMany(cascade= CascadeType.ALL, mappedBy="User")
-    private List<Account> accounts ;
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "user")
+    private List<Account> accounts;
 
-    @OneToMany(cascade= CascadeType.ALL, mappedBy="User")
-    private List<Transaction> transactions ;
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "user")
+    private List<Transaction> transactions;
+
 }

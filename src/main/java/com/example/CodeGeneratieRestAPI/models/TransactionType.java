@@ -1,7 +1,7 @@
 package com.example.CodeGeneratieRestAPI.models;
 
 public enum TransactionType {
-   WITHDRAW,
+    WITHDRAW,
     DEPOSIT,
     TRANSFER
 }
