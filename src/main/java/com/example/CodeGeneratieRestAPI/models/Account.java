@@ -39,6 +39,7 @@ public class Account {
     private List<Transaction> sentTransactions;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "fromAccount")
     private List<Transaction> receivedTransactions;
+
     // A constructor for Account that takes an AccountRequestDTO
     public Account(AccountRequestDTO accountRequestDTO) {
         this.userId = accountRequestDTO.getUserId();
@@ -71,9 +72,5 @@ public class Account {
             return user.getId();
         }
         return userId;
-    }
-
-    public void setUserId(Integer userId) {
-        this.userId = userId;
     }
 }

@@ -1,21 +1,11 @@
 package com.example.CodeGeneratieRestAPI.models;
 
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
-import jakarta.persistence.ElementCollection;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.Base64;
 import java.util.List;
 
 @Entity
@@ -33,9 +23,8 @@ public class User {
     private String first_name;
     private String last_name;
     private String username;
-    private String password;
+    private HashedPassword password;
     private String email;
-
 
     @Enumerated(EnumType.STRING)
     @Column(name = "userType")
@@ -50,4 +39,12 @@ public class User {
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "user")
     private List<Transaction> transactions;
 
+    public String getPassword() {
+        return new String(Base64.getDecoder().decode(this.hash));
+    }
+
+    public boolean validatePassword(String password) {
+        HashedPassword hashedPassword = new HashedPassword(password);
+        return hashedPassword.validatePassword(password);
+    }
 }

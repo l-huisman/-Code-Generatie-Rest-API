@@ -1,6 +1,7 @@
-package com.example.CodeGeneratieRestAPI.services;
+package com.example.CodeGeneratieRestAPI.models;
 
 import lombok.AllArgsConstructor;
+import lombok.Data;
 
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
@@ -10,28 +11,21 @@ import java.security.spec.InvalidKeySpecException;
 import java.security.spec.KeySpec;
 import java.util.Arrays;
 
-// TODO: Make this a singleton
+@Data
 
 @AllArgsConstructor
-public class PasswordHashingService {
+public class HashedPassword {
 
-    private static PasswordHashingService instance;
     private final byte[] hash;
     private final byte[] salt;
 
-    private PasswordHashingService(String password) {
+    public HashedPassword(String password) {
         SecureRandom random = new SecureRandom();
         salt = new byte[16];
         random.nextBytes(salt);
         this.hash = hashPasswordWithSalt(password, salt);
     }
 
-    public static PasswordHashingService getInstance(String password) {
-        if (instance == null) {
-            instance = new PasswordHashingService(password);
-        }
-        return instance;
-    }
 
     public boolean validatePassword(String password) {
         byte[] hashedPassword = hashPasswordWithSalt(password, salt);
