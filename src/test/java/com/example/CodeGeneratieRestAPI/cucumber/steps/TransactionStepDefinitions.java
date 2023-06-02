@@ -1,6 +1,10 @@
 package com.example.CodeGeneratieRestAPI.cucumber.steps;
 
+import com.example.CodeGeneratieRestAPI.models.Transaction;
+import com.example.CodeGeneratieRestAPI.models.TransactionType;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.jayway.jsonpath.JsonPath;
+
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
@@ -48,5 +52,26 @@ public class TransactionStepDefinitions extends BaseStepDefinitions {
     public void iShouldReceiveAllTransactions() {
         int actual = JsonPath.read(response.getBody(), "$.size()");
         Assertions.assertEquals(1, actual);
+    }
+
+    @When("^I add a transaction with amount (\\d+) and type \"([^\"]*)\"$")
+    public void iAddATransactionWithAmountAndType(float amount, String type) throws Throwable {
+        Transaction transaction = new Transaction();
+        transaction.setAmount(amount);
+        transaction.setTransactionType(TransactionType.valueOf(type));
+        HttpEntity<Transaction> request = new HttpEntity<>(transaction, httpHeaders);
+        response = restTemplate.postForEntity("/transactions", request, String.class);
+    }
+
+    @Then("^the response status code should be (\\d+)$")
+    public void theResponseStatusCodeShouldBe(int statusCode) throws Throwable {
+        Assertions.assertEquals(statusCode, response.getStatusCodeValue());
+    }
+
+    @Then("^the response body should contain the added transaction$")
+    public void theResponseBodyShouldContainTheAddedTransaction() throws Throwable {
+        Transaction addedTransaction = mapper.readValue(response.getBody(), Transaction.class);
+        Assertions.assertNotNull(addedTransaction.getId());
+        // Add more assertions for the other properties of the added transaction
     }
 }
