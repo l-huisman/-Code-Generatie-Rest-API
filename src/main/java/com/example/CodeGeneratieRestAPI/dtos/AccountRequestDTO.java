@@ -2,9 +2,11 @@ package com.example.CodeGeneratieRestAPI.dtos;
 
 import lombok.Data;
 
+import java.util.Date;
+
 @Data
 public class AccountRequestDTO {
-    private Integer userId;
+    private Long userId;
     private String iban;
     private String accountName;
     private Float dailyLimit;
@@ -13,6 +15,4 @@ public class AccountRequestDTO {
     private Float balance;
     private Boolean isSavings;
     private Boolean isActive;
-    private String created_at;
-
 }
