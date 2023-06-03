@@ -79,11 +79,11 @@ public class AccountService {
     }
     private User getLoggedInUser(){
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        Long userId = ((UserDetails) authentication.getPrincipal()).getUserId();
+        String username = ((UserDetails) authentication.getPrincipal()).getUsername();
 
-        User user = userRepository.findById(userId).orElse(null);
+        User user = userRepository.findUserByUsername(username).orElse(null);
         if (user == null)
-            throw new EntityNotFoundException("User with id '" + userId + "' does not exist");
+            throw new EntityNotFoundException("User with username '" + username + "' does not exist");
         return user;
     }
     private Boolean checkIfAccountBelongsToUser(String iban, User loggedInUser) {

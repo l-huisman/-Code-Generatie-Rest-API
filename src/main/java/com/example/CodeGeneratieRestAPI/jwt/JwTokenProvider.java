@@ -23,7 +23,7 @@ public class JwTokenProvider {
     @Autowired
     MyUserDetailService myUserDetailService;
 
-    public String createToken(Integer id, String username, UserType role) throws JwtException {
+    public String createToken(Long id, String username, UserType role) throws JwtException {
         Claims claims = Jwts.claims().setSubject(username);
         claims.put("userId", id);
         claims.put("role", role);

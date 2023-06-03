@@ -30,7 +30,7 @@ public class AccountController {
     //  GET mappings
 
     //  Get the balance of all active accounts combined
-    @GetMapping()
+    @GetMapping("/active")
     public Float getAllActiveAccountsBalanceForLoggedInUser() {
         try {
             //  Retrieve the data
@@ -46,7 +46,7 @@ public class AccountController {
     }
 
     //  Get the balance of all active AND non-active accounts combined
-    @GetMapping()
+    @GetMapping("/all")
     public Float getAllAccountsBalanceForLoggedInUser() {
         try {
             //  Retrieve the required data
