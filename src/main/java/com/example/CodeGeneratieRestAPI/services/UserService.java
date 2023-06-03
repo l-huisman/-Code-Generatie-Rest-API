@@ -43,6 +43,11 @@ public class UserService {
     }
 
     public LoginResponseDTO login(LoginRequestDTO request) {
-        throw new NotYetImplementedException();
+        User user = loginRepository.findByUsername(request.getUsername()).get();
+        if (user == null) {
+            throw new NotYetImplementedException("User not found");
+        }
+        String token = tokenProvider.createToken(user.getId(), user.getUsername(), user.getUserType());
+        return new LoginResponseDTO(token);
     }
 }
