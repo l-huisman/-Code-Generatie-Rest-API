@@ -32,7 +32,7 @@ public class AccountController {
     }
 
     //  Get the balance of all active accounts combined
-    @GetMapping
+    @GetMapping("/active")
     public Float getAllActiveAccountsBalanceByUserId(@RequestBody Long userId) {
         try {
             //  Retrieve the data
@@ -48,7 +48,7 @@ public class AccountController {
     }
 
     //  Get the balance of all active AND non-active accounts combined
-    @GetMapping
+    @GetMapping("/all")
     public Float getAllAccountsBalanceByUserId(@RequestBody Long userId) {
         try {
             //  Retrieve the required data
@@ -63,7 +63,7 @@ public class AccountController {
         }
     }
 
-    @GetMapping
+    @GetMapping("/balance")
     public Float getBalance(@RequestBody String iban) {
         try {
             //  Retrieve the data
