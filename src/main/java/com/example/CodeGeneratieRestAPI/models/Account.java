@@ -26,7 +26,7 @@ public class Account {
     private Integer id;
     @Column(unique = true)
     private String iban;
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "USER_ID", nullable = true)
     private User user;
     // The User object can optionally be filled, but the userId is always filled
@@ -132,7 +132,6 @@ public class Account {
             if (currentDate.compareTo(transaction.getCreatedAt()) == 0) {
                 amountSpentToday += transaction.getAmount();
             }
-
         }
         return amountSpentToday;
     }
