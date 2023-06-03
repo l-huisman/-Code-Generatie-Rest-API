@@ -19,7 +19,11 @@ public class AccountController {
     @PostMapping
     public AccountResponseDTO add(@RequestBody AccountRequestDTO account) {
         try {
-            return accountService.add(account);
+            //  Retrieve the data
+            var data = accountService.add(account);
+
+            //  Return the data
+            return data;
         } catch (Exception e) {
             //TODO: handle exception
             System.out.println(e);
@@ -31,7 +35,11 @@ public class AccountController {
     @GetMapping
     public Float getAllActiveAccountsBalanceByUserId(@RequestBody Long userId) {
         try {
-            return accountService.getAllActiveAccountsBalanceByUserId(userId);
+            //  Retrieve the data
+            var data = accountService.getAllActiveAccountsBalanceByUserId(userId);
+
+            //  Return the data
+            return data;
         } catch (Exception e) {
             //TODO: handle exception
             System.out.println(e);
@@ -43,7 +51,11 @@ public class AccountController {
     @GetMapping
     public Float getAllAccountsBalanceByUserId(@RequestBody Long userId) {
         try {
-            return accountService.getAllAccountsBalanceByUserId(userId);
+            //  Retrieve the required data
+            var data = accountService.getAllAccountsBalanceByUserId(userId);
+
+            //  Return the data
+            return data;
         } catch (Exception e) {
             //TODO: handle exception
             System.out.println(e);
@@ -54,7 +66,11 @@ public class AccountController {
     @GetMapping
     public Float getBalance(@RequestBody String iban) {
         try {
-            return accountService.getBalance(iban);
+            //  Retrieve the data
+            var data = accountService.getBalance(iban);
+
+            //  Return the data
+            return data;
         } catch (Exception e) {
             //TODO: handle exception
             System.out.println(e);
