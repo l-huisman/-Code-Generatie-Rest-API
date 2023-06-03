@@ -13,7 +13,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
-import java.util.List;
 
 @Component
 public class JwTokenProvider {
@@ -24,9 +23,10 @@ public class JwTokenProvider {
     @Autowired
     MyUserDetailService myUserDetailService;
 
-    public String createToken(String username, List<UserType> roles) throws JwtException {
+    public String createToken(Integer id, String username, UserType role) throws JwtException {
         Claims claims = Jwts.claims().setSubject(username);
-        claims.put("auth", roles.stream().map(UserType::name).toList());
+        claims.put("userId", id);
+        claims.put("role", role);
         Date now = new Date();
         Date expiration = new Date(now.getTime() + 3600000);
         return Jwts.builder().setClaims(claims).setIssuedAt(now).setExpiration(expiration).signWith(keyProvider.getPrivateKey()) // <- this is important, we need a key to sign the jwt

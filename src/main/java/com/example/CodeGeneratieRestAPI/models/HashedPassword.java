@@ -1,13 +1,12 @@
 package com.example.CodeGeneratieRestAPI.models;
 
+import jakarta.persistence.Lob;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
-
-import jakarta.persistence.Lob;
-
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
@@ -27,9 +26,16 @@ public class HashedPassword {
 
     public HashedPassword(String password) {
         SecureRandom random = new SecureRandom();
-        salt = new byte[16];
-        random.nextBytes(salt);
-        this.hash = hashPasswordWithSalt(password, salt);
+        this.salt = new byte[16];
+        random.nextBytes(this.salt);
+        this.hash = hashPasswordWithSalt(password, this.salt);
+    }
+
+    public HashedPassword() {
+        SecureRandom random = new SecureRandom();
+        this.salt = new byte[16];
+        random.nextBytes(this.salt);
+        this.hash = hashPasswordWithSalt("password", this.salt);
     }
 
     public boolean validatePassword(String password) {
