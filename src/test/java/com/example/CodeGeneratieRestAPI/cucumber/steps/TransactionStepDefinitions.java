@@ -1,5 +1,6 @@
 package com.example.CodeGeneratieRestAPI.cucumber.steps;
 
+import com.example.CodeGeneratieRestAPI.controllers.PrintForTestController;
 import com.example.CodeGeneratieRestAPI.models.Account;
 import com.example.CodeGeneratieRestAPI.models.Transaction;
 import com.example.CodeGeneratieRestAPI.models.TransactionType;
@@ -15,9 +16,11 @@ import io.cucumber.java.Before;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
+import jakarta.inject.Inject;
 import org.junit.jupiter.api.Assertions;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.HttpEntity;
@@ -28,10 +31,6 @@ import org.springframework.http.ResponseEntity;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
 import java.util.List;
@@ -43,16 +42,15 @@ public class TransactionStepDefinitions extends BaseStepDefinitions {
     private TestRestTemplate restTemplate;
     private ResponseEntity<String> response;
 
-    @Mock
+    @Autowired
     private TransactionRepository transactionRepository;
-        
-    @Mock
+
+    @Autowired
     private AccountRepository accountRepository;
 
-    @Mock
+    @Autowired
     private UserRepository userRepository;
 
-    @InjectMocks
     @Autowired
     private TransactionService transactionService;
 
@@ -94,53 +92,57 @@ public class TransactionStepDefinitions extends BaseStepDefinitions {
     public void aUserWithUsername(String username) {
         user = new User();
         user.setUsername(username);
-        when(userRepository.findUserByUsername(username)).thenReturn(Optional.of(user));
+        Optional<User> optionalUser = userRepository.findUserByUsername(username);
+        if (optionalUser.isPresent()) {
+            user = optionalUser.get();
+        } else {
+            userRepository.save(user);
+        }
     }
 
-    @Given("an account with IBAN {string} and balance {float}")
-    public void anAccountWithIbanAndBalance(String iban, float balance) {
-        account = new Account();
-        account.setIban(iban);
-        account.setBalance(balance);
-        when(accountRepository.findByIban(iban)).thenReturn(account);
-    }
+    @Given("{string} has a {string} account with IBAN {string} and balance {float} and transaction limit {float} and daily limit {float} and absolute limit {float}")
+    public void aAccountWithIbanAndBalance(String username, String isSavings, String iban, float balance, float transactionLimit, float dailyLimit, float absoluteLimit) {
+        account = accountRepository.findByIban(iban);
 
-    @Given("a savings account with IBAN {string} and balance {float}")
-    public void aSavingsAccountWithIbanAndBalance(String iban, float balance) {
-        account = new Account();
-        account.setIban(iban);
-        account.setBalance(balance);
-        account.setIsSavings(true);
-        when(accountRepository.findByIban(iban)).thenReturn(account);
-    }
-
-    @Given("an account with IBAN {string} and balance {float} and transaction limit {float}")
-    public void anAccountWithIbanAndBalanceAndTransactionLimit(String iban, float balance, float transactionLimit) {
-        account = new Account();
-        account.setIban(iban);
-        account.setBalance(balance);
-        account.setTransactionLimit(transactionLimit);
-        when(accountRepository.findByIban(iban)).thenReturn(account);
+        if (account == null) {
+            Optional<User> optionalUser = userRepository.findUserByUsername(username);
+            optionalUser.ifPresent(value -> user = value);
+            account = new Account();
+            account.setIban(iban);
+            account.setUser(user);
+            account.setBalance(balance);
+            account.setTransactionLimit(transactionLimit);
+            account.setDailyLimit(dailyLimit);
+            account.setAbsoluteLimit(absoluteLimit);
+            account.setIsSavings(isSavings.equals("savings"));
+            accountRepository.save(account);
+        }
     }
 
     @Given("an account with IBAN {string} and balance {float} and daily limit {float}")
     public void anAccountWithIbanAndBalanceAndDailyLimit(String iban, float balance, float dailyLimit) {
-        account = new Account();
-        account.setIban(iban);
-        account.setBalance(balance);
-        account.setDailyLimit(dailyLimit);
-        when(accountRepository.findByIban(iban)).thenReturn(account);
+        account = accountRepository.findByIban(iban);
+        if (account == null) {
+            account = new Account();
+            account.setIban(iban);
+            account.setBalance(balance);
+            account.setDailyLimit(dailyLimit);
+            accountRepository.save(account);
+        } else {
+            account.setBalance(balance);
+            account.setDailyLimit(dailyLimit);
+            accountRepository.save(account);
+        }
     }
 
-    @When("a transaction of {float} is added to the account")
-    public void aTransactionIsAddedToTheAccount(float amount) {
+    @When("a {string} transaction of {float} is added to the account")
+    public void aTransactionIsAddedToTheAccount(String transactionType, float amount) {
         transaction = new Transaction();
         transaction.setAmount(amount);
         transaction.setFromAccount(account);
-        transaction.setTransactionType(TransactionType.WITHDRAW);
-        when(transactionRepository.save(transaction)).thenReturn(transaction);
+        transaction.setTransactionType(TransactionType.valueOf(transactionType));
         try {
-            transactionService.add(transaction, user.getUsername());
+            transaction = transactionService.add(transaction, user.getUsername());
         } catch (RuntimeException e) {
             exception = e;
         }
@@ -151,8 +153,7 @@ public class TransactionStepDefinitions extends BaseStepDefinitions {
         transaction = new Transaction();
         transaction.setAmount(amount);
         transaction.setFromAccount(account);
-        transaction.setTransactionType(TransactionType.DEPOSIT);
-        when(transactionRepository.save(transaction)).thenReturn(transaction);
+        transaction.setTransactionType(TransactionType.WITHDRAW);
         try {
             transactionService.add(transaction, user.getUsername());
         } catch (RuntimeException e) {
@@ -165,10 +166,9 @@ public class TransactionStepDefinitions extends BaseStepDefinitions {
         transaction = new Transaction();
         transaction.setAmount(amount);
         transaction.setFromAccount(account);
-        transaction.setTransactionType(TransactionType.WITHDRAW);
-        when(transactionRepository.save(transaction)).thenReturn(transaction);
+        transaction.setTransactionType(TransactionType.DEPOSIT);
         try {
-            transactionService.add(transaction, user.getUsername());
+            transaction = transactionService.add(transaction, user.getUsername());
         } catch (RuntimeException e) {
             exception = e;
         }
@@ -180,7 +180,6 @@ public class TransactionStepDefinitions extends BaseStepDefinitions {
         transaction.setAmount(amount);
         transaction.setFromAccount(account);
         transaction.setTransactionType(TransactionType.TRANSFER);
-        when(transactionRepository.save(transaction)).thenReturn(transaction);
         try {
             transactionService.add(transaction, user.getUsername());
         } catch (RuntimeException e) {
@@ -188,15 +187,16 @@ public class TransactionStepDefinitions extends BaseStepDefinitions {
         }
     }
 
-    @When("another transaction of {float} is added to the account")
-    public void anotherTransactionIsAddedToTheAccount(float amount) {
+    @When("another {string} transaction of {float} is added to the account")
+    public void anotherTransactionIsAddedToTheAccount(String transactionType, float amount) {
         Transaction anotherTransaction = new Transaction();
         anotherTransaction.setAmount(amount);
         anotherTransaction.setFromAccount(account);
-        anotherTransaction.setTransactionType(TransactionType.WITHDRAW);
-        when(transactionRepository.save(anotherTransaction)).thenReturn(anotherTransaction);
+        anotherTransaction.setTransactionType(TransactionType.valueOf(transactionType));
+        PrintForTestController.print("My new System.out.print()");
         try {
             transactionService.add(anotherTransaction, user.getUsername());
+
         } catch (RuntimeException e) {
             exception = e;
         }
@@ -204,13 +204,18 @@ public class TransactionStepDefinitions extends BaseStepDefinitions {
 
     @Then("the transaction is saved successfully")
     public void theTransactionIsSavedSuccessfully() {
-        verify(transactionRepository).save(transaction);
+        Transaction savedTransaction = transactionRepository.findById(transaction.getId()).orElse(null);
+        assertNotNull(savedTransaction);
+        assertEquals(transaction.getAmount(), savedTransaction.getAmount());
+        //ssertEquals(transaction.getFromAccount(), savedTransaction.getFromAccount());
+        assertEquals(transaction.getTransactionType(), savedTransaction.getTransactionType());
         assertNull(exception);
     }
 
     @Then("a RuntimeException is thrown with message {string}")
     public void aRuntimeExceptionIsThrownWithMessage(String message) {
-        verify(transactionRepository, never()).save(transaction);
+        Transaction savedTransaction = transaction.getId() != null ? transactionRepository.findById(transaction.getId()).orElse(null) : null;
+        assertNull(savedTransaction);
         assertNotNull(exception);
         assertEquals(message, exception.getMessage());
     }

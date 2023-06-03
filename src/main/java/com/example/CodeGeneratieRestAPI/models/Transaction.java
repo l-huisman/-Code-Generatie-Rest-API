@@ -1,5 +1,6 @@
 package com.example.CodeGeneratieRestAPI.models;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 
 import jakarta.persistence.Column;
@@ -28,7 +29,7 @@ public class Transaction {
 
     @Id
     @GeneratedValue(strategy = GenerationType.TABLE)
-    private Integer id;
+    private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "USER_ID", nullable = true)
