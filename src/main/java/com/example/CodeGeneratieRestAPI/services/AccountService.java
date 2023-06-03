@@ -149,26 +149,26 @@ public class AccountService {
         Float balance = accountRepository.getBalanceByIban(iban);
         return balance != null ? balance : 0;
     }
-    // Update the balance of an account
-    public AccountResponseDTO updateBalance(String iban, Float amount){
-        // Check if the iban is valid
-        if (!ServiceHelper.checkIfObjectExistsByIdentifier(iban, Account.class)) {
-            throw new EntityNotFoundException("Account with IBAN: " + iban + " does not exist");
-        }
-        // Check if the amount is valid
-        if (amount == null) {
-            throw new IllegalArgumentException("Amount is null");
-        }
-        // Get the account
-        Account account = accountRepository.findByIban(iban);
-        // Update the balance
-        account.updateBalance(amount);
-        // Save the account
-        accountRepository.save(account);
-        // Create a response object and return it
-        return new AccountResponseDTO(account);
-
-    }
+//    // Update the balance of an account
+//    public AccountResponseDTO updateBalance(String iban, Float amount){
+//        // Check if the iban is valid
+//        if (!ServiceHelper.checkIfObjectExistsByIdentifier(iban, Account.class)) {
+//            throw new EntityNotFoundException("Account with IBAN: " + iban + " does not exist");
+//        }
+//        // Check if the amount is valid
+//        if (amount == null) {
+//            throw new IllegalArgumentException("Amount is null");
+//        }
+//        // Get the account
+//        Account account = accountRepository.findByIban(iban);
+//        // Update the balance
+//        account.updateBalance(amount);
+//        // Save the account
+//        accountRepository.save(account);
+//        // Create a response object and return it
+//        return new AccountResponseDTO(account);
+//
+//    }
     public Account getByIban(String iban) {
         // Get the current logged in user
         User currentLoggedInUser = getLoggedInUser();
@@ -207,7 +207,7 @@ public class AccountService {
         Account accountToUpdate = accountRepository.findByIban(account.getIban());
 
         // Update the account
-        Account updatedAccount = accountToUpdate.update(new Account(account));
+        Account updatedAccount = getUpdatedAccount(account, accountToUpdate);
 
         // Save the account
         accountRepository.save(updatedAccount);
