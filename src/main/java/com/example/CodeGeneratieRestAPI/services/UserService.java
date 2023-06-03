@@ -4,10 +4,10 @@ import com.example.CodeGeneratieRestAPI.dtos.LoginRequestDTO;
 import com.example.CodeGeneratieRestAPI.dtos.LoginResponseDTO;
 import com.example.CodeGeneratieRestAPI.jwt.JwTokenProvider;
 import com.example.CodeGeneratieRestAPI.models.User;
+import com.example.CodeGeneratieRestAPI.repositories.LoginRepository;
 import com.example.CodeGeneratieRestAPI.repositories.UserRepository;
+import org.hibernate.cfg.NotYetImplementedException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -16,11 +16,11 @@ import java.util.List;
 public class UserService {
 
     @Autowired
-    BCryptPasswordEncoder passwordEncoder;
-    @Autowired
     JwTokenProvider tokenProvider;
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private LoginRepository loginRepository;
 
     public List<User> getAll() {
         return (List<User>) userRepository.findAll();
@@ -43,12 +43,6 @@ public class UserService {
     }
 
     public LoginResponseDTO login(LoginRequestDTO request) {
-        User user = userRepository.findUserByUsername(request.getUsername()).orElseThrow(() -> new AuthenticationCredentialsNotFoundException("Username or password is incorrect"));
-        if (passwordEncoder.matches(request.getPassword(), user.getPassword())) {
-            String token = tokenProvider.createToken(user.getUsername(), user.getUserType());
-            return new LoginResponseDTO(token);
-        } else {
-            throw new AuthenticationCredentialsNotFoundException("Username or password is incorrect");
-        }
+        throw new NotYetImplementedException();
     }
 }

@@ -17,13 +17,11 @@ public class DataSeeder implements ApplicationRunner {
     @Autowired
     UserService userService;
 
-//    @Autowired
-//    UserService userService;
-
     @Override
     public void run(ApplicationArguments args) throws Exception {
         // Insert code here to seed data (Example: Default user, default bank account, etc.)
 //        Transaction transaction1 = new Transaction(1);
-//        transactionService.add(transaction1);
+//        transactionService.add(transaction1);        
+
     }
 }
