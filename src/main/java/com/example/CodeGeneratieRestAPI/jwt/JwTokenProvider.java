@@ -23,7 +23,7 @@ public class JwTokenProvider {
     @Autowired
     MyUserDetailService myUserDetailService;
 
-    public String createToken(Integer id, String username, UserType role) throws JwtException {
+    public String createToken(Long id, String username, UserType role) throws JwtException {
         Claims claims = Jwts.claims().setSubject(username);
         claims.put("userId", id);
         claims.put("role", role);
@@ -33,12 +33,14 @@ public class JwTokenProvider {
                 .compact();
     }
 
+
+
     public Authentication getAuthentication(String token) {
         try {
             Jws<Claims> claims = Jwts.parserBuilder().setSigningKey(keyProvider.getPrivateKey()).build().parseClaimsJws(token);
             String username = claims.getBody().getSubject();
             UserDetails userDetails = myUserDetailService.loadUserByUsername(username);
-            return new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
+            return new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
         } catch (JwtException | IllegalArgumentException e) {
             throw new JwtException("Bearer token not valid");
         }

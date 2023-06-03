@@ -26,7 +26,7 @@ public class Account {
     private User user;
     // The User object can optionally be filled, but the userId is always filled
     @Column(name = "USER_ID", nullable = true, insertable = false, updatable = false)
-    private Integer userId;
+    private Long userId;
     private String name;
     private Float dailyLimit;
     private Float transactionLimit;
@@ -67,7 +67,7 @@ public class Account {
         this.user = user;
     }
 
-    public Integer getUserId() {
+    public Long getUserId() {
         if (user != null) {
             return user.getId();
         }

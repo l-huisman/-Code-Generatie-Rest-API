@@ -4,7 +4,7 @@ import lombok.Data;
 
 @Data
 public class AccountRequestDTO {
-    private Integer userId;
+    private Long userId;
     private String iban;
     private String accountName;
     private Float dailyLimit;
