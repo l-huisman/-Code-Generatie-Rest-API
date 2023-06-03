@@ -33,12 +33,14 @@ public class JwTokenProvider {
                 .compact();
     }
 
+
+
     public Authentication getAuthentication(String token) {
         try {
             Jws<Claims> claims = Jwts.parserBuilder().setSigningKey(keyProvider.getPrivateKey()).build().parseClaimsJws(token);
             String username = claims.getBody().getSubject();
             UserDetails userDetails = myUserDetailService.loadUserByUsername(username);
-            return new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
+            return new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
         } catch (JwtException | IllegalArgumentException e) {
             throw new JwtException("Bearer token not valid");
         }
