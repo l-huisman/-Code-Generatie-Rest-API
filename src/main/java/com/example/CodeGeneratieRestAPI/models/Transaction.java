@@ -1,5 +1,7 @@
 package com.example.CodeGeneratieRestAPI.models;
 
+import java.util.Date;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -50,5 +52,5 @@ public class Transaction {
     private Float balance_before;
 
     @Column(name = "created_at")
-    private String createdAt;
+    private Date createdAt;
 }

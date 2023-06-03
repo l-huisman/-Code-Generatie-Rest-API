@@ -87,6 +87,9 @@ public class TransactionService {
 
         transaction.setUser(user);
 
+        //Update the account balance
+        fromAccount.setBalance(fromAccount.getBalance() - transaction.getAmount());
+
         return transactionRepository.save(transaction);
     }
 
