@@ -1,7 +1,7 @@
 package com.example.CodeGeneratieRestAPI.services;
 
 import com.example.CodeGeneratieRestAPI.models.User;
-import com.example.CodeGeneratieRestAPI.repositories.UserRepository;
+import com.example.CodeGeneratieRestAPI.repositories.LoginRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -10,13 +10,14 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class MyUserDetailService implements UserDetailsService {
+
     @Autowired
-    private UserRepository userRepository;
+    private LoginRepository loginRepository;
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        User user = userRepository.findUserByUsername(username).get();
-        UserDetails details = org.springframework.security.core.userdetails.User.withUsername(user.getUsername()).password(user.getPassword()).authorities(user.getUserType()).build();
+        User user = loginRepository.findUserByUsername(username).get();
+        UserDetails details = org.springframework.security.core.userdetails.User.withUsername(user.getUsername()).password(user.getPassword()).authorities(user.getUserType().toString()).build();
         return details;
     }
 }

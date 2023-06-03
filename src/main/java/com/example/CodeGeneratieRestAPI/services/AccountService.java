@@ -65,7 +65,7 @@ public class AccountService {
             throw new EntityNotFoundException("Account with IBAN " + iban + " does not exist");
         }
         // Get the balance of the account
-        Float balance = accountRepository.getBalance(iban);
+        Float balance = accountRepository.getBalanceByIban(iban);
 
         return balance != null ? balance : 0;
     }
@@ -94,7 +94,7 @@ public class AccountService {
         if (!ServiceHelper.checkIfObjectExistsByIdentifier(iban, Account.class)) {
             throw new EntityNotFoundException("Account with IBAN " + iban + " does not exist");
         }
-        Float balance = accountRepository.getBalance(iban);
+        Float balance = accountRepository.getBalanceByIban(iban);
         return balance != null ? balance : 0;
     }
     //  This is a private (generic) method that checks if an object exists by its identifier
