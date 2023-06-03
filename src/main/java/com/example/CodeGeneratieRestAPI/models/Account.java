@@ -129,7 +129,7 @@ public class Account {
 
         // Loop through all the transactions and check if the date is the same as the current date
         for (Transaction transaction : allTransactions) {
-            if (currentDate.compareTo(dateFormat.parse(transaction.getCreatedAt())) == 0) {
+            if (currentDate.compareTo(transaction.getCreatedAt()) == 0) {
                 amountSpentToday += transaction.getAmount();
             }
 
@@ -142,5 +142,4 @@ public class Account {
         allTransactions.addAll(this.receivedTransactions);
         return allTransactions;
     }
-}
 }
