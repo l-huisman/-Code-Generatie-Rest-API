@@ -2,8 +2,6 @@ package com.example.CodeGeneratieRestAPI.repositories;
 
 import com.example.CodeGeneratieRestAPI.models.Account;
 
-import java.util.List;
-
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
@@ -15,9 +13,9 @@ public interface AccountRepository extends CrudRepository<Account, Long> {
 
     Float getBalanceByIban(String iban);
 
-    Float getAllActiveAccountsBalanceByUserId(Long userId);   
-    
+    Float getAllActiveAccountsBalanceByUserId(Long userId);
     Float getAllAccountsBalanceByUserId(Long userId);
 
+    Boolean checkIfAccountBelongsToUser(String iban, Long userId);
     
 }

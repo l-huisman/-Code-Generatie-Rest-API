@@ -13,6 +13,14 @@ public class IBANGenerator {
     private static final int CHECKSUM_LENGTH = 2;
     private static final String BANK_CODE = "MRBA";
 
+    public static String getUniqueIban(){
+        do {
+            String iban = generateIban();
+            if (ServiceHelper.checkIfObjectExistsByIdentifier(iban, AccountRepository.class)) {
+                return iban;
+            }
+        } while (true);
+    }
     public static String generateIban() {
         try{
             StringBuilder ibanBuilder = new StringBuilder();
@@ -39,6 +47,7 @@ public class IBANGenerator {
             // Return the formatted IBAN
             // IMPORTANT! This could return an already existing IBAN,
             // so make sure to check if the IBAN already exists in the database before saving it
+            // OR use the getUniqueIban method
             return formattedIban.toString().toUpperCase();
         } catch (Exception exception) {
             throw new IBANGenerationException(exception.getMessage(), exception);

@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -29,16 +30,16 @@ public class Account {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "USER_ID", nullable = true)
     private User user;
-    // The User object can optionally be filled, but the userId is always filled
+    // The User object can optionally be filled, but the username is always filled
     @Column(name = "USER_ID", nullable = true, insertable = false, updatable = false)
-    private Integer userId;
+    private Long userId;
     private String name;
     private Float dailyLimit;
     private Float transactionLimit;
     private Float absoluteLimit;
     private Float balance;
     private Boolean isSavings;
-    private String createdAt;
+    private Date createdAt;
     private Boolean isActive;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "fromAccount")
     private List<Transaction> sentTransactions;
@@ -72,15 +73,23 @@ public class Account {
         this.user = user;
     }
 
-    public Integer getUserId() {
+    public Long getUserId() {
         if (user != null) {
             return user.getId();
         }
         return userId;
     }
 
-    public void setUserId(Integer userId) {
+    public void setUsername(Long userId) {
         this.userId = userId;
+    }
+    public void setIban(String iban) {
+        if (this.iban == null || this.iban.isEmpty()) {
+            this.iban = iban;
+        }
+        else {
+            throw new IllegalStateException("Iban is already set");
+        }
     }
 
     public Float updateBalance(Float amount) {
@@ -100,6 +109,20 @@ public class Account {
         }
 
     }
+    public Account update(Account account){
+        this.iban = account.getIban();
+        this.name = account.getName();
+        this.dailyLimit = account.getDailyLimit();
+        this.transactionLimit = account.getTransactionLimit();
+        this.absoluteLimit = account.getAbsoluteLimit();
+        this.balance = account.getBalance();
+        this.isSavings = account.getIsSavings();
+        this.isActive = account.getIsActive();
+        this.createdAt = account.getCreatedAt();
+        return this;
+    }
+    //  This is technically duplicate code, as this is also already done in the TransactionService class
+    //  However, this is done to make sure that the Account class is self-sufficient
     private boolean checkIfAmountIsHigherThanLimits(Float amount) throws ParseException {
         // Check if the amount is higher than the transaction limit
         if (amount > this.transactionLimit){
@@ -113,7 +136,6 @@ public class Account {
         if ((this.balance - amount) < this.absoluteLimit){
             throw new IllegalArgumentException("Transaction amount exceeds the absolute limit, the limit is: " + this.absoluteLimit + " the current balance is: " + this.balance);
         }
-
         return true;
     }
     private Float getAmountSpentToday() throws ParseException {
