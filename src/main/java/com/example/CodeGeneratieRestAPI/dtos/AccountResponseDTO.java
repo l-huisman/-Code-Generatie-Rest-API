@@ -3,6 +3,8 @@ package com.example.CodeGeneratieRestAPI.dtos;
 import com.example.CodeGeneratieRestAPI.models.Account;
 import lombok.Data;
 
+import java.util.Date;
+
 @Data
 public class AccountResponseDTO {
     private Long userId;
@@ -14,7 +16,7 @@ public class AccountResponseDTO {
     private Float balance;
     private Boolean isSavings;
     private Boolean isActive;
-    private String createdAt;
+    private Date createdAt;
 
     // A constructor that takes an Account object
     public AccountResponseDTO(Account account) {

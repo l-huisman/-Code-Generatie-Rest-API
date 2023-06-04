@@ -12,22 +12,32 @@ public class AccountController {
     @Autowired
     private AccountService accountService;
 
+    //  POST mappings
     @PostMapping
     public AccountResponseDTO add(@RequestBody AccountRequestDTO account) {
         try {
-            return accountService.add(account);
+            //  Retrieve the data
+            var data = accountService.add(account);
+
+            //  Return the data
+            return data;
         } catch (Exception e) {
             //TODO: handle exception
             System.out.println(e);
             return null;
         }
     }
+    //  GET mappings
 
     //  Get the balance of all active accounts combined
     @GetMapping("/active")
-    public Float getAllActiveAccountsBalanceByUserId(@RequestBody Long userId) {
+    public Float getAllActiveAccountsBalanceForLoggedInUser() {
         try {
-            return accountService.getAllActiveAccountsBalanceByUserId(userId);
+            //  Retrieve the data
+            var data = accountService.getAllActiveAccountsBalanceForLoggedInUser();
+
+            //  Return the data
+            return data;
         } catch (Exception e) {
             //TODO: handle exception
             System.out.println(e);
@@ -37,9 +47,13 @@ public class AccountController {
 
     //  Get the balance of all active AND non-active accounts combined
     @GetMapping("/all")
-    public Float getAllAccountsBalanceByUserId(@RequestBody Long userId) {
+    public Float getAllAccountsBalanceForLoggedInUser() {
         try {
-            return accountService.getAllAccountsBalanceByUserId(userId);
+            //  Retrieve the required data
+            var data = accountService.getAllAccountsBalanceForLoggedInUser();
+
+            //  Return the data
+            return data;
         } catch (Exception e) {
             //TODO: handle exception
             System.out.println(e);
@@ -47,10 +61,62 @@ public class AccountController {
         }
     }
 
-    @GetMapping("/balance")
-    public Float getBalance(@RequestBody String iban) {
+    @GetMapping()
+    public Float getBalanceByIban(@RequestBody String iban) {
         try {
-            return accountService.getBalance(iban);
+            //  Retrieve the data
+            var data = accountService.getBalanceByIban(iban);
+
+            //  Return the data
+            return data;
+        } catch (Exception e) {
+            //TODO: handle exception
+            System.out.println(e);
+            return null;
+        }
+    }
+    @GetMapping("/{iban}")
+    public AccountResponseDTO getAccountByAccountId(@PathVariable String iban) {
+        try{
+            //  Retrieve the data
+            var data = new AccountResponseDTO(accountService.getByIban(iban));
+
+            //  Return the data
+            return data;
+        } catch (Exception e) {
+            //TODO: handle exception
+            System.out.println(e);
+            return null;
+        }
+    }
+    // PUT mappings
+
+    @PutMapping()
+    public AccountResponseDTO update(@RequestBody AccountRequestDTO account) {
+        try {
+            //  Retrieve the data
+            var data = accountService.update(account);
+
+            //  Return the data
+            return data;
+        } catch (Exception e) {
+            //TODO: handle exception
+            System.out.println(e);
+            return null;
+        }
+    }
+    //  DELETE mappings
+
+    //  This is a SOFT delete, HARD deletes are NOT allowed
+    @DeleteMapping()
+    public Boolean delete(@RequestBody String iban) {
+
+        try {
+            // Perform the delete action
+            var data = accountService.delete(iban);
+
+            // Return the data
+            return data;
         } catch (Exception e) {
             //TODO: handle exception
             System.out.println(e);
