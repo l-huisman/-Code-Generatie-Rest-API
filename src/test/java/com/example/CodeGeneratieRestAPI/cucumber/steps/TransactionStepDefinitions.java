@@ -1,10 +1,6 @@
 package com.example.CodeGeneratieRestAPI.cucumber.steps;
 
-import com.example.CodeGeneratieRestAPI.controllers.PrintForTestController;
-import com.example.CodeGeneratieRestAPI.models.Account;
-import com.example.CodeGeneratieRestAPI.models.Transaction;
-import com.example.CodeGeneratieRestAPI.models.TransactionType;
-import com.example.CodeGeneratieRestAPI.models.User;
+import com.example.CodeGeneratieRestAPI.models.*;
 import com.example.CodeGeneratieRestAPI.repositories.AccountRepository;
 import com.example.CodeGeneratieRestAPI.repositories.TransactionRepository;
 import com.example.CodeGeneratieRestAPI.repositories.UserRepository;
@@ -12,15 +8,10 @@ import com.example.CodeGeneratieRestAPI.services.TransactionService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jayway.jsonpath.JsonPath;
 
-import io.cucumber.java.Before;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
-import jakarta.inject.Inject;
 import org.junit.jupiter.api.Assertions;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.HttpEntity;
@@ -38,6 +29,7 @@ import java.util.Optional;
 
 public class TransactionStepDefinitions extends BaseStepDefinitions {
     private final HttpHeaders httpHeaders = new HttpHeaders();
+
     @Autowired
     private TestRestTemplate restTemplate;
     private ResponseEntity<String> response;
@@ -57,7 +49,7 @@ public class TransactionStepDefinitions extends BaseStepDefinitions {
     @Autowired
     private ObjectMapper mapper;
 
-    private Account account;
+    private Account account, anotherAccount;
     private User user;
     private Transaction transaction;
     private RuntimeException exception;
@@ -69,6 +61,7 @@ public class TransactionStepDefinitions extends BaseStepDefinitions {
                         HttpMethod.OPTIONS,
                         new HttpEntity<>(null, httpHeaders), // null because OPTIONS does not have a body
                         String.class);
+
         List<String> options = Arrays.stream(response.getHeaders()
                         .get("Allow")
                         .get(0)// The first element is all allowed methods separated by comma
@@ -88,10 +81,11 @@ public class TransactionStepDefinitions extends BaseStepDefinitions {
         Assertions.assertEquals(1, actual);
     }
 
-    @Given("a user with username {string}")
-    public void aUserWithUsername(String username) {
+    @Given("a user with username {string} and type {string}")
+    public void aUserWithUsername(String username, String type) {
         user = new User();
         user.setUsername(username);
+        user.setUserType(UserType.valueOf(type));
         Optional<User> optionalUser = userRepository.findUserByUsername(username);
         if (optionalUser.isPresent()) {
             user = optionalUser.get();
@@ -119,28 +113,27 @@ public class TransactionStepDefinitions extends BaseStepDefinitions {
         }
     }
 
-    @Given("an account with IBAN {string} and balance {float} and daily limit {float}")
-    public void anAccountWithIbanAndBalanceAndDailyLimit(String iban, float balance, float dailyLimit) {
+    @Given("a {string} account with IBAN {string} and balance {float} and transaction limit {float} and daily limit {float} and absolute limit {float}")
+    public void anAccountWithIbanAndBalanceAndDailyLimit(String isSavings, String iban, float balance, float transactionLimit, float dailyLimit, float absoluteLimit) {
         account = accountRepository.findByIban(iban);
         if (account == null) {
             account = new Account();
             account.setIban(iban);
             account.setBalance(balance);
+            account.setTransactionLimit(transactionLimit);
             account.setDailyLimit(dailyLimit);
-            accountRepository.save(account);
-        } else {
-            account.setBalance(balance);
-            account.setDailyLimit(dailyLimit);
+            account.setAbsoluteLimit(absoluteLimit);
+            account.setIsSavings(isSavings.equals("savings"));
             accountRepository.save(account);
         }
     }
 
-    @When("a {string} transaction of {float} is added to the account")
-    public void aTransactionIsAddedToTheAccount(String transactionType, float amount) {
+    @When("a withdraw transaction of {float} is added to the account")
+    public void aWithdrawTransactionIsAddedToTheAccount(float amount) {
         transaction = new Transaction();
         transaction.setAmount(amount);
         transaction.setFromAccount(account);
-        transaction.setTransactionType(TransactionType.valueOf(transactionType));
+        transaction.setTransactionType(TransactionType.WITHDRAW);
         try {
             transaction = transactionService.add(transaction, user.getUsername());
         } catch (RuntimeException e) {
@@ -152,21 +145,26 @@ public class TransactionStepDefinitions extends BaseStepDefinitions {
     public void aDepositTransactionIsAddedToTheAccount(float amount) {
         transaction = new Transaction();
         transaction.setAmount(amount);
-        transaction.setFromAccount(account);
-        transaction.setTransactionType(TransactionType.WITHDRAW);
+        transaction.setToAccount(account);
+        transaction.setTransactionType(TransactionType.DEPOSIT);
         try {
-            transactionService.add(transaction, user.getUsername());
+            transaction = transactionService.add(transaction, user.getUsername());
         } catch (RuntimeException e) {
+            System.out.println(e.getMessage());
             exception = e;
         }
     }
 
-    @When("a withdraw transaction of {float} is added to the account")
-    public void aWithdrawTransactionIsAddedToTheAccount(float amount) {
+    @When("a transfer transaction of {float} to IBAN {string} is added to the account")
+    public void aTransferTransactionToIBANIsAddedToTheAccount(float amount, String toAccountIban) {
+        anotherAccount = accountRepository.findByIban(toAccountIban);
+
         transaction = new Transaction();
         transaction.setAmount(amount);
         transaction.setFromAccount(account);
-        transaction.setTransactionType(TransactionType.DEPOSIT);
+        transaction.setToAccount(anotherAccount);
+        transaction.setTransactionType(TransactionType.TRANSFER);
+        //print transaction
         try {
             transaction = transactionService.add(transaction, user.getUsername());
         } catch (RuntimeException e) {
@@ -174,8 +172,8 @@ public class TransactionStepDefinitions extends BaseStepDefinitions {
         }
     }
 
-    @When("a transfer transaction of {float} is added to the account without a toAccountId")
-    public void aTransferTransactionIsAddedToTheAccountWithoutAToAccountId(float amount) {
+    @When("a transfer transaction of {float} is added to the account without a toAccountIban")
+    public void aTransferTransactionIsAddedToTheAccountWithoutAToAccountIban(float amount) {
         transaction = new Transaction();
         transaction.setAmount(amount);
         transaction.setFromAccount(account);
@@ -187,17 +185,47 @@ public class TransactionStepDefinitions extends BaseStepDefinitions {
         }
     }
 
-    @When("another {string} transaction of {float} is added to the account")
-    public void anotherTransactionIsAddedToTheAccount(String transactionType, float amount) {
+    @When("another deposit transaction of {float} is added to the account")
+    public void anotherDepositTransactionIsAddedToTheAccount(float amount) {
+        Transaction anotherTransaction = new Transaction();
+        anotherTransaction.setAmount(amount);
+        anotherTransaction.setToAccount(account);
+        anotherTransaction.setTransactionType(TransactionType.DEPOSIT);
+        try {
+            transactionService.add(anotherTransaction, user.getUsername());
+        } catch (RuntimeException e) {
+            System.out.println(e.getMessage());
+            exception = e;
+        }
+    }
+
+    @When("another withdraw transaction of {float} is added to the account")
+    public void anotherWithdrawTransactionIsAddedToTheAccount(float amount) {
         Transaction anotherTransaction = new Transaction();
         anotherTransaction.setAmount(amount);
         anotherTransaction.setFromAccount(account);
-        anotherTransaction.setTransactionType(TransactionType.valueOf(transactionType));
-        PrintForTestController.print("My new System.out.print()");
+        anotherTransaction.setTransactionType(TransactionType.WITHDRAW);
         try {
             transactionService.add(anotherTransaction, user.getUsername());
-
         } catch (RuntimeException e) {
+            System.out.println(e.getMessage());
+            exception = e;
+        }
+    }
+
+    @When("another transfer transaction of {float} to IBAN {string} is added to the account")
+    public void anotherTransferTransactionIsAddedToTheAccount(float amount, String toAccountIban) {
+        anotherAccount = accountRepository.findByIban(toAccountIban);
+
+        Transaction anotherTransaction = new Transaction();
+        anotherTransaction.setAmount(amount);
+        anotherTransaction.setFromAccount(account);
+        anotherTransaction.setToAccount(anotherAccount);
+        anotherTransaction.setTransactionType(TransactionType.TRANSFER);
+        try {
+            transactionService.add(anotherTransaction, user.getUsername());
+        } catch (RuntimeException e) {
+            System.out.println(e.getMessage());
             exception = e;
         }
     }

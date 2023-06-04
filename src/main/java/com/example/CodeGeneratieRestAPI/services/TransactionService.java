@@ -42,13 +42,19 @@ public class TransactionService {
 
     public Transaction add(Transaction transaction, String username) {
         Account transactionToAccount = transaction.getToAccount();
-        Account fromAccount = accountRepository.findByIban(transaction.getFromAccount().getIban());
+        Account transactionFromAccount = transaction.getFromAccount();
+        Account fromAccount = transactionFromAccount != null ? accountRepository.findByIban(transaction.getFromAccount().getIban()) : null;
         Account toAccount = transactionToAccount != null ? accountRepository.findByIban(transaction.getToAccount().getIban()) : null;
         User user = userRepository.findUserByUsername(username).get();
 
         //Check negative amount
         if (transaction.getAmount() < 0) {
             throw new RuntimeException("The transaction amount can not be negative.");
+        }
+
+        //Check zero amount
+        if (transaction.getAmount() == 0) {
+            throw new RuntimeException("The transaction amount can not be zero.");
         }
 
         switch (transaction.getTransactionType()) {
@@ -79,10 +85,8 @@ public class TransactionService {
 
                 //Check if the transaction amount didn't exceed the transaction limit
                 if (fromAccount.getTransactionLimit() < transaction.getAmount()) {
-                    throw new RuntimeException("The daily limit for this account has been exceeded.");
+                    throw new RuntimeException("The transaction limit for this account has been exceeded.");
                 }
-
-                System.out.println("kaas");
 
                 //Check if the transaction amount didn't exceed the total limit
                 if (fromAccount.getDailyLimit() < getTodaysAccumulatedTransactionAmount(fromAccount.getIban()) + transaction.getAmount()) {
@@ -101,12 +105,12 @@ public class TransactionService {
 
                 //Check if the transaction amount didn't exceed the transaction limit
                 if (fromAccount.getTransactionLimit() < transaction.getAmount()) {
-                    throw new RuntimeException("The daily limit for this account has been exceeded.");
+                    throw new RuntimeException("The transaction limit for this account has been exceeded.");
                 }
 
                 //Check if the transaction amount didn't exceed the total limit
                 if (fromAccount.getDailyLimit() < getTodaysAccumulatedTransactionAmount(fromAccount.getIban()) + transaction.getAmount()) {
-                    throw new RuntimeException("This account exceded the daily limit.");
+                    throw new RuntimeException("This account exceeded the daily limit.");
                 }
 
                 //Update the account balance
