@@ -4,6 +4,7 @@ import com.example.CodeGeneratieRestAPI.dtos.LoginRequestDTO;
 import com.example.CodeGeneratieRestAPI.dtos.LoginResponseDTO;
 import com.example.CodeGeneratieRestAPI.jwt.JwTokenProvider;
 import com.example.CodeGeneratieRestAPI.models.User;
+import com.example.CodeGeneratieRestAPI.models.UserType;
 import com.example.CodeGeneratieRestAPI.repositories.LoginRepository;
 import com.example.CodeGeneratieRestAPI.repositories.UserRepository;
 import org.hibernate.cfg.NotYetImplementedException;
@@ -66,5 +67,15 @@ public class UserService {
         user.setPassword(null);
 
         return new LoginResponseDTO(token, user);
+    }
+
+    public Enum<UserType> validate(String bearerToken) {
+        String token = bearerToken.substring(7);
+        if (tokenProvider.validateToken(token)) {
+            String userType = tokenProvider.getUserTypeFromJWT(token);
+            return UserType.valueOf(userType);
+        } else {
+            return null;
+        }
     }
 }
