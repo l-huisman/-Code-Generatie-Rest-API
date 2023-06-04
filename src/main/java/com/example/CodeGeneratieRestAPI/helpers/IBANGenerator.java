@@ -13,7 +13,7 @@ public class IBANGenerator {
     private static final int CHECKSUM_LENGTH = 2;
     private static final String BANK_CODE = "MRBA";
 
-    public static String getUniqueIban(){
+    public static String getUniqueIban() {
         do {
             String iban = generateIban();
             if (ServiceHelper.checkIfObjectExistsByIdentifier(iban, AccountRepository.class)) {
@@ -21,8 +21,9 @@ public class IBANGenerator {
             }
         } while (true);
     }
+
     public static String generateIban() {
-        try{
+        try {
             StringBuilder ibanBuilder = new StringBuilder();
             Random random = new Random();
 
@@ -54,6 +55,7 @@ public class IBANGenerator {
         }
 
     }
+
     // Calculate the two-digit checksum using modulo-97 (this is the ISO 7064 mod 97-10 algorithm)
     private static int calculateChecksum(String ibanDigits) {
         ibanDigits += "00"; // Append the country code and checksum (initially 00)

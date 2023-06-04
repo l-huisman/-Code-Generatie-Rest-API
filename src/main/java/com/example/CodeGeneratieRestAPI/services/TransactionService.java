@@ -88,7 +88,7 @@ public class TransactionService {
                 if (fromAccount.getDailyLimit() < getTodaysAccumulatedTransactionAmount(fromAccount.getIban()) + transaction.getAmount()) {
                     throw new RuntimeException("This account exceded the daily limit.");
                 }
-                
+
                 //Update the account balance
                 fromAccount.setBalance(fromAccount.getBalance() - transaction.getAmount());
                 accountRepository.save(fromAccount);
@@ -153,7 +153,7 @@ public class TransactionService {
         if (!user.getUserType().equals(UserType.EMPLOYEE) && !user.getAccounts().stream().anyMatch(account -> account.getIban().equals(iban))) {
             throw new RuntimeException("This user does not own the specified account");
         }
-        
+
         return transactionRepository.findAllByCreatedAtLessThanEqualAndCreatedAtGreaterThanEqualAndFromAccountIbanOrToAccountIbanAndDescriptionContainingOrLabelContaining(startDate, endDate, iban, iban, description, label);
     }
 }

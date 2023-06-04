@@ -10,6 +10,7 @@ import org.hibernate.cfg.NotYetImplementedException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.List;
 
 @Service
@@ -26,7 +27,14 @@ public class UserService {
         return (List<User>) userRepository.findAll();
     }
 
+    public User getMe(String bearerToken) {
+        String token = bearerToken.substring(7);
+        long id = tokenProvider.getUserIdFromJWT(token);
+        return userRepository.findById(id).get();
+    }
+
     public User add(User user) {
+        user.setCreated_at(this.CreationDate());
         return userRepository.save(user);
     }
 
@@ -42,12 +50,21 @@ public class UserService {
         userRepository.deleteById(id);
     }
 
+    private String CreationDate() {
+        Date date = new Date();
+        return date.toString();
+    }
+
     public LoginResponseDTO login(LoginRequestDTO request) {
         User user = loginRepository.findByUsername(request.getUsername()).get();
         if (user == null) {
             throw new NotYetImplementedException("User not found");
         }
         String token = tokenProvider.createToken(user.getId(), user.getUsername(), user.getUserType());
-        return new LoginResponseDTO(token);
+
+        // user object without password
+        user.setPassword(null);
+
+        return new LoginResponseDTO(token, user);
     }
 }
