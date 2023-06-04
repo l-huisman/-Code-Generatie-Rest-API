@@ -29,15 +29,15 @@ public class JwTokenProvider {
         claims.put("role", role);
         Date now = new Date();
         Date expiration = new Date(now.getTime() + 3600000);
-        return Jwts.builder().setClaims(claims).setIssuedAt(now).setExpiration(expiration).signWith(keyProvider.getPrivateKey()) // <- this is important, we need a key to sign the jwt
+        return Jwts.builder().setClaims(claims).setIssuedAt(now).setExpiration(expiration)
+                .signWith(keyProvider.getPrivateKey()) // <- this is important, we need a key to sign the jwt
                 .compact();
     }
 
-
-
     public Authentication getAuthentication(String token) {
         try {
-            Jws<Claims> claims = Jwts.parserBuilder().setSigningKey(keyProvider.getPrivateKey()).build().parseClaimsJws(token);
+            Jws<Claims> claims = Jwts.parserBuilder().setSigningKey(keyProvider.getPrivateKey()).build()
+                    .parseClaimsJws(token);
             String username = claims.getBody().getSubject();
             UserDetails userDetails = myUserDetailService.loadUserByUsername(username);
             return new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
@@ -45,5 +45,10 @@ public class JwTokenProvider {
             throw new JwtException("Bearer token not valid");
         }
     }
-}
 
+    public Long getUserIdFromJWT(String token) {
+        double userID = Jwts.parserBuilder().setSigningKey(keyProvider.getPrivateKey()).build().parseClaimsJws(token)
+                .getBody().get("userId", Double.class);
+        return (long) userID;
+    }
+}

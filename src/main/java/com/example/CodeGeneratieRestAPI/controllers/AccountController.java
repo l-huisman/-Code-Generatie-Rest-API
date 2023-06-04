@@ -6,6 +6,8 @@ import com.example.CodeGeneratieRestAPI.services.AccountService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/accounts")
 public class AccountController {
@@ -61,7 +63,7 @@ public class AccountController {
         }
     }
 
-    @GetMapping()
+    @GetMapping("/balance")
     public Float getBalanceByIban(@RequestBody String iban) {
         try {
             //  Retrieve the data
@@ -75,9 +77,10 @@ public class AccountController {
             return null;
         }
     }
+
     @GetMapping("/{iban}")
     public AccountResponseDTO getAccountByAccountId(@PathVariable String iban) {
-        try{
+        try {
             //  Retrieve the data
             var data = new AccountResponseDTO(accountService.getByIban(iban));
 
@@ -117,6 +120,17 @@ public class AccountController {
 
             // Return the data
             return data;
+        } catch (Exception e) {
+            //TODO: handle exception
+            System.out.println(e);
+            return null;
+        }
+    }
+
+    @GetMapping
+    public List<AccountResponseDTO> getAllAccounts() {
+        try {
+            return accountService.getAllAccounts();
         } catch (Exception e) {
             //TODO: handle exception
             System.out.println(e);

@@ -26,6 +26,11 @@ public class UserController {
         return userService.getById(id);
     }
 
+    @GetMapping("/me")
+    public User getMe(@RequestHeader("Authorization") String token) {
+        return userService.getMe(token);
+    }
+
     @PostMapping
     public User add(@RequestBody User user) {
         return userService.add(user);
@@ -36,6 +41,8 @@ public class UserController {
         return userService.login(request);
     }
 
+
+    // TODO: Look into -> Updates to null if not provided
     @PutMapping("/{id}")
     public User update(@PathVariable Long id, @RequestBody User user) {
         user.setId(id);
