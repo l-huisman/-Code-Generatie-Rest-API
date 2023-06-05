@@ -13,13 +13,13 @@ public class LoginController {
     @Autowired
     UserService userService;
 
-    @PostMapping
-    public LoginResponseDTO login(@RequestBody LoginRequestDTO req) {
-        return userService.login(req);
-    }
-
     @GetMapping("/validate")
     public Enum<UserType> validate(@RequestHeader("Authorization") String token) {
         return userService.validate(token);
+    }
+
+    @PostMapping
+    public LoginResponseDTO login(@RequestBody LoginRequestDTO req) {
+        return userService.login(req);
     }
 }

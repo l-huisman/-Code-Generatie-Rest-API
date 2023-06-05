@@ -11,6 +11,8 @@ import java.util.List;
 @RestController
 @RequestMapping("/accounts")
 public class AccountController {
+    // TODO: Check why no data is returned when calling the endpoints
+
     @Autowired
     private AccountService accountService;
 
@@ -18,28 +20,23 @@ public class AccountController {
     @PostMapping
     public AccountResponseDTO add(@RequestBody AccountRequestDTO account) {
         try {
-            //  Retrieve the data
-            var data = accountService.add(account);
-
-            //  Return the data
-            return data;
+            // Retrieve and return the data
+            return accountService.add(account);
         } catch (Exception e) {
             //TODO: handle exception
             System.out.println(e);
             return null;
         }
     }
+
     //  GET mappings
 
     //  Get the balance of all active accounts combined
     @GetMapping("/active")
     public Float getAllActiveAccountsBalanceForLoggedInUser() {
         try {
-            //  Retrieve the data
-            var data = accountService.getAllActiveAccountsBalanceForLoggedInUser();
-
-            //  Return the data
-            return data;
+            // Retrieve the balance of all active accounts combined and return it
+            return accountService.getAllActiveAccountsBalanceForLoggedInUser();
         } catch (Exception e) {
             //TODO: handle exception
             System.out.println(e);
@@ -51,11 +48,8 @@ public class AccountController {
     @GetMapping("/all")
     public Float getAllAccountsBalanceForLoggedInUser() {
         try {
-            //  Retrieve the required data
-            var data = accountService.getAllAccountsBalanceForLoggedInUser();
-
-            //  Return the data
-            return data;
+            // Retrieve the balance of all accounts combined and return it
+            return accountService.getAllAccountsBalanceForLoggedInUser();
         } catch (Exception e) {
             //TODO: handle exception
             System.out.println(e);
@@ -66,11 +60,8 @@ public class AccountController {
     @GetMapping("/balance")
     public Float getBalanceByIban(@RequestBody String iban) {
         try {
-            //  Retrieve the data
-            var data = accountService.getBalanceByIban(iban);
-
-            //  Return the data
-            return data;
+            // Retrieve the balance of an account by its iban and return it
+            return accountService.getBalanceByIban(iban);
         } catch (Exception e) {
             //TODO: handle exception
             System.out.println(e);
@@ -81,11 +72,8 @@ public class AccountController {
     @GetMapping("/{iban}")
     public AccountResponseDTO getAccountByAccountId(@PathVariable String iban) {
         try {
-            //  Retrieve the data
-            var data = new AccountResponseDTO(accountService.getByIban(iban));
-
-            //  Return the data
-            return data;
+            // Retrieve an account by its iban and return it
+            return new AccountResponseDTO(accountService.getByIban(iban));
         } catch (Exception e) {
             //TODO: handle exception
             System.out.println(e);
@@ -97,11 +85,8 @@ public class AccountController {
     @PutMapping()
     public AccountResponseDTO update(@RequestBody AccountRequestDTO account) {
         try {
-            //  Retrieve the data
-            var data = accountService.update(account);
-
-            //  Return the data
-            return data;
+            // Update the account and return the updated account
+            return accountService.update(account);
         } catch (Exception e) {
             //TODO: handle exception
             System.out.println(e);
@@ -115,11 +100,8 @@ public class AccountController {
     public Boolean delete(@RequestBody String iban) {
 
         try {
-            // Perform the delete action
-            var data = accountService.delete(iban);
-
-            // Return the data
-            return data;
+            // Delete the account
+            return accountService.delete(iban);
         } catch (Exception e) {
             //TODO: handle exception
             System.out.println(e);
@@ -130,6 +112,7 @@ public class AccountController {
     @GetMapping
     public List<AccountResponseDTO> getAllAccounts() {
         try {
+            // Retrieve a list of all accounts
             return accountService.getAllAccounts();
         } catch (Exception e) {
             //TODO: handle exception
