@@ -25,10 +25,12 @@ import static com.example.CodeGeneratieRestAPI.helpers.IBANGenerator.getUniqueIb
 
 @Service
 public class AccountService {
+
     @Autowired
     private AccountRepository accountRepository;
     @Autowired
     private UserRepository userRepository;
+
 
     public AccountResponseDTO add(AccountRequestDTO accountRequestDTO) {
         try {
@@ -77,7 +79,6 @@ public class AccountService {
         if (!accountRequestDTO.getUserId().equals(loggedInUser.getId()) && accountRequestDTO.getUserId() != null) {
             throw new IllegalArgumentException("The id of the owner of the account you are trying to add/edit does not match the id of the authenticated user");
         }
-
     }
 
     private User getLoggedInUser() {

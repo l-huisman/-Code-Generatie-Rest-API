@@ -16,6 +16,8 @@ public class UserController {
     @Autowired
     private UserService userService;
 
+    // TODO: Update to return DTO instead of model
+
     @GetMapping
     public List<User> getAll() {
         return userService.getAll();
@@ -35,12 +37,6 @@ public class UserController {
     public User add(@RequestBody User user) {
         return userService.add(user);
     }
-
-    @PostMapping("/login")
-    public LoginResponseDTO login(@RequestBody LoginRequestDTO request) {
-        return userService.login(request);
-    }
-
 
     // TODO: Look into -> Updates to null if not provided
     @PutMapping("/{id}")
