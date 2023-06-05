@@ -2,25 +2,37 @@ package com.example.CodeGeneratieRestAPI.controllers;
 
 import com.example.CodeGeneratieRestAPI.dtos.AccountRequestDTO;
 import com.example.CodeGeneratieRestAPI.dtos.AccountResponseDTO;
+import com.example.CodeGeneratieRestAPI.models.Account;
 import com.example.CodeGeneratieRestAPI.services.AccountService;
+import org.modelmapper.ModelMapper;
+import org.modelmapper.config.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Arrays;
+import java.util.List;
 
 @RestController
 @RequestMapping("/accounts")
 public class AccountController {
+    ModelMapper modelMapper;
     @Autowired
     private AccountService accountService;
 
+    public AccountController(){
+        modelMapper = new ModelMapper();
+        modelMapper.getConfiguration().setFieldMatchingEnabled(true).setFieldAccessLevel(Configuration.AccessLevel.PRIVATE);
+    }
     //  POST mappings
     @PostMapping
-    public AccountResponseDTO add(@RequestBody AccountRequestDTO account) {
+    public AccountResponseDTO add(@RequestBody(required = true) AccountRequestDTO accountRequestDTO) {
         try {
             //  Retrieve the data
-            var data = accountService.add(account);
+            Account account = accountService.add(accountRequestDTO);
 
             //  Return the data
-            return data;
+
+            return modelMapper.map(account, AccountResponseDTO.class);
         } catch (Exception e) {
             //TODO: handle exception
             System.out.println(e);
@@ -29,15 +41,15 @@ public class AccountController {
     }
     //  GET mappings
 
-    //  Get the balance of all active accounts combined
+    //  Get all active accounts
     @GetMapping("/active")
-    public Float getAllActiveAccountsBalanceForLoggedInUser() {
+    public List<AccountResponseDTO> getAllActiveAccountsForLoggedInUser(@RequestParam(required = false) String search) {
         try {
             //  Retrieve the data
-            var data = accountService.getAllActiveAccountsBalanceForLoggedInUser();
+            List<Account> accounts = accountService.getAllActiveAccountsForLoggedInUser(search);
 
             //  Return the data
-            return data;
+            return Arrays.asList(modelMapper.map(accounts, AccountResponseDTO[].class));
         } catch (Exception e) {
             //TODO: handle exception
             System.out.println(e);
@@ -45,15 +57,15 @@ public class AccountController {
         }
     }
 
-    //  Get the balance of all active AND non-active accounts combined
+    //  Get all active AND non-active accounts
     @GetMapping("/all")
-    public Float getAllAccountsBalanceForLoggedInUser() {
+    public List<AccountResponseDTO> getAllAccountsForLoggedInUser(@RequestParam(required = false) String search) {
         try {
             //  Retrieve the required data
-            var data = accountService.getAllAccountsBalanceForLoggedInUser();
+            List<Account> accounts = accountService.getAllAccountsForLoggedInUser(search);
 
             //  Return the data
-            return data;
+            return Arrays.asList(modelMapper.map(accounts, AccountResponseDTO[].class));
         } catch (Exception e) {
             //TODO: handle exception
             System.out.println(e);
@@ -62,13 +74,13 @@ public class AccountController {
     }
 
     @GetMapping()
-    public Float getBalanceByIban(@RequestBody String iban) {
+    public List<AccountResponseDTO> getAllAccounts(@RequestParam(required = false) String search) {
         try {
             //  Retrieve the data
-            var data = accountService.getBalanceByIban(iban);
+            List<Account> accounts = accountService.getAllAccounts(search);
 
             //  Return the data
-            return data;
+            return Arrays.asList(modelMapper.map(accounts, AccountResponseDTO[].class));
         } catch (Exception e) {
             //TODO: handle exception
             System.out.println(e);
@@ -76,13 +88,13 @@ public class AccountController {
         }
     }
     @GetMapping("/{iban}")
-    public AccountResponseDTO getAccountByAccountId(@PathVariable String iban) {
+    public AccountResponseDTO getAccountByIban(@PathVariable(required = true) String iban) {
         try{
             //  Retrieve the data
-            var data = new AccountResponseDTO(accountService.getByIban(iban));
+            Account account = accountService.getAccountByIban(iban);
 
             //  Return the data
-            return data;
+            return modelMapper.map(account, AccountResponseDTO.class);
         } catch (Exception e) {
             //TODO: handle exception
             System.out.println(e);
@@ -92,13 +104,13 @@ public class AccountController {
     // PUT mappings
 
     @PutMapping()
-    public AccountResponseDTO update(@RequestBody AccountRequestDTO account) {
+    public AccountResponseDTO update(@RequestBody(required = true) AccountRequestDTO accountRequestDTO) {
         try {
             //  Retrieve the data
-            var data = accountService.update(account);
+            Account account = accountService.update(accountRequestDTO);
 
             //  Return the data
-            return data;
+            return modelMapper.map(account, AccountResponseDTO.class);
         } catch (Exception e) {
             //TODO: handle exception
             System.out.println(e);
@@ -109,14 +121,14 @@ public class AccountController {
 
     //  This is a SOFT delete, HARD deletes are NOT allowed
     @DeleteMapping()
-    public Boolean delete(@RequestBody String iban) {
+    public Boolean delete(@RequestBody(required = true) String iban) {
 
         try {
             // Perform the delete action
-            var data = accountService.delete(iban);
+            Boolean succesOrFailed = accountService.delete(iban);
 
             // Return the data
-            return data;
+            return succesOrFailed;
         } catch (Exception e) {
             //TODO: handle exception
             System.out.println(e);
