@@ -2,8 +2,6 @@ package com.example.CodeGeneratieRestAPI.dtos;
 
 import lombok.Data;
 
-import java.util.Date;
-
 @Data
 public class AccountRequestDTO {
     private Long userId;

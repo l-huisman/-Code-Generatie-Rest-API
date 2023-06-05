@@ -5,7 +5,6 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -84,23 +83,23 @@ public class Account {
     public void setUsername(Long userId) {
         this.userId = userId;
     }
+
     public void setIban(String iban) {
         if (this.iban == null || this.iban.isEmpty()) {
             this.iban = iban;
-        }
-        else {
+        } else {
             throw new IllegalStateException("Iban is already set");
         }
     }
 
     public Float updateBalance(Float amount) {
-        try{
-            if (this.balance == null ) {
+        try {
+            if (this.balance == null) {
                 throw new IllegalStateException("Account balance is not set");
             }
-             if (checkIfAmountIsHigherThanLimits(amount)){
-                 this.balance = this.balance + amount;
-             }
+            if (checkIfAmountIsHigherThanLimits(amount)) {
+                this.balance = this.balance + amount;
+            }
 
             return this.balance;
         } catch (ParseException e) {
@@ -110,7 +109,8 @@ public class Account {
         }
 
     }
-    public Account update(Account account){
+
+    public Account update(Account account) {
         this.iban = account.getIban();
         this.name = account.getName();
         this.dailyLimit = account.getDailyLimit();
@@ -122,23 +122,25 @@ public class Account {
         this.createdAt = account.getCreatedAt();
         return this;
     }
+
     //  This is technically duplicate code, as this is also already done in the TransactionService class
     //  However, this is done to make sure that the Account class is self-sufficient
     private boolean checkIfAmountIsHigherThanLimits(Float amount) throws ParseException {
         // Check if the amount is higher than the transaction limit
-        if (amount > this.transactionLimit){
+        if (amount > this.transactionLimit) {
             throw new IllegalArgumentException("Transaction amount exceeds the transaction limit, the limit is: " + this.transactionLimit);
         }
         // Check if the amount is higher than or exceeds the daily limit (including the amount already spent today)
-        if (amount > this.dailyLimit || (getAmountSpentToday() + amount) > this.dailyLimit){
+        if (amount > this.dailyLimit || (getAmountSpentToday() + amount) > this.dailyLimit) {
             throw new IllegalArgumentException("Transaction amount exceeds the daily limit, the limit is: " + this.dailyLimit);
         }
         // Check if the amount change exceeds the absolute limit
-        if ((this.balance - amount) < this.absoluteLimit){
+        if ((this.balance - amount) < this.absoluteLimit) {
             throw new IllegalArgumentException("Transaction amount exceeds the absolute limit, the limit is: " + this.absoluteLimit + " the current balance is: " + this.balance);
         }
         return true;
     }
+
     private Float getAmountSpentToday() throws ParseException {
         List<Transaction> allTransactions = this.getAllTransactions();
 
@@ -158,6 +160,7 @@ public class Account {
         }
         return amountSpentToday;
     }
+
     private List<Transaction> getAllTransactions() {
         List<Transaction> allTransactions = new ArrayList<>();
         allTransactions.addAll(this.sentTransactions);

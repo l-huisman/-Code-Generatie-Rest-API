@@ -10,13 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Arrays;
 import java.util.Date;
@@ -39,7 +33,7 @@ public class TransactionController {
     public List<TransactionResponseDTO> getAll(@RequestParam Date startDate, @RequestParam Date endDate, @RequestParam String fromAccountIban, @RequestParam String search) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String username = ((UserDetails) authentication.getPrincipal()).getUsername();
-        
+
         List<Transaction> transactions = transactionService.getAll(startDate, endDate, fromAccountIban, search, search, username);
 
         return Arrays.asList(modelMapper.map(transactions, TransactionResponseDTO[].class));
@@ -67,7 +61,7 @@ public class TransactionController {
     public Transaction add(@RequestBody TransactionRequestDTO transactionIn) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String username = ((UserDetails) authentication.getPrincipal()).getUsername();
-        
+
         Transaction transaction = modelMapper.map(transactionIn, Transaction.class);
 
         return transactionService.add(transaction, username);

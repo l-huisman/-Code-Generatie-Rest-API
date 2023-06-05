@@ -12,6 +12,8 @@ import java.util.List;
 public interface AccountRepository extends CrudRepository<Account, Long> {
     Account findByIban(String iban);
 
+    List<Account> findAll();
+
     Boolean existsByIban(String iban);
 
     //Float getBalanceByIban(String iban);

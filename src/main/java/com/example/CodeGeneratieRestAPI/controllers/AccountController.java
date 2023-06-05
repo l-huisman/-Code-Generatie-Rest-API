@@ -39,6 +39,7 @@ public class AccountController {
             return null;
         }
     }
+
     //  GET mappings
 
     //  Get all active accounts
@@ -87,6 +88,7 @@ public class AccountController {
             return null;
         }
     }
+
     @GetMapping("/{iban}")
     public AccountResponseDTO getAccountByIban(@PathVariable(required = true) String iban) {
         try{

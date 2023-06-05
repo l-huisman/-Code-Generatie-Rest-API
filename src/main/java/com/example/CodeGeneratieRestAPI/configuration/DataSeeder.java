@@ -22,6 +22,9 @@ public class DataSeeder implements ApplicationRunner {
     @Autowired
     UserService userService;
 
+    @Autowired
+    AccountService accountService;
+
     @Override
     public void run(ApplicationArguments args) throws Exception {
         // Insert code here to seed data (Example: Default user, default bank account, etc.)
@@ -36,17 +39,6 @@ public class DataSeeder implements ApplicationRunner {
         defaultUser.setUsername("admin");
         defaultUser.setPassword(new HashedPassword("admin"));
         defaultUser.setUserType(UserType.EMPLOYEE);
-        userService.add(defaultUser);
-    }
-    private void seedData() {
-        // Insert code here to seed data (Example: Default user, default bank account, etc.)
-
-        // Add a default user
-        User defaultUser = new User();
-        defaultUser.setUsername("admin");
-        defaultUser.setPassword(new HashedPassword("admin"));
-        defaultUser.setUserType(UserType.EMPLOYEE);
-
         userService.add(defaultUser);
 
         //  Add a few default bank accounts
