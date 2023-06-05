@@ -1,5 +1,6 @@
 package com.example.CodeGeneratieRestAPI.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -24,6 +25,7 @@ public class User {
     private String username;
 
     @Embedded
+    @JsonIgnore
     @AttributeOverride(name = "hash", column = @Column(name = "password_hash"))
     @AttributeOverride(name = "salt", column = @Column(name = "password_salt"))
     private HashedPassword password;

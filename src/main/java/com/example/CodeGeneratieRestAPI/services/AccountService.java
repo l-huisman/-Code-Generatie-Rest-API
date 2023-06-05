@@ -17,19 +17,23 @@ import org.springframework.stereotype.Service;
 import java.lang.reflect.Field;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import static com.example.CodeGeneratieRestAPI.helpers.IBANGenerator.getUniqueIban;
 
 @Service
 public class AccountService {
+
     @Autowired
     private AccountRepository accountRepository;
     @Autowired
     private UserRepository userRepository;
 
+
     public AccountResponseDTO add(AccountRequestDTO accountRequestDTO) {
-        try{
+        try {
             User currentLoggedInUser = getLoggedInUser();
 
             //  Check if the accountRequestDTO is valid
@@ -75,9 +79,9 @@ public class AccountService {
         if (!accountRequestDTO.getUserId().equals(loggedInUser.getId()) && accountRequestDTO.getUserId() != null) {
             throw new IllegalArgumentException("The id of the owner of the account you are trying to add/edit does not match the id of the authenticated user");
         }
-
     }
-    private User getLoggedInUser(){
+
+    private User getLoggedInUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String username = ((UserDetails) authentication.getPrincipal()).getUsername();
 
@@ -86,6 +90,7 @@ public class AccountService {
             throw new EntityNotFoundException("User with username '" + username + "' does not exist");
         return user;
     }
+
     private Boolean checkIfAccountBelongsToUser(String iban, User loggedInUser) {
         if (loggedInUser.getUserType().equals("EMPLOYEE")) {
             return true;
@@ -112,7 +117,7 @@ public class AccountService {
 //    }
 
     public Float getAllActiveAccountsBalanceForLoggedInUser() {
-        // Get the current logged in user
+        // Get the current logged-in user
         User currentLoggedInUser = getLoggedInUser();
 
         // Get the balance of all accounts of the user and return it
@@ -123,7 +128,7 @@ public class AccountService {
     }
 
     public Float getAllAccountsBalanceForLoggedInUser() {
-        // Get the current logged in user
+        // Get the current logged-in user
         User currentLoggedInUser = getLoggedInUser();
 
         // Get the balance of all accounts of the user and return it
@@ -134,7 +139,7 @@ public class AccountService {
     }
 
     public Float getBalanceByIban(String iban) {
-        // Get the current logged in user
+        // Get the current logged-in user
         User currentLoggedInUser = getLoggedInUser();
 
         // Check if the iban is valid
@@ -149,8 +154,10 @@ public class AccountService {
         Float balance = accountRepository.getBalanceByIban(iban);
         return balance != null ? balance : 0;
     }
-//    // Update the balance of an account
-//    public AccountResponseDTO updateBalance(String iban, Float amount){
+
+    //    // Update the balance of an account
+//    public AccountResponseDTO updateBalance(String iban, Float amount)
+//    {
 //        // Check if the iban is valid
 //        if (!ServiceHelper.checkIfObjectExistsByIdentifier(iban, Account.class)) {
 //            throw new EntityNotFoundException("Account with IBAN: " + iban + " does not exist");
@@ -170,7 +177,7 @@ public class AccountService {
 //
 //    }
     public Account getByIban(String iban) {
-        // Get the current logged in user
+        // Get the current logged-in user
         User currentLoggedInUser = getLoggedInUser();
 
         // Check if the iban is valid
@@ -186,8 +193,9 @@ public class AccountService {
         //  Get the account details by iban and return it
         return accountRepository.findByIban(iban);
     }
-    public AccountResponseDTO update(AccountRequestDTO account){
-        // Get the current logged in user
+
+    public AccountResponseDTO update(AccountRequestDTO account) {
+        // Get the current logged-in user
         User loggedInUser = getLoggedInUser();
 
         // Check if the accountRequestDTO is valid
@@ -215,7 +223,8 @@ public class AccountService {
         // Create a response object and return it
         return new AccountResponseDTO(updatedAccount);
     }
-    private Account getUpdatedAccount(AccountRequestDTO accountWithNewValues, Account accountToUpdate){
+
+    private Account getUpdatedAccount(AccountRequestDTO accountWithNewValues, Account accountToUpdate) {
         // Loop through all the fields of the accountWithNewValues object
         // If the field is not null and the value is different from the one in the accountToUpdate object
         // Set the new value to the accountToUpdate object
@@ -242,8 +251,9 @@ public class AccountService {
         // Return the updated account
         return accountToUpdate;
     }
-    public Boolean delete(String iban){
-        // Get the current logged in user
+
+    public Boolean delete(String iban) {
+        // Get the current logged-in user
         User loggedInUser = getLoggedInUser();
 
         // Check if the account exists
@@ -264,5 +274,14 @@ public class AccountService {
         accountRepository.save(accountToDelete);
 
         return true;
+    }
+
+    public List<AccountResponseDTO> getAllAccounts() {
+        List<Account> accounts = accountRepository.findAll();
+        List<AccountResponseDTO> accountsresponse = new ArrayList<>();
+        for (Account account : accounts) {
+            accountsresponse.add(new AccountResponseDTO(account));
+        }
+        return accountsresponse;
     }
 }

@@ -12,13 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.util.Arrays;
@@ -73,7 +67,7 @@ public class TransactionController {
     public Transaction add(@RequestBody TransactionRequestDTO transactionIn) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String username = ((UserDetails) authentication.getPrincipal()).getUsername();
-        
+
         Transaction transaction = modelMapper.map(transactionIn, Transaction.class);
 
         return transactionService.add(transaction, username);
