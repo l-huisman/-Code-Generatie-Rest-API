@@ -4,24 +4,38 @@ import com.example.CodeGeneratieRestAPI.dtos.AccountRequestDTO;
 import com.example.CodeGeneratieRestAPI.dtos.AccountResponseDTO;
 import com.example.CodeGeneratieRestAPI.models.Account;
 import com.example.CodeGeneratieRestAPI.services.AccountService;
+import org.modelmapper.Converter;
 import org.modelmapper.ModelMapper;
+import org.modelmapper.PropertyMap;
+import org.modelmapper.TypeMap;
 import org.modelmapper.config.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
+
+import static org.hibernate.Hibernate.map;
 
 @RestController
 @RequestMapping("/accounts")
 public class AccountController {
-    ModelMapper modelMapper;
     @Autowired
     private AccountService accountService;
+    private final ModelMapper modelMapper;
 
-    public AccountController(){
+    public AccountController() {
         modelMapper = new ModelMapper();
+
+        //  Set the field matching to strict
         modelMapper.getConfiguration().setFieldMatchingEnabled(true).setFieldAccessLevel(Configuration.AccessLevel.PRIVATE);
+        PropertyMap<Account, AccountResponseDTO> accountMap = new PropertyMap<>() {
+            protected void configure() {
+                map().setUserId(source.getUser().getId());
+            }
+        };
+        modelMapper.addMappings(accountMap);
     }
     //  POST mappings
     @PostMapping
@@ -31,8 +45,7 @@ public class AccountController {
             Account account = accountService.add(accountRequestDTO);
 
             //  Return the data
-
-            return modelMapper.map(account, AccountResponseDTO.class);
+            return new AccountResponseDTO(account);
         } catch (Exception e) {
             //TODO: handle exception
             System.out.println(e);

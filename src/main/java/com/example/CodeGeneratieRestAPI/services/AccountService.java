@@ -20,6 +20,7 @@ import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 import static com.example.CodeGeneratieRestAPI.helpers.IBANGenerator.getUniqueIban;
 
@@ -32,12 +33,17 @@ public class AccountService {
     private UserRepository userRepository;
 
     public Account add(AccountRequestDTO accountRequestDTO) {
+        return add(accountRequestDTO, false);
+    }
+    public Account add(AccountRequestDTO accountRequestDTO, boolean skipAuthentication) {
         try{
-            User currentLoggedInUser = getLoggedInUser();
+            if (!skipAuthentication) {
 
-            //  Check if the accountRequestDTO is valid
-            this.checkIfAccountRequestDTOIsValid(accountRequestDTO, currentLoggedInUser);
+                User currentLoggedInUser = getLoggedInUser();
 
+                //  Check if the accountRequestDTO is valid
+                this.checkIfAccountRequestDTOIsValid(accountRequestDTO, currentLoggedInUser);
+            }
             //  Check if the IBAN has not been set yet
             if (accountRequestDTO.getIban() != null) {
                 throw new IllegalArgumentException("You cannot set the IBAN of a new account");
@@ -136,7 +142,6 @@ public class AccountService {
     public List<Account> getAllAccounts(String search){
         // Get the current logged in user
         User currentLoggedInUser = getLoggedInUser();
-        List<Account> accounts = null;
 
         // Check if the user is an employee
         if (!currentLoggedInUser.getUserType().getAuthority().equals("EMPLOYEE")) {
@@ -144,7 +149,10 @@ public class AccountService {
         }
 
         // Get all accounts that match the search query
-        accounts = accountRepository.findAllByUserUsernameContainingOrNameContaining(search, search);
+        //accounts = accountRepository.findAll();
+        //List<Account> accounts = accountRepository.findAllByUserUsernameContainingOrNameContaining(search, search);
+        //List<Account> accounts = accountRepository.findAllBySearchTerm(search);
+        List<Account> accounts = accountRepository.findAll();
         return accounts;
     }
 
@@ -189,7 +197,7 @@ public class AccountService {
         User currentLoggedInUser = getLoggedInUser();
 
         // Check if the iban is valid
-        if (!ServiceHelper.checkIfObjectExistsByIdentifier(iban, Account.class)) {
+        if (!ServiceHelper.checkIfObjectExistsByIdentifier(iban, new Account())) {
             throw new EntityNotFoundException("Account with IBAN: " + iban + " does not exist");
         }
 
@@ -209,7 +217,7 @@ public class AccountService {
         this.checkIfAccountRequestDTOIsValid(account, loggedInUser);
 
         // Check if the account exists
-        if (!ServiceHelper.checkIfObjectExistsByIdentifier(account.getIban(), Account.class)) {
+        if (!ServiceHelper.checkIfObjectExistsByIdentifier(account.getIban(), new Account())) {
             throw new EntityNotFoundException("Account with IBAN: " + account.getIban() + " does not exist");
         }
 
@@ -264,12 +272,12 @@ public class AccountService {
         User loggedInUser = getLoggedInUser();
 
         // Check if the account exists
-        if (!ServiceHelper.checkIfObjectExistsByIdentifier(iban, Account.class)) {
+        if (ServiceHelper.checkIfObjectExistsByIdentifier(iban, new Account())) {
             throw new EntityNotFoundException("Account with IBAN: " + iban + " does not exist");
         }
 
         // Check if the account belongs to the user
-        if (!checkIfAccountBelongsToUser(iban, loggedInUser)) {
+        if (checkIfAccountBelongsToUser(iban, loggedInUser)) {
             throw new IllegalArgumentException("The account with IBAN " + iban + " does not belong to the user with id " + loggedInUser.getId());
         }
 
@@ -283,12 +291,12 @@ public class AccountService {
         return true;
     }
 
-    public List<AccountResponseDTO> getAllAccounts() {
-        List<Account> accounts = accountRepository.findAll();
-        List<AccountResponseDTO> accountsresponse = new ArrayList<>();
-        for (Account account : accounts) {
-            accountsresponse.add(new AccountResponseDTO(account));
-        }
-        return accountsresponse;
-    }
+//    public List<AccountResponseDTO> getAllAccounts() {
+//        List<Account> accounts = accountRepository.findAll();
+//        List<AccountResponseDTO> accountsresponse = new ArrayList<>();
+//        for (Account account : accounts) {
+//            accountsresponse.add(new AccountResponseDTO(account));
+//        }
+//        return accountsresponse;
+//    }
 }

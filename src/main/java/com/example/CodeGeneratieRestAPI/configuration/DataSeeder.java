@@ -13,6 +13,8 @@ import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.stereotype.Component;
 
+import java.util.Date;
+
 @Component
 public class DataSeeder implements ApplicationRunner {
 
@@ -42,10 +44,48 @@ public class DataSeeder implements ApplicationRunner {
         userService.add(defaultUser);
 
         //  Add a few default bank accounts
-
+        addAccounts(defaultUser);
 
 
         //  Add a few default transactions
+
+    }
+    private void addAccounts(User user){
+//        AccountRequestDTO account1 = new AccountRequestDTO();
+//        account1.setIban("NL01INHO0000000001");
+//        account1.setUserId(user.getId());
+//        account1.setAccountName("Luke's account");
+//        account1.setDailyLimit(1000f);
+//        account1.setTransactionLimit(500f);
+//        account1.setAbsoluteLimit(100f);
+//        account1.setBalance(5000f);
+//        account1.setIsSavings(false);
+//        account1.setIsActive(true);
+//        accountService.add(account1, true);
+//
+//        AccountRequestDTO account2 = new AccountRequestDTO();
+//        account2.setIban("NL02INHO0000000002");
+//        account2.setUserId(user.getId());
+//        account2.setAccountName("Luke's second account");
+//        account2.setDailyLimit(2000f);
+//        account2.setTransactionLimit(1000f);
+//        account2.setAbsoluteLimit(200f);
+//        account2.setBalance(8000f);
+//        account2.setIsSavings(false);
+//        account2.setIsActive(true);
+//        accountService.add(account2, true);
+//
+//        AccountRequestDTO account3 = new AccountRequestDTO();
+//        account3.setIban("NL03INHO0000000003");
+//        account3.setUserId(user.getId());
+//        account3.setAccountName("Luke's third account");
+//        account3.setDailyLimit(1500f);
+//        account3.setTransactionLimit(800f);
+//        account3.setAbsoluteLimit(150f);
+//        account3.setBalance(6000f);
+//        account3.setIsSavings(false);
+//        account3.setIsActive(true);
+//        accountService.add(account3, true);
 
     }
 }
