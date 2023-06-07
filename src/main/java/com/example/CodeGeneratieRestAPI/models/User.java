@@ -17,11 +17,11 @@ import java.util.List;
 @Table(name = "\"users\"")
 public class User {
     @Id
-    @GeneratedValue(strategy = GenerationType.TABLE)
+    @GeneratedValue
     private Long id;
 
-    private String first_name;
-    private String last_name;
+    private String firstName;
+    private String lastName;
     private String username;
 
     @Embedded
@@ -36,9 +36,10 @@ public class User {
     @Column(name = "user_type")
     private UserType userType;
 
-    private String created_at;
+    private String createdAt;
 
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "user")
+    @OneToMany(mappedBy = "user")
+    @JsonIgnore
     private List<Account> accounts;
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "user")

@@ -17,7 +17,7 @@ import java.util.Date;
 public class Transaction {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.TABLE)
+    @GeneratedValue
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -25,7 +25,7 @@ public class Transaction {
     private User user;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "from_iban", nullable = true)
+    @JoinColumn(name = "from_iban", nullable = false)
     private Account fromAccount;
 
     @ManyToOne(fetch = FetchType.LAZY)

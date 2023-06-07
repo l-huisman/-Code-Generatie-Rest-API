@@ -22,11 +22,11 @@ import java.util.List;
 
 public class Account {
     @Id
-    @GeneratedValue(strategy = GenerationType.TABLE)
+    @GeneratedValue
     private Integer id;
     @Column(unique = true)
     private String iban;
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "USER_ID", nullable = true)
     private User user;
     // The User object can optionally be filled, but the username is always filled
@@ -40,10 +40,11 @@ public class Account {
     private Boolean isSavings;
     private Date createdAt;
     private Boolean isActive;
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "fromAccount", fetch = FetchType.EAGER)
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "fromAccount")
     private List<Transaction> sentTransactions;
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "fromAccount", fetch = FetchType.EAGER)
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "toAccount")
     private List<Transaction> receivedTransactions;
+
 
     // A constructor for Account that takes an AccountRequestDTO
     public Account(AccountRequestDTO accountRequestDTO) {

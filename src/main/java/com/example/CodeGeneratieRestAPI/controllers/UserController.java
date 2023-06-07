@@ -1,7 +1,5 @@
 package com.example.CodeGeneratieRestAPI.controllers;
 
-import com.example.CodeGeneratieRestAPI.dtos.LoginRequestDTO;
-import com.example.CodeGeneratieRestAPI.dtos.LoginResponseDTO;
 import com.example.CodeGeneratieRestAPI.models.User;
 import com.example.CodeGeneratieRestAPI.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;

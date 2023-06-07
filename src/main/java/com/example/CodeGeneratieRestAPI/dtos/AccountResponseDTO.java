@@ -18,6 +18,10 @@ public class AccountResponseDTO {
     private Boolean isActive;
     private Date createdAt;
 
+    // Empty constructor
+    public AccountResponseDTO() {
+    }
+
     // A constructor that takes an Account object
     public AccountResponseDTO(Account account) {
         this.userId = account.getUserId();

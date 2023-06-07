@@ -8,14 +8,11 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class ServiceHelper {
-    @Autowired
     private static AccountRepository accountRepository;
-    @Autowired
     private static UserRepository userRepository;
-    @Autowired
     private static TransactionRepository transactionRepository;
 
-    public static <T, U> boolean checkIfObjectExistsByIdentifier(T identifier, U objectDataType) {
+    public static <T> boolean checkIfObjectExistsByIdentifier(T identifier, Object objectDataType) {
         switch (objectDataType.getClass().getSimpleName()) {
             case "Account":
                 return accountRepository.existsByIban((String) identifier);
@@ -26,5 +23,20 @@ public class ServiceHelper {
             default:
                 throw new IllegalArgumentException("Object type is not valid");
         }
+    }
+
+    @Autowired
+    public void setAccountRepository(AccountRepository accountRepository) {
+        ServiceHelper.accountRepository = accountRepository;
+    }
+
+    @Autowired
+    public void setUserRepository(UserRepository userRepository) {
+        ServiceHelper.userRepository = userRepository;
+    }
+
+    @Autowired
+    public void setTransactionRepository(TransactionRepository transactionRepository) {
+        ServiceHelper.transactionRepository = transactionRepository;
     }
 }

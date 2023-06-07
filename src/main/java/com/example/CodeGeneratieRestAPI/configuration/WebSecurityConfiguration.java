@@ -25,12 +25,17 @@ public class WebSecurityConfiguration {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
         httpSecurity.csrf().disable();
+
         httpSecurity.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
-        httpSecurity.authorizeRequests()
+
+        httpSecurity.authorizeHttpRequests()
                 .requestMatchers("/login").permitAll()
                 .anyRequest().authenticated();
+
         httpSecurity.addFilterBefore(jwtTokenFilter, UsernamePasswordAuthenticationFilter.class);
+
         httpSecurity.cors(customizer -> customizer.configurationSource(corsConfigurationSource()));
+
         return httpSecurity.build();
     }
 
