@@ -40,7 +40,7 @@ public class Account {
     private Boolean isSavings;
     private Date createdAt;
     private Boolean isActive;
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "fromAccount")
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "fromAccount", fetch = FetchType.EAGER)
     private List<Transaction> sentTransactions;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "toAccount")
     private List<Transaction> receivedTransactions;

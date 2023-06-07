@@ -25,7 +25,7 @@ public class Transaction {
     private User user;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "from_iban", nullable = false)
+    @JoinColumn(name = "from_iban", nullable = true)
     private Account fromAccount;
 
     @ManyToOne(fetch = FetchType.LAZY)
