@@ -52,7 +52,7 @@ public class TransactionService {
         }
 
         switch (transaction.getTransactionType()) {
-            case DEPOSIT:
+            case DEPOSIT -> {
                 if (toAccount == null) {
                     throw new RuntimeException("The to account can't be empty.");
                 }
@@ -65,8 +65,8 @@ public class TransactionService {
                 //Update the account balance
                 toAccount.setBalance(toAccount.getBalance() + transaction.getAmount());
                 accountRepository.save(toAccount);
-                break;
-            case WITHDRAW:
+            }
+            case WITHDRAW -> {
                 //Check if the user owns this account or is an admin
                 if (!user.getUserType().equals(UserType.EMPLOYEE) && !fromAccount.getUser().getUsername().equals(user.getUsername())) {
                     throw new RuntimeException("This account does not belong to this user.");
@@ -92,8 +92,8 @@ public class TransactionService {
                 //Update the account balance
                 fromAccount.setBalance(fromAccount.getBalance() - transaction.getAmount());
                 accountRepository.save(fromAccount);
-                break;
-            case TRANSFER:
+            }
+            case TRANSFER -> {
                 //Check if there is a to and from account
                 if (toAccount == null || fromAccount == null) {
                     throw new RuntimeException("The to or from account can't be empty.");
@@ -114,9 +114,8 @@ public class TransactionService {
                 accountRepository.save(fromAccount);
                 toAccount.setBalance(toAccount.getBalance() + transaction.getAmount());
                 accountRepository.save(toAccount);
-                break;
-            default:
-                throw new RuntimeException("The transaction type is not valid.");
+            }
+            default -> throw new RuntimeException("The transaction type is not valid.");
         }
 
         transaction.setUser(user);
