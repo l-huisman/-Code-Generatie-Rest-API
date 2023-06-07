@@ -90,7 +90,7 @@ public class TransactionService {
 
                 //Check if the transaction amount didn't exceed the total limit
                 if (fromAccount.getDailyLimit() < getTodaysAccumulatedTransactionAmount(fromAccount.getIban()) + transaction.getAmount()) {
-                    throw new RuntimeException("This account exceded the daily limit.");
+                    throw new RuntimeException("This account exceeded the daily limit.");
                 }
 
                 //Update the account balance
@@ -101,6 +101,11 @@ public class TransactionService {
                 //Check if there is a to and from account
                 if (toAccount == null || fromAccount == null) {
                     throw new RuntimeException("The to or from account can't be empty.");
+                }
+
+                //Check if the user owns this account or is an admin
+                if (!user.getUserType().equals(UserType.EMPLOYEE) && !fromAccount.getUser().getUsername().equals(user.getUsername())) {
+                    throw new RuntimeException("This account does not belong to this user.");
                 }
 
                 //Check if the transaction amount didn't exceed the transaction limit

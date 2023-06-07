@@ -47,8 +47,8 @@ public class TransactionStepDefinitions extends BaseStepDefinitions {
     private ObjectMapper mapper;
 
     private Account account, anotherAccount;
-    private User user;
-    private Transaction transaction;
+    private User user, anotherUser;
+    private Transaction transaction, anotherTransaction;
     private RuntimeException exception;
 
     @Given("The endpoint for {string} is available for method {string}")
@@ -91,6 +91,19 @@ public class TransactionStepDefinitions extends BaseStepDefinitions {
         }
     }
 
+    @Given("another user with username {string} and type {string}")
+    public void anotherUserWithUsername(String username, String type) {
+        anotherUser = new User();
+        anotherUser.setUsername(username);
+        anotherUser.setUserType(UserType.valueOf(type));
+        Optional<User> optionalUser = userRepository.findUserByUsername(username);
+        if (optionalUser.isPresent()) {
+            anotherUser = optionalUser.get();
+        } else {
+            userRepository.save(anotherUser);
+        }
+    }
+
     @Given("{string} has a {string} account with IBAN {string} and balance {float} and transaction limit {float} and daily limit {float} and absolute limit {float}")
     public void aAccountWithIbanAndBalance(String username, String isSavings, String iban, float balance, float transactionLimit, float dailyLimit, float absoluteLimit) {
         account = accountRepository.findByIban(iban);
@@ -107,6 +120,25 @@ public class TransactionStepDefinitions extends BaseStepDefinitions {
             account.setAbsoluteLimit(absoluteLimit);
             account.setIsSavings(isSavings.equals("savings"));
             accountRepository.save(account);
+        }
+    }
+
+    @Given("another user {string} has a {string} account with IBAN {string} and balance {float} and transaction limit {float} and daily limit {float} and absolute limit {float}")
+    public void anotherUserAccountWithIbanAndBalance(String username, String isSavings, String iban, float balance, float transactionLimit, float dailyLimit, float absoluteLimit) {
+        anotherAccount = accountRepository.findByIban(iban);
+
+        if (anotherAccount == null) {
+            Optional<User> optionalUser = userRepository.findUserByUsername(username);
+            optionalUser.ifPresent(value -> anotherUser = value);
+            anotherAccount = new Account();
+            anotherAccount.setIban(iban);
+            anotherAccount.setUser(anotherUser);
+            anotherAccount.setBalance(balance);
+            anotherAccount.setTransactionLimit(transactionLimit);
+            anotherAccount.setDailyLimit(dailyLimit);
+            anotherAccount.setAbsoluteLimit(absoluteLimit);
+            anotherAccount.setIsSavings(isSavings.equals("savings"));
+            accountRepository.save(anotherAccount);
         }
     }
 
@@ -169,6 +201,68 @@ public class TransactionStepDefinitions extends BaseStepDefinitions {
         }
     }
 
+    @When("a deposit transaction of {float} to IBAN {string} is added to the account")
+    public void aDepositTransactionToIBANIsAddedToTheAccount(float amount, String toAccountIban) {
+        account = accountRepository.findByIban(toAccountIban);
+
+        transaction = new Transaction();
+        transaction.setAmount(amount);
+        transaction.setToAccount(account);
+        transaction.setTransactionType(TransactionType.DEPOSIT);
+        //print transaction
+        try {
+            transaction = transactionService.add(transaction, user.getUsername());
+        } catch (RuntimeException e) {
+            exception = e;
+        }
+    }
+
+    @When("a withdraw transaction of {float} from IBAN {string} is added to the account")
+    public void aWithdrawTransactionToIBANIsAddedToTheAccount(float amount, String fromAccountIban) {
+        account = accountRepository.findByIban(fromAccountIban);
+
+        transaction = new Transaction();
+        transaction.setAmount(amount);
+        transaction.setFromAccount(account);
+        transaction.setTransactionType(TransactionType.WITHDRAW);
+        //print transaction
+        try {
+            transaction = transactionService.add(transaction, user.getUsername());
+        } catch (RuntimeException e) {
+            exception = e;
+        }
+    }
+
+    @When("a transfer transaction of {float} from IBAN {string} to IBAN {string} is added to the account")
+    public void aTransferTransactionToIBANIsAddedToTheAccount(float amount, String fromAccountIban, String toAccountIban) {
+        account = accountRepository.findByIban(toAccountIban);
+        Account fromAccount = accountRepository.findByIban(fromAccountIban);
+
+        transaction = new Transaction();
+        transaction.setAmount(amount);
+        transaction.setFromAccount(fromAccount);
+        transaction.setToAccount(account);
+        transaction.setTransactionType(TransactionType.TRANSFER);
+        //print transaction
+        try {
+            transaction = transactionService.add(transaction, user.getUsername());
+        } catch (RuntimeException e) {
+            exception = e;
+        }
+    }
+
+    @When("a deposit transaction of {float} is added to the account without a toAccountIban")
+    public void aDepositTransactionIsAddedToTheAccountWithoutAToAccountIban(float amount) {
+        transaction = new Transaction();
+        transaction.setAmount(amount);
+        transaction.setTransactionType(TransactionType.DEPOSIT);
+        try {
+            transactionService.add(transaction, user.getUsername());
+        } catch (RuntimeException e) {
+            exception = e;
+        }
+    }
+
     @When("a transfer transaction of {float} is added to the account without a toAccountIban")
     public void aTransferTransactionIsAddedToTheAccountWithoutAToAccountIban(float amount) {
         transaction = new Transaction();
@@ -182,9 +276,22 @@ public class TransactionStepDefinitions extends BaseStepDefinitions {
         }
     }
 
+    @When("a transfer transaction of {float} is added to the account without a fromAccountIban")
+    public void aTransferTransactionIsAddedToTheAccountWithoutAFromAccountIban(float amount) {
+        transaction = new Transaction();
+        transaction.setAmount(amount);
+        transaction.setToAccount(account);
+        transaction.setTransactionType(TransactionType.TRANSFER);
+        try {
+            transactionService.add(transaction, user.getUsername());
+        } catch (RuntimeException e) {
+            exception = e;
+        }
+    }
+
     @When("another deposit transaction of {float} is added to the account")
     public void anotherDepositTransactionIsAddedToTheAccount(float amount) {
-        Transaction anotherTransaction = new Transaction();
+        anotherTransaction = new Transaction();
         anotherTransaction.setAmount(amount);
         anotherTransaction.setToAccount(account);
         anotherTransaction.setTransactionType(TransactionType.DEPOSIT);
@@ -198,7 +305,7 @@ public class TransactionStepDefinitions extends BaseStepDefinitions {
 
     @When("another withdraw transaction of {float} is added to the account")
     public void anotherWithdrawTransactionIsAddedToTheAccount(float amount) {
-        Transaction anotherTransaction = new Transaction();
+        anotherTransaction = new Transaction();
         anotherTransaction.setAmount(amount);
         anotherTransaction.setFromAccount(account);
         anotherTransaction.setTransactionType(TransactionType.WITHDRAW);
@@ -214,7 +321,7 @@ public class TransactionStepDefinitions extends BaseStepDefinitions {
     public void anotherTransferTransactionIsAddedToTheAccount(float amount, String toAccountIban) {
         anotherAccount = accountRepository.findByIban(toAccountIban);
 
-        Transaction anotherTransaction = new Transaction();
+        anotherTransaction = new Transaction();
         anotherTransaction.setAmount(amount);
         anotherTransaction.setFromAccount(account);
         anotherTransaction.setToAccount(anotherAccount);
@@ -240,6 +347,13 @@ public class TransactionStepDefinitions extends BaseStepDefinitions {
     @Then("a RuntimeException is thrown with message {string}")
     public void aRuntimeExceptionIsThrownWithMessage(String message) {
         Transaction savedTransaction = transaction.getId() != null ? transactionRepository.findById(transaction.getId()).orElse(null) : null;
+        assertNull(savedTransaction);
+        assertNotNull(exception);
+        assertEquals(message, exception.getMessage());
+    }
+    @Then("a other RuntimeException is thrown with message {string}")
+    public void aOtherRuntimeExceptionIsThrownWithMessage(String message) {
+        Transaction savedTransaction = anotherTransaction.getId() != null ? transactionRepository.findById(anotherTransaction.getId()).orElse(null) : null;
         assertNull(savedTransaction);
         assertNotNull(exception);
         assertEquals(message, exception.getMessage());
