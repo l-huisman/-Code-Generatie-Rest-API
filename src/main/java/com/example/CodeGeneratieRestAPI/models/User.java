@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
 
 import java.util.List;
 
@@ -13,6 +14,7 @@ import java.util.List;
 
 @AllArgsConstructor
 @NoArgsConstructor
+@RequiredArgsConstructor
 
 @Table(name = "\"users\"")
 public class User {
@@ -43,6 +45,7 @@ public class User {
     private List<Account> accounts;
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "user")
+    @JsonIgnore
     private List<Transaction> transactions;
 
 
@@ -53,5 +56,9 @@ public class User {
 
     public String getPassword() {
         return password.getPassword();
+    }
+
+    public HashedPassword getHashedPassword() {
+        return password;
     }
 }

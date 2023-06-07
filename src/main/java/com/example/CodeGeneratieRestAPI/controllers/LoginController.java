@@ -1,7 +1,9 @@
 package com.example.CodeGeneratieRestAPI.controllers;
 
+import com.example.CodeGeneratieRestAPI.dtos.ErrorDTO;
 import com.example.CodeGeneratieRestAPI.dtos.LoginRequestDTO;
 import com.example.CodeGeneratieRestAPI.dtos.LoginResponseDTO;
+import com.example.CodeGeneratieRestAPI.dtos.RegisterRequestDTO;
 import com.example.CodeGeneratieRestAPI.models.UserType;
 import com.example.CodeGeneratieRestAPI.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,7 +21,16 @@ public class LoginController {
     }
 
     @PostMapping
-    public LoginResponseDTO login(@RequestBody LoginRequestDTO req) {
-        return userService.login(req);
+    public LoginResponseDTO login(@RequestBody LoginRequestDTO req) throws Exception {
+        try{
+            return userService.login(req);
+        } catch (Exception e) {
+            throw new Exception(e.getMessage());
+        }
     }
+
+//    @PostMapping("/register")
+//    public LoginResponseDTO register(@RequestBody RegisterRequestDTO req) {
+//        return userService.register(req);
+//    }
 }

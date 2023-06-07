@@ -36,6 +36,7 @@ public class DataSeeder implements ApplicationRunner {
         defaultUser.setEmail("684651@student.inholland.nl");
         defaultUser.setUsername("admin");
         defaultUser.setPassword(new HashedPassword("admin"));
+        System.out.println(defaultUser.getPassword());
         defaultUser.setUserType(UserType.EMPLOYEE);
         userService.add(defaultUser);
 

@@ -8,7 +8,6 @@ import com.example.CodeGeneratieRestAPI.repositories.AccountRepository;
 import com.example.CodeGeneratieRestAPI.repositories.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
