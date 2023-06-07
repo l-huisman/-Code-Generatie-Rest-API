@@ -7,7 +7,6 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
-import java.util.Optional;
 
 @Repository
 public interface AccountRepository extends CrudRepository<Account, Long> {
@@ -17,14 +16,11 @@ public interface AccountRepository extends CrudRepository<Account, Long> {
 
     Boolean existsByIban(String iban);
 
-    //Float getBalanceByIban(String iban);
+    Float getBalanceByIban(String iban);
 
-    //List<Account> getAllActiveAccountsByUserId(Long userId);
-    //List<Account> getAllAccountsByUserId(Long userId);
-    List<Account> findAllByNameContainingAndUser_Id(String accountName, Long userId);
-    //List<Account> findAllByNameContaining(String accountName);
-    List<Account> findAllByUserUsernameContainingOrNameContaining(Optional<String> userUsername, Optional<String> accountName);
-    //List<Account> findAllByUserUsernameContainingOrUserFirst_nameContainingOrUserLast_nameContainingOrNameContainingOrIbanContaining(String search);
+    Float getAllActiveAccountsBalanceByUserId(Long userId);
+
+    Float getAllAccountsBalanceByUserId(Long userId);
 
     @Query("SELECT a FROM Account a WHERE a.user.username LIKE %:search% " +
             "OR a.user.first_name LIKE %:search% " +
