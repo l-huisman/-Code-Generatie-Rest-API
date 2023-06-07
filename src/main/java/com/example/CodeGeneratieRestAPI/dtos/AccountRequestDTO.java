@@ -4,7 +4,6 @@ import lombok.Data;
 
 @Data
 public class AccountRequestDTO {
-    private Long userId;
     private String iban;
     private String accountName;
     private Float dailyLimit;
@@ -17,8 +16,7 @@ public class AccountRequestDTO {
     public AccountRequestDTO() {
     }
 
-    public AccountRequestDTO(Long userId, String iban, String accountName, Float dailyLimit, Float transactionLimit, Float absoluteLimit, Float balance, Boolean isSavings, Boolean isActive) {
-        this.userId = userId;
+    public AccountRequestDTO(String iban, String accountName, Float dailyLimit, Float transactionLimit, Float absoluteLimit, Float balance, Boolean isSavings, Boolean isActive) {
         this.accountName = accountName;
         this.dailyLimit = dailyLimit;
         this.transactionLimit = transactionLimit;

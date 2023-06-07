@@ -32,6 +32,7 @@ public interface AccountRepository extends CrudRepository<Account, Long> {
             "OR a.name LIKE %:search% " +
             "OR a.iban LIKE %:search%")
     List<Account> findAllBySearchTerm(String search);
+    Account findAccountByIban(String iban);
     //List<Account> findAllByUser_Id(Long userId);
     @Query("SELECT COUNT(a) > 0 FROM Account a WHERE a.iban = :iban AND a.user.id = :userId")
     boolean checkIfAccountBelongsToUser(@Param("iban") String iban, @Param("userId") Long userId);

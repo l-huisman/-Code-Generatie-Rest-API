@@ -36,7 +36,7 @@ public class AccountService {
         try{
             User currentLoggedInUser = getLoggedInUser();
             //  Check if the accountRequestDTO is valid
-            this.checkIfAccountRequestDTOIsValid(accountRequestDTO, currentLoggedInUser);
+            this.checkIfAccountRequestDTOIsValid(accountRequestDTO);
 
             //  Check if the IBAN has not been set yet
             if (accountRequestDTO.getIban() != null) {
@@ -50,7 +50,7 @@ public class AccountService {
             accountRequestDTO.setIban(iban);
 
             //  Create new account object and save it to the database
-            Account newAccount = new Account(accountRequestDTO);
+            Account newAccount = new Account(accountRequestDTO, currentLoggedInUser);
             newAccount.setCreatedAt(getCurrentDate());
 
             accountRepository.save(newAccount);
@@ -68,12 +68,17 @@ public class AccountService {
         return Date.from(LocalDateTime.now(zone).atZone(zone).toInstant());
     }
 
+    private void checkIfAccountRequestDTOIsValid(AccountRequestDTO accountRequestDTO) {
+        if (accountRequestDTO == null) {
+            throw new IllegalArgumentException("AccountRequest object is null");
+        }
+    }
     private void checkIfAccountRequestDTOIsValid(AccountRequestDTO accountRequestDTO, User loggedInUser) {
         if (accountRequestDTO == null) {
             throw new IllegalArgumentException("AccountRequest object is null");
         }
-        if (!accountRequestDTO.getUserId().equals(loggedInUser.getId()) && accountRequestDTO.getUserId() != null) {
-            throw new AccessDeniedException("The id of the owner of the account you are trying to add/edit does not match the id of the authenticated user and the authenticated user is not an employee");
+        if (!checkIfAccountBelongsToUser(accountRequestDTO.getIban(), loggedInUser) || !loggedInUser.getUserType().equals("EMPLOYEE")) {
+            throw new AccessDeniedException("You are not allowed to access this account");
         }
     }
 

@@ -48,7 +48,6 @@ public class Account {
 
     // A constructor for Account that takes an AccountRequestDTO
     public Account(AccountRequestDTO accountRequestDTO) {
-        this.userId = accountRequestDTO.getUserId();
         this.iban = accountRequestDTO.getIban();
         this.name = accountRequestDTO.getAccountName();
         this.dailyLimit = accountRequestDTO.getDailyLimit();
@@ -61,7 +60,6 @@ public class Account {
 
     // A constructor for Account that takes an AccountRequestDTO and a User
     public Account(AccountRequestDTO accountRequestDTO, User user) {
-        this.userId = accountRequestDTO.getUserId();
         this.iban = accountRequestDTO.getIban();
         this.name = accountRequestDTO.getAccountName();
         this.dailyLimit = accountRequestDTO.getDailyLimit();
@@ -77,7 +75,7 @@ public class Account {
         if (user != null) {
             return user.getId();
         }
-        return userId;
+        return userId != null ? userId : 0L;
     }
 
     public void setUsername(Long userId) {
