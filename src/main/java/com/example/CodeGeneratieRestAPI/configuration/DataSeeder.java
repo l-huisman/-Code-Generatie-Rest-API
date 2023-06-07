@@ -44,7 +44,7 @@ public class DataSeeder implements ApplicationRunner {
         userService.add(defaultUser);
 
         //  Add a few default bank accounts
-        addAccounts(defaultUser);
+        //addAccounts(defaultUser);
 
 
         //  Add a few default transactions

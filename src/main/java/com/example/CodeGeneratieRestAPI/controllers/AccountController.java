@@ -137,7 +137,6 @@ public class AccountController {
     //  This is a SOFT delete, HARD deletes are NOT allowed
     @DeleteMapping()
     public Boolean delete(@RequestBody(required = true) String iban) {
-
         try {
             // Perform the delete action
             Boolean succesOrFailed = accountService.delete(iban);

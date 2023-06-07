@@ -35,13 +35,22 @@ public class AccountService {
     public Account add(AccountRequestDTO accountRequestDTO) {
         try{
             User currentLoggedInUser = getLoggedInUser();
+
             //  Check if the accountRequestDTO is valid
-            this.checkIfAccountRequestDTOIsValid(accountRequestDTO, currentLoggedInUser);
+            //this.checkIfAccountRequestDTOIsValid(accountRequestDTO, currentLoggedInUser);
 
             //  Check if the IBAN has not been set yet
             if (accountRequestDTO.getIban() != null) {
                 throw new IllegalArgumentException("You cannot set the IBAN of a new account");
             }
+
+            //  If the user is an employee, check if the user id is set
+            if (currentLoggedInUser.getUserType().equals("EMPLOYEE") && accountRequestDTO.getUserId() == null) {
+                throw new IllegalArgumentException("You cannot add an account as an employee without setting the user id");
+            }
+
+            //  Set the userId on the account
+            accountRequestDTO.setUserId(currentLoggedInUser.getId());
 
             //  Generate a new unique IBAN
             String iban = getUniqueIban();
