@@ -1,6 +1,7 @@
 package com.example.CodeGeneratieRestAPI.models;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -17,11 +18,11 @@ import java.util.List;
 @Table(name = "\"users\"")
 public class User {
     @Id
-    @GeneratedValue(strategy = GenerationType.TABLE)
+    @GeneratedValue
     private Long id;
 
-    private String first_name;
-    private String last_name;
+    private String firstName;
+    private String lastName;
     private String username;
 
     @Embedded
@@ -38,7 +39,8 @@ public class User {
 
     private String created_at;
 
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "user")
+    @OneToMany(mappedBy = "user")
+    @JsonIgnore
     private List<Account> accounts;
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "user")

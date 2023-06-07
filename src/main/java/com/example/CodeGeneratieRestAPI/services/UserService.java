@@ -2,6 +2,7 @@ package com.example.CodeGeneratieRestAPI.services;
 
 import com.example.CodeGeneratieRestAPI.dtos.LoginRequestDTO;
 import com.example.CodeGeneratieRestAPI.dtos.LoginResponseDTO;
+import com.example.CodeGeneratieRestAPI.dtos.UserResponseDTO;
 import com.example.CodeGeneratieRestAPI.jwt.JwTokenProvider;
 import com.example.CodeGeneratieRestAPI.models.User;
 import com.example.CodeGeneratieRestAPI.models.UserType;
@@ -63,10 +64,16 @@ public class UserService {
         }
         String token = tokenProvider.createToken(user.getId(), user.getUsername(), user.getUserType());
 
-        // user object without password
-        user.setPassword(null);
+        UserResponseDTO userResponseDTO = new UserResponseDTO();
+        userResponseDTO.setFirstName(user.getFirstName());
+        userResponseDTO.setLastName(user.getLastName());
+        userResponseDTO.setUsername(user.getUsername());
+        userResponseDTO.setEmail(user.getEmail());
+        userResponseDTO.setUserType(user.getUserType());
+        userResponseDTO.setCreatedAt(user.getCreated_at());
 
-        return new LoginResponseDTO(token, user);
+
+        return new LoginResponseDTO(token, userResponseDTO);
     }
 
     public Enum<UserType> validate(String bearerToken) {

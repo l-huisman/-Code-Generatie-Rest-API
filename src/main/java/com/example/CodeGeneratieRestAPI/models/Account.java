@@ -22,11 +22,11 @@ import java.util.List;
 
 public class Account {
     @Id
-    @GeneratedValue(strategy = GenerationType.TABLE)
+    @GeneratedValue
     private Integer id;
     @Column(unique = true)
     private String iban;
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "USER_ID", nullable = true)
     private User user;
     // The User object can optionally be filled, but the username is always filled
