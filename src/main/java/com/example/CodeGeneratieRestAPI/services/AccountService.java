@@ -45,13 +45,16 @@ public class AccountService {
             //  If the user is an employee, check if the user id is set
             if (currentLoggedInUser.getUserType().equals("EMPLOYEE") && accountRequestDTO.getUserId() == null) {
                 throw new IllegalArgumentException("You cannot add an account as an employee without setting the user id");
+            } else {
+                //  If the user is not an employee, set the user id to the id of the current logged in user
+                accountRequestDTO.setUserId(currentLoggedInUser.getId());
             }
 
             //  Get the user
             User user = userRepository.findById(accountRequestDTO.getUserId()).orElse(null);
 
             ////  Set the userId on the account
-            //accountRequestDTO.setUserId(currentLoggedInUser.getId());
+            accountRequestDTO.setUserId(currentLoggedInUser.getId());
 
             //  Generate a new unique IBAN
             String iban = getUniqueIban();
