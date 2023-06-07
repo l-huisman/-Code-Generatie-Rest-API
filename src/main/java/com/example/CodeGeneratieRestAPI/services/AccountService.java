@@ -9,6 +9,7 @@ import com.example.CodeGeneratieRestAPI.repositories.AccountRepository;
 import com.example.CodeGeneratieRestAPI.repositories.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -56,9 +57,8 @@ public class AccountService {
             accountRepository.save(newAccount);
 
             // Create a response object and return it
-            AccountResponseDTO response = new AccountResponseDTO(newAccount);
 
-            return response;
+            return new AccountResponseDTO(newAccount);
         } catch (Exception e) {
             throw e;
         }
@@ -76,8 +76,7 @@ public class AccountService {
             throw new IllegalArgumentException("AccountRequest object is null");
         }
         if (!accountRequestDTO.getUserId().equals(loggedInUser.getId()) && accountRequestDTO.getUserId() != null) {
-            throw new IllegalArgumentException(
-                    "The id of the owner of the account you are trying to add/edit does not match the id of the authenticated user");
+            throw new AccessDeniedException("The id of the owner of the account you are trying to add/edit does not match the id of the authenticated user and the authenticated user is not an employee");
         }
     }
 
@@ -86,8 +85,7 @@ public class AccountService {
         String username = ((UserDetails) authentication.getPrincipal()).getUsername();
 
         User user = userRepository.findUserByUsername(username).orElse(null);
-        if (user == null)
-            throw new EntityNotFoundException("User with username '" + username + "' does not exist");
+        if (user == null) throw new EntityNotFoundException("User with username '" + username + "' does not exist");
         return user;
     }
 
@@ -118,89 +116,57 @@ public class AccountService {
     // return balance != null ? balance : 0;
     // }
 
-    public Float getAllActiveAccountsBalanceForLoggedInUser() {
+    public List<Account> getAllActiveAccountsForLoggedInUser(String accountName) {
         // Get the current logged-in user
         User currentLoggedInUser = getLoggedInUser();
 
-        // Get the balance of all accounts of the user and return it
-        Float allActiveAccountsBalance = accountRepository
-                .getAllActiveAccountsBalanceByUserId(currentLoggedInUser.getId());
-
-        // If the user has no accounts, return 0
-        return allActiveAccountsBalance != null ? allActiveAccountsBalance : 0;
+        //  Return the accounts
+        return accountRepository.findAllByNameContainingAndUser_Id(accountName, currentLoggedInUser.getId());
     }
 
-    public Float getAllAccountsBalanceForLoggedInUser() {
+    public List<Account> getAllAccountsForLoggedInUser(String accountName) {
         // Get the current logged-in user
         User currentLoggedInUser = getLoggedInUser();
 
-        // Get the balance of all accounts of the user and return it
-        Float balance = accountRepository.getAllAccountsBalanceByUserId(currentLoggedInUser.getId());
-
-        // If the user has no balance, return 0
-        return balance != null ? balance : 0.0f;
+        // Return the accounts
+        return accountRepository.findAllByNameContainingAndUser_Id(accountName, currentLoggedInUser.getId());
     }
 
-    public Float getBalanceByIban(String iban) {
+    public List<Account> getAllAccounts(String search) {
+        // Get the current logged-in user
+        User currentLoggedInUser = getLoggedInUser();
+
+        // Check if the user is an employee
+        if (!currentLoggedInUser.getUserType().getAuthority().equals("EMPLOYEE")) {
+            throw new IllegalArgumentException("You are not authorized to perform this action");
+        }
+
+        // Get all accounts that match the search query
+        //accounts = accountRepository.findAll();
+        //List<Account> accounts = accountRepository.findAllByUserUsernameContainingOrNameContaining(search, search);
+        //List<Account> accounts = accountRepository.findAllBySearchTerm(search);
+        return accountRepository.findAll();
+    }
+
+    public Account getAccountByIban(String iban) {
         // Get the current logged-in user
         User currentLoggedInUser = getLoggedInUser();
 
         // Check if the iban is valid
-        if (!ServiceHelper.checkIfObjectExistsByIdentifier(iban, Account.class)) {
-            throw new EntityNotFoundException("Account with IBAN " + iban + " does not exist");
-        }
-        // Check if the account belongs to the user or if the user is an employee
-        if (!accountRepository.checkIfAccountBelongsToUser(iban, currentLoggedInUser.getId())) {
-            throw new IllegalArgumentException(
-                    "Account with IBAN " + iban + " does not belong to user with id " + currentLoggedInUser.getId());
-        }
-
-        Float balance = accountRepository.getBalanceByIban(iban);
-        return balance != null ? balance : 0;
-    }
-
-    // // Update the balance of an account
-    // public AccountResponseDTO updateBalance(String iban, Float amount)
-    // {
-    // // Check if the iban is valid
-    // if (!ServiceHelper.checkIfObjectExistsByIdentifier(iban, Account.class)) {
-    // throw new EntityNotFoundException("Account with IBAN: " + iban + " does not
-    // exist");
-    // }
-    // // Check if the amount is valid
-    // if (amount == null) {
-    // throw new IllegalArgumentException("Amount is null");
-    // }
-    // // Get the account
-    // Account account = accountRepository.findByIban(iban);
-    // // Update the balance
-    // account.updateBalance(amount);
-    // // Save the account
-    // accountRepository.save(account);
-    // // Create a response object and return it
-    // return new AccountResponseDTO(account);
-    //
-    // }
-    public Account getByIban(String iban) {
-        // Get the current logged-in user
-        User currentLoggedInUser = getLoggedInUser();
-
-        // Check if the iban is valid
-        if (!ServiceHelper.checkIfObjectExistsByIdentifier(iban, Account.class)) {
+        if (!ServiceHelper.checkIfObjectExistsByIdentifier(iban, new Account())) {
             throw new EntityNotFoundException("Account with IBAN: " + iban + " does not exist");
         }
 
         // Check if the account belongs to the user or if the user is an employee
         if (!accountRepository.checkIfAccountBelongsToUser(iban, currentLoggedInUser.getId())) {
-            throw new IllegalArgumentException(
-                    "Account with IBAN " + iban + " does not belong to user with id " + currentLoggedInUser.getId());
+            throw new IllegalArgumentException("Account with IBAN " + iban + " does not belong to user with id " + currentLoggedInUser.getId());
         }
 
         // Get the account details by iban and return it
         return accountRepository.findByIban(iban);
     }
 
-    public AccountResponseDTO update(AccountRequestDTO account) {
+    public Account update(AccountRequestDTO account) {
         // Get the current logged-in user
         User loggedInUser = getLoggedInUser();
 
@@ -208,14 +174,13 @@ public class AccountService {
         this.checkIfAccountRequestDTOIsValid(account, loggedInUser);
 
         // Check if the account exists
-        if (!ServiceHelper.checkIfObjectExistsByIdentifier(account.getIban(), Account.class)) {
+        if (!ServiceHelper.checkIfObjectExistsByIdentifier(account.getIban(), new Account())) {
             throw new EntityNotFoundException("Account with IBAN: " + account.getIban() + " does not exist");
         }
 
         // Check if the account belongs to the user
         if (!checkIfAccountBelongsToUser(account.getIban(), loggedInUser)) {
-            throw new IllegalArgumentException("The account with IBAN " + account.getIban()
-                    + " does not belong to the user with id " + loggedInUser.getId());
+            throw new IllegalArgumentException("The account with IBAN " + account.getIban() + " does not belong to the user with id " + loggedInUser.getId());
         }
 
         // Get the account to update
@@ -228,7 +193,7 @@ public class AccountService {
         accountRepository.save(updatedAccount);
 
         // Create a response object and return it
-        return new AccountResponseDTO(updatedAccount);
+        return updatedAccount;
     }
 
     private Account getUpdatedAccount(AccountRequestDTO accountWithNewValues, Account accountToUpdate) {
@@ -238,8 +203,7 @@ public class AccountService {
         // Set the new value to the accountToUpdate object
         for (Field field : accountWithNewValues.getClass().getDeclaredFields()) {
             // Skip the iban field (it cannot be updated
-            if (field.getName().equals("iban"))
-                continue;
+            if (field.getName().equals("iban")) continue;
 
             // Set the field to accessible
             field.setAccessible(true);
@@ -264,15 +228,14 @@ public class AccountService {
         User loggedInUser = getLoggedInUser();
 
         // Check if the account exists
-        if (!ServiceHelper.checkIfObjectExistsByIdentifier(iban, Account.class)) {
+        if (ServiceHelper.checkIfObjectExistsByIdentifier(iban, new Account())) {
             throw new EntityNotFoundException("Account with IBAN: " + iban + " does not exist");
         }
 
         // Check if the account belongs to the user
-        if (!checkIfAccountBelongsToUser(iban, loggedInUser)) {
-            throw new IllegalArgumentException(
-                    "The account with IBAN " + iban + " does not belong to the user with id " + loggedInUser.getId());
-        }
+        if (!checkIfAccountBelongsToUser(iban, loggedInUser))
+            throw new IllegalArgumentException("The account with IBAN " + iban + " does not belong to the user with id " + loggedInUser.getId());
+
 
         // Get the account
         Account accountToDelete = accountRepository.findByIban(iban);

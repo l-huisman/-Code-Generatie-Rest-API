@@ -15,13 +15,13 @@ import org.springframework.stereotype.Component;
 import java.util.Date;
 import java.util.Random;
 
+
 @Component
 public class DataSeeder implements ApplicationRunner {
 
     // Declare services here (Autowired)
     @Autowired
     TransactionService transactionService;
-
     @Autowired
     UserService userService;
 
@@ -78,7 +78,7 @@ public class DataSeeder implements ApplicationRunner {
             account.setIban(null);
             account.setUser(user);
             account.setUserId(user.getId());
-            account.setName("${user.first_name} ${user.last_name} $avings account");
+            account.setName(user.getFirst_name() + " " + user.getLast_name() + "$avings account");
             account.setDailyLimit(100f);
             account.setTransactionLimit(100f);
             account.setAbsoluteLimit(-50f);

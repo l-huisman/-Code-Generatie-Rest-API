@@ -12,6 +12,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -19,8 +20,8 @@ import java.util.List;
 @RestController
 @RequestMapping("/transactions")
 public class TransactionController {
-
     ModelMapper modelMapper;
+
     @Autowired
     private TransactionService transactionService;
 
@@ -30,11 +31,14 @@ public class TransactionController {
     }
 
     @GetMapping
-    public List<TransactionResponseDTO> getAll(@RequestParam Date startDate, @RequestParam Date endDate, @RequestParam String fromAccountIban, @RequestParam String search) {
+    public List<TransactionResponseDTO> getAll(@RequestParam String start_date, @RequestParam String end_date, @RequestParam String from_account_iban, @RequestParam String search) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String username = ((UserDetails) authentication.getPrincipal()).getUsername();
 
-        List<Transaction> transactions = transactionService.getAll(startDate, endDate, fromAccountIban, search, search, username);
+        Date startDate = java.sql.Date.valueOf(LocalDate.parse(start_date));
+        Date endDate = java.sql.Date.valueOf(LocalDate.parse(end_date));
+
+        List<Transaction> transactions = transactionService.getAll(startDate, endDate, from_account_iban, search, search, username);
 
         return Arrays.asList(modelMapper.map(transactions, TransactionResponseDTO[].class));
     }

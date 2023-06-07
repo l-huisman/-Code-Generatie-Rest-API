@@ -1,7 +1,5 @@
 package com.example.CodeGeneratieRestAPI.controllers;
 
-import com.example.CodeGeneratieRestAPI.dtos.LoginRequestDTO;
-import com.example.CodeGeneratieRestAPI.dtos.LoginResponseDTO;
 import com.example.CodeGeneratieRestAPI.models.User;
 import com.example.CodeGeneratieRestAPI.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,8 +13,6 @@ public class UserController {
 
     @Autowired
     private UserService userService;
-
-    // TODO: Update to return DTO instead of model
 
     @GetMapping
     public List<User> getAll() {
@@ -38,7 +34,6 @@ public class UserController {
         return userService.add(user);
     }
 
-    // TODO: Look into -> Updates to null if not provided
     @PutMapping("/{id}")
     public User update(@PathVariable Long id, @RequestBody User user) {
         user.setId(id);
