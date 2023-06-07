@@ -47,8 +47,11 @@ public class AccountService {
                 throw new IllegalArgumentException("You cannot add an account as an employee without setting the user id");
             }
 
-            //  Set the userId on the account
-            accountRequestDTO.setUserId(currentLoggedInUser.getId());
+            //  Get the user
+            User user = userRepository.findById(accountRequestDTO.getUserId()).orElse(null);
+
+            ////  Set the userId on the account
+            //accountRequestDTO.setUserId(currentLoggedInUser.getId());
 
             //  Generate a new unique IBAN
             String iban = getUniqueIban();
@@ -57,7 +60,7 @@ public class AccountService {
             accountRequestDTO.setIban(iban);
 
             //  Create new account object and save it to the database
-            Account newAccount = new Account(accountRequestDTO);
+            Account newAccount = new Account(accountRequestDTO, user);
             newAccount.setCreatedAt(getCurrentDate());
 
             accountRepository.save(newAccount);
@@ -79,9 +82,9 @@ public class AccountService {
         if (accountRequestDTO == null) {
             throw new IllegalArgumentException("AccountRequest object is null");
         }
-        if (!accountRequestDTO.getUserId().equals(loggedInUser.getId()) && accountRequestDTO.getUserId() != null) {
-            throw new AccessDeniedException("The id of the owner of the account you are trying to add/edit does not match the id of the authenticated user and the authenticated user is not an employee");
-        }
+//        if (!accountRequestDTO.getUserId().equals(loggedInUser.getId()) && accountRequestDTO.getUserId() != null) {
+//            throw new AccessDeniedException("The id of the owner of the account you are trying to add/edit does not match the id of the authenticated user and the authenticated user is not an employee");
+//        }
     }
 
     private User getLoggedInUser() {

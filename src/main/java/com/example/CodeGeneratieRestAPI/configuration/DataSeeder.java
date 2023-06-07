@@ -72,19 +72,19 @@ public class DataSeeder implements ApplicationRunner {
         userService.getAll().forEach(user -> {
             Random random = new Random();
             // Create default accounts
-            Account account = new Account();
-            account.setIban(null);
-            account.setUser(user);
-            account.setUserId(user.getId());
-            account.setName(user.getFirst_name() + " " + user.getLast_name() + " $avings account");
-            account.setDailyLimit(100f);
-            account.setTransactionLimit(100f);
-            account.setAbsoluteLimit(-50f);
-            account.setBalance(1000f);
-            account.setIsSavings(random.nextBoolean());
-            account.setCreatedAt(new Date());
-            account.setIsActive(true);
-            accountService.addSeededAccount(account);
+//            Account account = new Account();
+//            account.setIban(null);
+//            account.setUser(user);
+//            account.setUserId(user.getId());
+//            account.setName(user.getFirst_name() + " " + user.getLast_name() + " $avings account");
+//            account.setDailyLimit(100f);
+//            account.setTransactionLimit(100f);
+//            account.setAbsoluteLimit(-50f);
+//            account.setBalance(1000f);
+//            account.setIsSavings(random.nextBoolean());
+//            account.setCreatedAt(new Date());
+//            account.setIsActive(true);
+//            accountService.addSeededAccount(account);
         });
     }
 }
