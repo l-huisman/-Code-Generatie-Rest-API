@@ -36,7 +36,7 @@ public class UserService {
     }
 
     public User add(User user) {
-        user.setCreated_at(this.CreationDate());
+        user.setCreatedAt(this.CreationDate());
         return userRepository.save(user);
     }
 
@@ -70,7 +70,7 @@ public class UserService {
         userResponseDTO.setUsername(user.getUsername());
         userResponseDTO.setEmail(user.getEmail());
         userResponseDTO.setUserType(user.getUserType());
-        userResponseDTO.setCreatedAt(user.getCreated_at());
+        userResponseDTO.setCreatedAt(user.getCreatedAt());
 
 
         return new LoginResponseDTO(token, userResponseDTO);

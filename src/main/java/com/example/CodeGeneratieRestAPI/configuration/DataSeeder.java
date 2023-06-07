@@ -70,6 +70,7 @@ public class DataSeeder implements ApplicationRunner {
         userService.add(defaultCustomer3);
 
         userService.getAll().forEach(user -> {
+            if (user.getUserType() == UserType.EMPLOYEE) return;
             Random random = new Random();
             // Create default accounts
             Account account = new Account();

@@ -36,7 +36,7 @@ public class User {
     @Column(name = "user_type")
     private UserType userType;
 
-    private String created_at;
+    private String createdAt;
 
     @OneToMany(mappedBy = "user")
     @JsonIgnore
