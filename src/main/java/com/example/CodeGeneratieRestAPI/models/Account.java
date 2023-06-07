@@ -42,9 +42,8 @@ public class Account {
     private Boolean isActive;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "fromAccount", fetch = FetchType.EAGER)
     private List<Transaction> sentTransactions;
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "toAccount")
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "fromAccount", fetch = FetchType.EAGER)
     private List<Transaction> receivedTransactions;
-
 
     // A constructor for Account that takes an AccountRequestDTO
     public Account(AccountRequestDTO accountRequestDTO) {
