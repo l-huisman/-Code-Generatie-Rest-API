@@ -33,17 +33,11 @@ public class AccountService {
     private UserRepository userRepository;
 
     public Account add(AccountRequestDTO accountRequestDTO) {
-        return add(accountRequestDTO, false);
-    }
-    public Account add(AccountRequestDTO accountRequestDTO, boolean skipAuthentication) {
         try{
-            if (!skipAuthentication) {
+            User currentLoggedInUser = getLoggedInUser();
+            //  Check if the accountRequestDTO is valid
+            this.checkIfAccountRequestDTOIsValid(accountRequestDTO, currentLoggedInUser);
 
-                User currentLoggedInUser = getLoggedInUser();
-
-                //  Check if the accountRequestDTO is valid
-                this.checkIfAccountRequestDTOIsValid(accountRequestDTO, currentLoggedInUser);
-            }
             //  Check if the IBAN has not been set yet
             if (accountRequestDTO.getIban() != null) {
                 throw new IllegalArgumentException("You cannot set the IBAN of a new account");
