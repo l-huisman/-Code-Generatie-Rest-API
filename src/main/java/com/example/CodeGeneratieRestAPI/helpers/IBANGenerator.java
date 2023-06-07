@@ -1,6 +1,7 @@
 package com.example.CodeGeneratieRestAPI.helpers;
 
 import com.example.CodeGeneratieRestAPI.exceptions.IBANGenerationException;
+import com.example.CodeGeneratieRestAPI.models.Account;
 import com.example.CodeGeneratieRestAPI.repositories.AccountRepository;
 
 import java.math.BigInteger;
@@ -16,7 +17,7 @@ public class IBANGenerator {
     public static String getUniqueIban() {
         do {
             String iban = generateIban();
-            if (ServiceHelper.checkIfObjectExistsByIdentifier(iban, AccountRepository.class)) {
+            if (!ServiceHelper.checkIfObjectExistsByIdentifier(iban, new Account())) {
                 return iban;
             }
         } while (true);

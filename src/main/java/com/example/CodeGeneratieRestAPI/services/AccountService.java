@@ -1,7 +1,6 @@
 package com.example.CodeGeneratieRestAPI.services;
 
 import com.example.CodeGeneratieRestAPI.dtos.AccountRequestDTO;
-import com.example.CodeGeneratieRestAPI.dtos.AccountResponseDTO;
 import com.example.CodeGeneratieRestAPI.helpers.ServiceHelper;
 import com.example.CodeGeneratieRestAPI.models.Account;
 import com.example.CodeGeneratieRestAPI.models.User;
@@ -9,6 +8,7 @@ import com.example.CodeGeneratieRestAPI.repositories.AccountRepository;
 import com.example.CodeGeneratieRestAPI.repositories.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -20,6 +20,7 @@ import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 import static com.example.CodeGeneratieRestAPI.helpers.IBANGenerator.getUniqueIban;
 
@@ -31,9 +32,8 @@ public class AccountService {
     @Autowired
     private UserRepository userRepository;
 
-
-    public AccountResponseDTO add(AccountRequestDTO accountRequestDTO) {
-        try {
+    public Account add(AccountRequestDTO accountRequestDTO) {
+        try{
             User currentLoggedInUser = getLoggedInUser();
 
             //  Check if the accountRequestDTO is valid
@@ -64,10 +64,7 @@ public class AccountService {
 
             accountRepository.save(newAccount);
 
-            //  Create a response object and return it
-            AccountResponseDTO response = new AccountResponseDTO(newAccount);
-
-            return response;
+            return newAccount;
         } catch (Exception e) {
             throw e;
         }
@@ -85,7 +82,7 @@ public class AccountService {
             throw new IllegalArgumentException("AccountRequest object is null");
         }
         if (!accountRequestDTO.getUserId().equals(loggedInUser.getId()) && accountRequestDTO.getUserId() != null) {
-            throw new IllegalArgumentException("The id of the owner of the account you are trying to add/edit does not match the id of the authenticated user");
+            throw new AccessDeniedException("The id of the owner of the account you are trying to add/edit does not match the id of the authenticated user and the authenticated user is not an employee");
         }
     }
 
@@ -124,48 +121,62 @@ public class AccountService {
 //        return balance != null ? balance : 0;
 //    }
 
-    public Float getAllActiveAccountsBalanceForLoggedInUser() {
-        // Get the current logged-in user
+    public List<Account> getAllActiveAccountsForLoggedInUser(String accountName) {
+        // Get the current logged in user
         User currentLoggedInUser = getLoggedInUser();
 
         // Get the balance of all accounts of the user and return it
-        Float allActiveAccountsBalance = accountRepository.getAllActiveAccountsBalanceByUserId(currentLoggedInUser.getId());
+        List<Account> allActiveAccountsBalance = accountRepository.findAllByNameContainingAndUser_Id(accountName, currentLoggedInUser.getId());
 
-        //  If the user has no accounts, return 0
-        return allActiveAccountsBalance != null ? allActiveAccountsBalance : 0;
+        //  Return the accounts
+        return allActiveAccountsBalance;
     }
 
-    public Float getAllAccountsBalanceForLoggedInUser() {
-        // Get the current logged-in user
+    public List<Account> getAllAccountsForLoggedInUser(String accountName) {
+        // Get the current logged in user
         User currentLoggedInUser = getLoggedInUser();
 
         // Get the balance of all accounts of the user and return it
-        Float balance = accountRepository.getAllAccountsBalanceByUserId(currentLoggedInUser.getId());
+        List<Account> accounts = accountRepository.findAllByNameContainingAndUser_Id(accountName, currentLoggedInUser.getId());
 
-        // If the user has no balance, return 0
-        return balance != null ? balance : 0.0f;
+        // Return the accounts
+        return accounts;
     }
-
-    public Float getBalanceByIban(String iban) {
-        // Get the current logged-in user
+    public List<Account> getAllAccounts(String search){
+        // Get the current logged in user
         User currentLoggedInUser = getLoggedInUser();
 
-        // Check if the iban is valid
-        if (!ServiceHelper.checkIfObjectExistsByIdentifier(iban, Account.class)) {
-            throw new EntityNotFoundException("Account with IBAN " + iban + " does not exist");
-        }
-        // Check if the account belongs to the user or if the user is an employee
-        if (!accountRepository.checkIfAccountBelongsToUser(iban, currentLoggedInUser.getId())) {
-            throw new IllegalArgumentException("Account with IBAN " + iban + " does not belong to user with id " + currentLoggedInUser.getId());
+        // Check if the user is an employee
+        if (!currentLoggedInUser.getUserType().getAuthority().equals("EMPLOYEE")) {
+            throw new IllegalArgumentException("You are not authorized to perform this action");
         }
 
-        Float balance = accountRepository.getBalanceByIban(iban);
-        return balance != null ? balance : 0;
+        // Get all accounts that match the search query
+        //accounts = accountRepository.findAll();
+        //List<Account> accounts = accountRepository.findAllByUserUsernameContainingOrNameContaining(search, search);
+        //List<Account> accounts = accountRepository.findAllBySearchTerm(search);
+        List<Account> accounts = accountRepository.findAll();
+        return accounts;
     }
 
-    //    // Update the balance of an account
-//    public AccountResponseDTO updateBalance(String iban, Float amount)
-//    {
+//    public Float getBalanceByIban(String iban) {
+//        // Get the current logged in user
+//        User currentLoggedInUser = getLoggedInUser();
+//
+//        // Check if the iban is valid
+//        if (!ServiceHelper.checkIfObjectExistsByIdentifier(iban, Account.class)) {
+//            throw new EntityNotFoundException("Account with IBAN " + iban + " does not exist");
+//        }
+//        // Check if the account belongs to the user or if the user is an employee
+//        if (!accountRepository.checkIfAccountBelongsToUser(iban, currentLoggedInUser.getId())) {
+//            throw new IllegalArgumentException("Account with IBAN " + iban + " does not belong to user with id " + currentLoggedInUser.getId());
+//        }
+//
+//        Float balance = accountRepository.getBalanceByIban(iban);
+//        return balance != null ? balance : 0;
+//    }
+//    // Update the balance of an account
+//    public AccountResponseDTO updateBalance(String iban, Float amount){
 //        // Check if the iban is valid
 //        if (!ServiceHelper.checkIfObjectExistsByIdentifier(iban, Account.class)) {
 //            throw new EntityNotFoundException("Account with IBAN: " + iban + " does not exist");
@@ -184,12 +195,12 @@ public class AccountService {
 //        return new AccountResponseDTO(account);
 //
 //    }
-    public Account getByIban(String iban) {
-        // Get the current logged-in user
+    public Account getAccountByIban(String iban) {
+        // Get the current logged in user
         User currentLoggedInUser = getLoggedInUser();
 
         // Check if the iban is valid
-        if (!ServiceHelper.checkIfObjectExistsByIdentifier(iban, Account.class)) {
+        if (!ServiceHelper.checkIfObjectExistsByIdentifier(iban, new Account())) {
             throw new EntityNotFoundException("Account with IBAN: " + iban + " does not exist");
         }
 
@@ -201,16 +212,15 @@ public class AccountService {
         //  Get the account details by iban and return it
         return accountRepository.findByIban(iban);
     }
-
-    public AccountResponseDTO update(AccountRequestDTO account) {
-        // Get the current logged-in user
+    public Account update(AccountRequestDTO account){
+        // Get the current logged in user
         User loggedInUser = getLoggedInUser();
 
         // Check if the accountRequestDTO is valid
         this.checkIfAccountRequestDTOIsValid(account, loggedInUser);
 
         // Check if the account exists
-        if (!ServiceHelper.checkIfObjectExistsByIdentifier(account.getIban(), Account.class)) {
+        if (!ServiceHelper.checkIfObjectExistsByIdentifier(account.getIban(), new Account())) {
             throw new EntityNotFoundException("Account with IBAN: " + account.getIban() + " does not exist");
         }
 
@@ -229,7 +239,7 @@ public class AccountService {
         accountRepository.save(updatedAccount);
 
         // Create a response object and return it
-        return new AccountResponseDTO(updatedAccount);
+        return updatedAccount;
     }
 
     private Account getUpdatedAccount(AccountRequestDTO accountWithNewValues, Account accountToUpdate) {
@@ -265,12 +275,12 @@ public class AccountService {
         User loggedInUser = getLoggedInUser();
 
         // Check if the account exists
-        if (!ServiceHelper.checkIfObjectExistsByIdentifier(iban, Account.class)) {
+        if (ServiceHelper.checkIfObjectExistsByIdentifier(iban, new Account())) {
             throw new EntityNotFoundException("Account with IBAN: " + iban + " does not exist");
         }
 
         // Check if the account belongs to the user
-        if (!checkIfAccountBelongsToUser(iban, loggedInUser)) {
+        if (checkIfAccountBelongsToUser(iban, loggedInUser)) {
             throw new IllegalArgumentException("The account with IBAN " + iban + " does not belong to the user with id " + loggedInUser.getId());
         }
 
@@ -284,12 +294,12 @@ public class AccountService {
         return true;
     }
 
-    public List<AccountResponseDTO> getAllAccounts() {
-        List<Account> accounts = accountRepository.findAll();
-        List<AccountResponseDTO> accountsresponse = new ArrayList<>();
-        for (Account account : accounts) {
-            accountsresponse.add(new AccountResponseDTO(account));
-        }
-        return accountsresponse;
-    }
+//    public List<AccountResponseDTO> getAllAccounts() {
+//        List<Account> accounts = accountRepository.findAll();
+//        List<AccountResponseDTO> accountsresponse = new ArrayList<>();
+//        for (Account account : accounts) {
+//            accountsresponse.add(new AccountResponseDTO(account));
+//        }
+//        return accountsresponse;
+//    }
 }
