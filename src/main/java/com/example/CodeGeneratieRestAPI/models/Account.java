@@ -28,8 +28,7 @@ public class Account {
     private String iban;
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "USER_ID", nullable = true)
-    private User user;
-    // The User object can optionally be filled, but the username is always filled
+    private User user; // The User object can optionally be filled, but the username is always filled
     @Column(name = "USER_ID", nullable = true, insertable = false, updatable = false)
     private Long userId;
     private String name;
@@ -122,20 +121,25 @@ public class Account {
         return this;
     }
 
-    //  This is technically duplicate code, as this is also already done in the TransactionService class
-    //  However, this is done to make sure that the Account class is self-sufficient
+    // This is technically duplicate code, as this is also already done in the
+    // TransactionService class
+    // However, this is done to make sure that the Account class is self-sufficient
     private boolean checkIfAmountIsHigherThanLimits(Float amount) throws ParseException {
         // Check if the amount is higher than the transaction limit
         if (amount > this.transactionLimit) {
-            throw new IllegalArgumentException("Transaction amount exceeds the transaction limit, the limit is: " + this.transactionLimit);
+            throw new IllegalArgumentException(
+                    "Transaction amount exceeds the transaction limit, the limit is: " + this.transactionLimit);
         }
-        // Check if the amount is higher than or exceeds the daily limit (including the amount already spent today)
+        // Check if the amount is higher than or exceeds the daily limit (including the
+        // amount already spent today)
         if (amount > this.dailyLimit || (getAmountSpentToday() + amount) > this.dailyLimit) {
-            throw new IllegalArgumentException("Transaction amount exceeds the daily limit, the limit is: " + this.dailyLimit);
+            throw new IllegalArgumentException(
+                    "Transaction amount exceeds the daily limit, the limit is: " + this.dailyLimit);
         }
         // Check if the amount change exceeds the absolute limit
         if ((this.balance - amount) < this.absoluteLimit) {
-            throw new IllegalArgumentException("Transaction amount exceeds the absolute limit, the limit is: " + this.absoluteLimit + " the current balance is: " + this.balance);
+            throw new IllegalArgumentException("Transaction amount exceeds the absolute limit, the limit is: "
+                    + this.absoluteLimit + " the current balance is: " + this.balance);
         }
         return true;
     }
@@ -151,7 +155,8 @@ public class Account {
         // Get the current date
         Date currentDate = new Date();
 
-        // Loop through all the transactions and check if the date is the same as the current date
+        // Loop through all the transactions and check if the date is the same as the
+        // current date
         for (Transaction transaction : allTransactions) {
             if (currentDate.compareTo(transaction.getCreatedAt()) == 0) {
                 amountSpentToday += transaction.getAmount();
