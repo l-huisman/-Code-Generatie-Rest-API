@@ -13,6 +13,8 @@ import java.util.Optional;
 public interface AccountRepository extends CrudRepository<Account, Long> {
     Account findByIban(String iban);
 
+    @Query("SELECT a FROM Account a WHERE a.iban = :iban")
+    Optional<Account> getAccountByIban(String iban);
     List<Account> findAll();
 
     Boolean existsByIban(String iban);
