@@ -1,6 +1,5 @@
 package com.example.CodeGeneratieRestAPI.configuration;
 
-import com.example.CodeGeneratieRestAPI.dtos.AccountRequestDTO;
 import com.example.CodeGeneratieRestAPI.models.Account;
 import com.example.CodeGeneratieRestAPI.models.HashedPassword;
 import com.example.CodeGeneratieRestAPI.models.User;
@@ -14,6 +13,7 @@ import org.springframework.boot.ApplicationRunner;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
+import java.util.Random;
 
 @Component
 public class DataSeeder implements ApplicationRunner {
@@ -29,10 +29,6 @@ public class DataSeeder implements ApplicationRunner {
 
     @Override
     public void run(ApplicationArguments args) throws Exception {
-        // Insert code here to seed data (Example: Default user, default bank account, etc.)
-        // Transaction transaction1 = new Transaction(1);
-        // transactionService.add(transaction1);
-
         // Create a default user
         User defaultUser = new User();
         defaultUser.setFirst_name("Luke");
@@ -43,49 +39,52 @@ public class DataSeeder implements ApplicationRunner {
         defaultUser.setUserType(UserType.EMPLOYEE);
         userService.add(defaultUser);
 
-        //  Add a few default bank accounts
-        //addAccounts(defaultUser);
+        // Create a default customer user
+        User defaultCustomer = new User();
+        defaultCustomer.setFirst_name("Dewi");
+        defaultCustomer.setLast_name("Cabret");
+        defaultCustomer.setEmail("647824@student.inholland.nl");
+        defaultCustomer.setUsername("Dewi");
+        defaultCustomer.setPassword(new HashedPassword("Dewi"));
+        defaultCustomer.setUserType(UserType.USER);
+        userService.add(defaultCustomer);
 
+        // Create another default customer user
+        User defaultCustomer2 = new User();
+        defaultCustomer2.setFirst_name("Devon");
+        defaultCustomer2.setLast_name("van Wichen");
+        defaultCustomer2.setEmail("650122@student.inholland.nl");
+        defaultCustomer2.setUsername("Devon");
+        defaultCustomer2.setPassword(new HashedPassword("Devon"));
+        defaultCustomer2.setUserType(UserType.USER);
+        userService.add(defaultCustomer2);
 
-        //  Add a few default transactions
+        // Create another default customer user
+        User defaultCustomer3 = new User();
+        defaultCustomer3.setFirst_name("Mark");
+        defaultCustomer3.setLast_name("de Haan");
+        defaultCustomer3.setEmail("Mark.deHaan@inholland.nl");
+        defaultCustomer3.setUsername("Mark");
+        defaultCustomer3.setPassword(new HashedPassword("Mark"));
+        defaultCustomer3.setUserType(UserType.USER);
+        userService.add(defaultCustomer3);
 
-    }
-    private void addAccounts(User user){
-        AccountRequestDTO account1 = new AccountRequestDTO();
-        account1.setIban("NL01INHO0000000001");
-        account1.setUserId(user.getId());
-        account1.setAccountName("Luke's account");
-        account1.setDailyLimit(1000f);
-        account1.setTransactionLimit(500f);
-        account1.setAbsoluteLimit(100f);
-        account1.setBalance(5000f);
-        account1.setIsSavings(false);
-        account1.setIsActive(true);
-        accountService.add(account1);
-
-        AccountRequestDTO account2 = new AccountRequestDTO();
-        account2.setIban("NL02INHO0000000002");
-        account2.setUserId(user.getId());
-        account2.setAccountName("Luke's second account");
-        account2.setDailyLimit(2000f);
-        account2.setTransactionLimit(1000f);
-        account2.setAbsoluteLimit(200f);
-        account2.setBalance(8000f);
-        account2.setIsSavings(false);
-        account2.setIsActive(true);
-        accountService.add(account2);
-
-        AccountRequestDTO account3 = new AccountRequestDTO();
-        account3.setIban("NL03INHO0000000003");
-        account3.setUserId(user.getId());
-        account3.setAccountName("Luke's third account");
-        account3.setDailyLimit(1500f);
-        account3.setTransactionLimit(800f);
-        account3.setAbsoluteLimit(150f);
-        account3.setBalance(6000f);
-        account3.setIsSavings(false);
-        account3.setIsActive(true);
-        accountService.add(account3);
-
+        userService.getAll().forEach(user -> {
+            Random random = new Random();
+            // Create default accounts
+            Account account = new Account();
+            account.setIban(null);
+            account.setUser(user);
+            account.setUserId(user.getId());
+            account.setName(user.getFirst_name() + " " + user.getLast_name() + " $avings account");
+            account.setDailyLimit(100f);
+            account.setTransactionLimit(100f);
+            account.setAbsoluteLimit(-50f);
+            account.setBalance(1000f);
+            account.setIsSavings(random.nextBoolean());
+            account.setCreatedAt(new Date());
+            account.setIsActive(true);
+            accountService.addSeededAccount(account);
+        });
     }
 }
