@@ -31,8 +31,8 @@ public class DataSeeder implements ApplicationRunner {
     public void run(ApplicationArguments args) throws Exception {
         // Create a default user
         User defaultUser = new User();
-        defaultUser.setFirst_name("Luke");
-        defaultUser.setLast_name("Huisman");
+        defaultUser.setFirstName("Luke");
+        defaultUser.setLastName("Huisman");
         defaultUser.setEmail("684651@student.inholland.nl");
         defaultUser.setUsername("admin");
         defaultUser.setPassword(new HashedPassword("admin"));
@@ -41,8 +41,8 @@ public class DataSeeder implements ApplicationRunner {
 
         // Create a default customer user
         User defaultCustomer = new User();
-        defaultCustomer.setFirst_name("Dewi");
-        defaultCustomer.setLast_name("Cabret");
+        defaultCustomer.setFirstName("Dewi");
+        defaultCustomer.setLastName("Cabret");
         defaultCustomer.setEmail("647824@student.inholland.nl");
         defaultCustomer.setUsername("Dewi");
         defaultCustomer.setPassword(new HashedPassword("Dewi"));
@@ -51,8 +51,8 @@ public class DataSeeder implements ApplicationRunner {
 
         // Create another default customer user
         User defaultCustomer2 = new User();
-        defaultCustomer2.setFirst_name("Devon");
-        defaultCustomer2.setLast_name("van Wichen");
+        defaultCustomer2.setFirstName("Devon");
+        defaultCustomer2.setLastName("van Wichen");
         defaultCustomer2.setEmail("650122@student.inholland.nl");
         defaultCustomer2.setUsername("Devon");
         defaultCustomer2.setPassword(new HashedPassword("Devon"));
@@ -61,8 +61,8 @@ public class DataSeeder implements ApplicationRunner {
 
         // Create another default customer user
         User defaultCustomer3 = new User();
-        defaultCustomer3.setFirst_name("Mark");
-        defaultCustomer3.setLast_name("de Haan");
+        defaultCustomer3.setFirstName("Mark");
+        defaultCustomer3.setLastName("de Haan");
         defaultCustomer3.setEmail("Mark.deHaan@inholland.nl");
         defaultCustomer3.setUsername("Mark");
         defaultCustomer3.setPassword(new HashedPassword("Mark"));
@@ -72,19 +72,19 @@ public class DataSeeder implements ApplicationRunner {
         userService.getAll().forEach(user -> {
             Random random = new Random();
             // Create default accounts
-//            Account account = new Account();
-//            account.setIban(null);
-//            account.setUser(user);
-//            account.setUserId(user.getId());
-//            account.setName(user.getFirst_name() + " " + user.getLast_name() + " $avings account");
-//            account.setDailyLimit(100f);
-//            account.setTransactionLimit(100f);
-//            account.setAbsoluteLimit(-50f);
-//            account.setBalance(1000f);
-//            account.setIsSavings(random.nextBoolean());
-//            account.setCreatedAt(new Date());
-//            account.setIsActive(true);
-//            accountService.addSeededAccount(account);
+            Account account = new Account();
+            account.setIban(null);
+            account.setUser(user);
+            account.setUserId(user.getId());
+            account.setName(user.getFirstName() + " " + user.getLastName() + " $avings account");
+            account.setDailyLimit(100f);
+            account.setTransactionLimit(100f);
+            account.setAbsoluteLimit(-50f);
+            account.setBalance(1000f);
+            account.setIsSavings(random.nextBoolean());
+            account.setCreatedAt(new Date());
+            account.setIsActive(true);
+            accountService.addSeededAccount(account);
         });
     }
 }

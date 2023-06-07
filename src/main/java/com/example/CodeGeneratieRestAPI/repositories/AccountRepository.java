@@ -30,8 +30,8 @@ public interface AccountRepository extends CrudRepository<Account, Long> {
     //List<Account> findAllByUserUsernameContainingOrUserFirst_nameContainingOrUserLast_nameContainingOrNameContainingOrIbanContaining(String search);
 
     @Query("SELECT a FROM Account a WHERE a.user.username LIKE %:search% " +
-            "OR a.user.first_name LIKE %:search% " +
-            "OR a.user.last_name LIKE %:search% " +
+            "OR a.user.firstName LIKE %:search% " +
+            "OR a.user.lastName LIKE %:search% " +
             "OR a.name LIKE %:search% " +
             "OR a.iban LIKE %:search%")
     List<Account> findAllBySearchTerm(String search);
