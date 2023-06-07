@@ -2,7 +2,6 @@ package com.example.CodeGeneratieRestAPI.helpers;
 
 import com.example.CodeGeneratieRestAPI.exceptions.IBANGenerationException;
 import com.example.CodeGeneratieRestAPI.models.Account;
-import com.example.CodeGeneratieRestAPI.repositories.AccountRepository;
 
 import java.math.BigInteger;
 import java.util.Random;

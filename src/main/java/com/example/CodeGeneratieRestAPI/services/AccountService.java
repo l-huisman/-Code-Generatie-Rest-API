@@ -17,10 +17,8 @@ import org.springframework.stereotype.Service;
 import java.lang.reflect.Field;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Optional;
 
 import static com.example.CodeGeneratieRestAPI.helpers.IBANGenerator.getUniqueIban;
 
@@ -33,7 +31,7 @@ public class AccountService {
     private UserRepository userRepository;
 
     public Account add(AccountRequestDTO accountRequestDTO) {
-        try{
+        try {
             User currentLoggedInUser = getLoggedInUser();
 
             //  Check if the accountRequestDTO is valid
@@ -142,7 +140,8 @@ public class AccountService {
         // Return the accounts
         return accounts;
     }
-    public List<Account> getAllAccounts(String search){
+
+    public List<Account> getAllAccounts(String search) {
         // Get the current logged in user
         User currentLoggedInUser = getLoggedInUser();
 
@@ -159,7 +158,7 @@ public class AccountService {
         return accounts;
     }
 
-//    public Float getBalanceByIban(String iban) {
+    //    public Float getBalanceByIban(String iban) {
 //        // Get the current logged in user
 //        User currentLoggedInUser = getLoggedInUser();
 //
@@ -212,7 +211,8 @@ public class AccountService {
         //  Get the account details by iban and return it
         return accountRepository.findByIban(iban);
     }
-    public Account update(AccountRequestDTO account){
+
+    public Account update(AccountRequestDTO account) {
         // Get the current logged in user
         User loggedInUser = getLoggedInUser();
 
@@ -292,6 +292,11 @@ public class AccountService {
         accountRepository.save(accountToDelete);
 
         return true;
+    }
+
+    public void addSeededAccount(Account account) {
+        account.setIban(getUniqueIban());
+        accountRepository.save(account);
     }
 
 //    public List<AccountResponseDTO> getAllAccounts() {
