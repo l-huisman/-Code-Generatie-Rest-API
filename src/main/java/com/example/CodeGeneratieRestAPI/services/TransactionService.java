@@ -49,6 +49,12 @@ public class TransactionService {
         return transactionRepository.findAll(endOfDay, startOfDay, search);
     }
 
+    public List<Transaction> getAllByUserId(String username) {
+        User user = userRepository.findUserByUsername(username).get();
+
+        return transactionRepository.findAllByUserId(user.getId());
+    }
+
     public Transaction addSeed(Transaction transaction, String username) {
         Account fromAccount = transaction.getFromAccount();
         Account toAccount = transaction.getToAccount();
@@ -206,11 +212,18 @@ public class TransactionService {
     public List<Transaction> getAllByAccountIban(String iban, Date startDate, Date endDate, String search, String username) {
         User user = userRepository.findUserByUsername(username).get();
 
+        Date startOfDay = Date.from(startDate.toInstant()
+                .atZone(ZoneId.systemDefault())
+                .toLocalDate().atStartOfDay(ZoneId.systemDefault()).toInstant());
+        Date endOfDay = Date.from(endDate.toInstant()
+                .atZone(ZoneId.systemDefault())
+                .toLocalDate().atTime(LocalTime.MAX).atZone(ZoneId.systemDefault()).toInstant());
+
         //Check if user is not an employee and if the user doesn't own the account
         if (!user.getUserType().equals(UserType.EMPLOYEE) && !user.getAccounts().stream().anyMatch(account -> account.getIban().equals(iban))) {
             throw new RuntimeException("This user does not own the specified account");
         }
 
-        return transactionRepository.findAllByIban(endDate, startDate, iban, search);
+        return transactionRepository.findAllByIban(endOfDay, startOfDay, iban, search);
     }
 }

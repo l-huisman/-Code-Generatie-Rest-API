@@ -9,6 +9,7 @@ import java.util.Date;
 
 @Data
 public class TransactionResponseDTO {
+    private Long id;
     private String fromAccountIban;
     private String toAccountIban;
     private TransactionType transactionType;
@@ -22,6 +23,7 @@ public class TransactionResponseDTO {
     }
 
     public TransactionResponseDTO(Transaction transaction) {
+        this.id = transaction.getId();
         this.fromAccountIban = transaction.getFromAccount() != null ? transaction.getFromAccount().getIban() : null;
         this.toAccountIban = transaction.getToAccount() != null ? transaction.getToAccount().getIban() : null;
         this.transactionType = transaction.getTransactionType();
