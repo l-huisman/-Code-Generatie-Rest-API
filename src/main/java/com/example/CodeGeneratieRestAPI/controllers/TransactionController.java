@@ -48,6 +48,22 @@ public class TransactionController {
         }
     }
 
+    @GetMapping("/user")
+    public List<TransactionResponseDTO> getAllByUserId() {
+        try {
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            String username = ((UserDetails) authentication.getPrincipal()).getUsername();
+
+            List<Transaction> transactions = transactionService.getAllByUserId(username);
+
+            return Arrays.asList(modelMapper.map(transactions, TransactionResponseDTO[].class));
+        } catch (Exception e) {
+            //TODO: handle exception
+            System.out.println(e);
+            return null;
+        }
+    }
+
     @GetMapping("/{id}")
     public TransactionResponseDTO getById(@PathVariable long id) {
         try {
@@ -84,8 +100,6 @@ public class TransactionController {
     @PostMapping
     public TransactionResponseDTO add(@RequestBody(required = true) TransactionRequestDTO transactionIn) {
         try {
-            System.out.println("test");
-
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             String username = ((UserDetails) authentication.getPrincipal()).getUsername();
 

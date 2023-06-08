@@ -13,6 +13,8 @@ import java.util.List;
 public interface TransactionRepository extends CrudRepository<Transaction, Long> {
     List<Transaction> findAllByCreatedAtLessThanEqualAndCreatedAtGreaterThanEqualAndFromAccountIbanAndDescriptionContainingOrLabelContaining(Date startDate, Date endDate, String fromAccountIban, String description, String label);
 
+    @Query("SELECT t FROM Transaction t LEFT JOIN t.toAccount LEFT JOIN t.fromAccount LEFT JOIN t.toAccount.user LEFT JOIN t.fromAccount.user WHERE t.fromAccount.user.id = :id OR t.toAccount.user.id = :id")
+    List<Transaction> findAllByUserId(Long id);
     @Query("SELECT t FROM Transaction t WHERE t.createdAt <= :endDate AND t.createdAt >= :startDate AND (t.description LIKE CONCAT('%', :search, '%') OR t.label LIKE CONCAT('%', :search, '%'))")
     List<Transaction> findAll(Date endDate, Date startDate, String search);
 
