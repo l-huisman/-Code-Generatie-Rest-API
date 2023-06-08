@@ -142,18 +142,18 @@ public class AccountController {
     //  DELETE mappings
 
     //  This is a SOFT delete, HARD deletes are NOT allowed
-    @DeleteMapping()
-    public ResponseEntity<ApiResponse<String>> delete(@RequestBody(required = true) String ibanProvided) {
+    @DeleteMapping("/{iban}")
+    public ResponseEntity<ApiResponse<String>> delete(@PathVariable(required = true) String iban) {
         try {
             //  Convert the JSON to a POJO, so we can use the iban and perform the delete action
-            String responseBody = accountService.delete(objectMapper.readTree(ibanProvided).get("iban").asText());
+            String responseBody = accountService.delete(iban);
 
             // Return a response entity with the response body and the status code
             return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse<>(true, responseBody));
 
         } catch (Exception e) {
             //TODO: handle exception
-            System.out.println(e);
+            //System.out.println(e);
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ApiResponse<>(false, e.getMessage()));
         }
     }

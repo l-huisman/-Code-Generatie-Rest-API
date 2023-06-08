@@ -2,7 +2,9 @@ package com.example.CodeGeneratieRestAPI.services;
 
 import com.example.CodeGeneratieRestAPI.dtos.AccountRequestDTO;
 import com.example.CodeGeneratieRestAPI.exceptions.AccountCreationException;
+import com.example.CodeGeneratieRestAPI.exceptions.AccountNotAccessibleException;
 import com.example.CodeGeneratieRestAPI.exceptions.AccountNotFoundException;
+import com.example.CodeGeneratieRestAPI.exceptions.UserNotFoundException;
 import com.example.CodeGeneratieRestAPI.helpers.ServiceHelper;
 import com.example.CodeGeneratieRestAPI.models.Account;
 import com.example.CodeGeneratieRestAPI.models.User;
@@ -98,7 +100,7 @@ public class AccountService {
 
         User user = userRepository.findUserByUsername(username).orElse(null);
         if (user == null)
-            throw new EntityNotFoundException("User with username '" + username + "' does not exist");
+            throw new UserNotFoundException("User with username '" + username + "' does not exist");
         return user;
     }
 
@@ -109,16 +111,18 @@ public class AccountService {
         return accountRepository.checkIfAccountBelongsToUser(iban, loggedInUser.getId());
     }
     private Boolean checkAccount(String iban){
-        User currentLoggedInUser = getLoggedInUser();
+
 
         // Check if the iban is valid
         if (!ServiceHelper.checkIfObjectExistsByIdentifier(iban, new Account())) {
             throw new AccountNotFoundException("Account with IBAN: " + iban + " does not exist");
         }
 
+        User currentLoggedInUser = getLoggedInUser();
+
         // Check if the account belongs to the user or if the user is an employee
         if (!accountRepository.checkIfAccountBelongsToUser(iban, currentLoggedInUser.getId()) && !currentLoggedInUser.getUserType().getAuthority().equals("EMPLOYEE")) {
-            throw new IllegalArgumentException("Account with IBAN " + iban + " does not belong to user with id " + currentLoggedInUser.getId());
+            throw new AccountNotAccessibleException("Account with IBAN " + iban + " does not belong to you!");
         }
         return true;
     }
@@ -290,15 +294,8 @@ public class AccountService {
         // Get the current logged-in user
         User loggedInUser = getLoggedInUser();
 
-        // Check if the account exists
-        if (!ServiceHelper.checkIfObjectExistsByIdentifier(iban, new Account())) {
-            throw new EntityNotFoundException("Account with IBAN: " + iban + " does not exist");
-        }
-
-        // Check if the account belongs to the user or if the user is an employee
-        if (!accountRepository.checkIfAccountBelongsToUser(iban, loggedInUser.getId()) && !loggedInUser.getUserType().getAuthority().equals("EMPLOYEE")) {
-            throw new IllegalArgumentException("Account with IBAN " + iban + " does not belong to user with id " + loggedInUser.getId());
-        }
+        // Check account
+        this.checkAccount(iban);
 
         // Get the account
         Account account = accountRepository.getAccountByIban(iban).orElseThrow(() -> new EntityNotFoundException("Account with IBAN: " + iban + " does not exist"));
