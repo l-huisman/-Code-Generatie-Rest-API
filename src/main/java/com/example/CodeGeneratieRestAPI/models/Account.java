@@ -27,7 +27,7 @@ public class Account {
     private Integer id;
     @Column(unique = true)
     private String iban;
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "USER_ID", nullable = true)
     private User user;
     // The User object can optionally be filled, but the username is always filled
@@ -42,8 +42,10 @@ public class Account {
     private Date createdAt;
     private Boolean isActive;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "fromAccount")
+    @JsonIgnore
     private List<Transaction> sentTransactions;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "toAccount")
+    @JsonIgnore
     private List<Transaction> receivedTransactions;
 
 

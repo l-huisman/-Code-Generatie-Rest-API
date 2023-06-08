@@ -1,9 +1,6 @@
 package com.example.CodeGeneratieRestAPI.configuration;
 
-import com.example.CodeGeneratieRestAPI.models.Account;
-import com.example.CodeGeneratieRestAPI.models.HashedPassword;
-import com.example.CodeGeneratieRestAPI.models.User;
-import com.example.CodeGeneratieRestAPI.models.UserType;
+import com.example.CodeGeneratieRestAPI.models.*;
 import com.example.CodeGeneratieRestAPI.services.AccountService;
 import com.example.CodeGeneratieRestAPI.services.TransactionService;
 import com.example.CodeGeneratieRestAPI.services.UserService;
@@ -86,6 +83,23 @@ public class DataSeeder implements ApplicationRunner {
             account.setCreatedAt(new Date());
             account.setIsActive(true);
             accountService.addSeededAccount(account);
+
+            Transaction transaction = new Transaction();
+            transaction.setTransactionType(TransactionType.DEPOSIT);
+            transaction.setToAccount(account);
+            transaction.setAmount(180f);
+            transaction.setLabel("Initial deposit");
+            transaction.setDescription("Initial deposit");
+
+            Transaction transaction2 = new Transaction();
+            transaction2.setTransactionType(TransactionType.WITHDRAW);
+            transaction2.setFromAccount(account);
+            transaction2.setAmount(40f);
+            transaction2.setLabel("Initial withdraw");
+            transaction2.setDescription("Initial withdraw");
+
+            transactionService.addSeed(transaction, user.getUsername());
+            transactionService.addSeed(transaction2, user.getUsername());
         });
     }
 }

@@ -1,5 +1,6 @@
 package com.example.CodeGeneratieRestAPI.services;
 
+import com.example.CodeGeneratieRestAPI.dtos.TransactionRequestDTO;
 import com.example.CodeGeneratieRestAPI.models.Account;
 import com.example.CodeGeneratieRestAPI.models.Transaction;
 import com.example.CodeGeneratieRestAPI.models.User;
@@ -16,6 +17,7 @@ import java.time.LocalTime;
 import java.time.ZoneId;
 import java.util.Date;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 @Service
 public class TransactionService {
@@ -29,26 +31,75 @@ public class TransactionService {
     @Autowired
     private UserRepository userRepository;
 
-    public List<Transaction> getAll(Date startDate, Date endDate, String fromAccountIban, String description, String label, String username) {
+    public List<Transaction> getAll(Date startDate, Date endDate, String search, String username) {
         User user = userRepository.findUserByUsername(username).get();
+
+        Date startOfDay = Date.from(startDate.toInstant()
+                .atZone(ZoneId.systemDefault())
+                .toLocalDate().atStartOfDay(ZoneId.systemDefault()).toInstant());
+        Date endOfDay = Date.from(endDate.toInstant()
+                .atZone(ZoneId.systemDefault())
+                .toLocalDate().atTime(LocalTime.MAX).atZone(ZoneId.systemDefault()).toInstant());
 
         //Check if user is not an employee and if the doesn't user owns the account
-        if (!user.getUserType().equals(UserType.EMPLOYEE) && !user.getAccounts().stream().anyMatch(account -> account.getIban().equals(fromAccountIban))) {
-            throw new RuntimeException("This user does not own the specified account");
+        if (!user.getUserType().equals(UserType.EMPLOYEE)) {
+            throw new RuntimeException("This user is not an employee.");
         }
 
-        return transactionRepository.findAllByCreatedAtLessThanEqualAndCreatedAtGreaterThanEqualAndFromAccountIbanAndDescriptionContainingOrLabelContaining(startDate, endDate, fromAccountIban, description, label);
+        return transactionRepository.findAll(endOfDay, startOfDay, search);
     }
 
-    public Transaction add(Transaction transaction, String username) {
-        Account transactionToAccount = transaction.getToAccount();
-        Account fromAccount = accountRepository.findByIban(transaction.getFromAccount().getIban());
-        Account toAccount = transactionToAccount != null ? accountRepository.findByIban(transaction.getToAccount().getIban()) : null;
+    public Transaction addSeed(Transaction transaction, String username) {
+        Account fromAccount = transaction.getFromAccount();
+        Account toAccount = transaction.getToAccount();
         User user = userRepository.findUserByUsername(username).get();
+
+        switch (transaction.getTransactionType()) {
+            case DEPOSIT:
+                //Update the account balance
+                toAccount.setBalance(toAccount.getBalance() + transaction.getAmount());
+                accountRepository.save(toAccount);
+                break;
+            case WITHDRAW:
+                //Update the account balance
+                fromAccount.setBalance(fromAccount.getBalance() - transaction.getAmount());
+                accountRepository.save(fromAccount);
+                break;
+            case TRANSFER:
+                //Update the account balance
+                fromAccount.setBalance(fromAccount.getBalance() - transaction.getAmount());
+                toAccount.setBalance(toAccount.getBalance() + transaction.getAmount());
+                accountRepository.save(fromAccount);
+                accountRepository.save(toAccount);
+                break;
+            default:
+                throw new RuntimeException("The transaction type is not valid.");
+        }
+
+        transaction.setUser(user);
+
+        transaction.setCreatedAt(java.sql.Timestamp.valueOf(LocalDateTime.now()));
+
+        return transactionRepository.save(transaction);
+    }
+
+    public Transaction add(TransactionRequestDTO transactionIn, String username) {
+        String transactionToAccount = transactionIn.getToAccountIban();
+        String transactionFromAccount = transactionIn.getFromAccountIban();
+        Account fromAccount = transactionFromAccount != null ? accountRepository.findByIban(transactionIn.getFromAccountIban()) : null;
+        Account toAccount = transactionToAccount != null ? accountRepository.findByIban(transactionIn.getToAccountIban()) : null;
+        User user = userRepository.findUserByUsername(username).get();
+
+        Transaction transaction = new Transaction(fromAccount, toAccount, transactionIn.getAmount(), transactionIn.getLabel(), transactionIn.getDescription(), transactionIn.getTransactionType());
 
         //Check negative amount
         if (transaction.getAmount() < 0) {
             throw new RuntimeException("The transaction amount can not be negative.");
+        }
+
+        //Check zero amount
+        if (transaction.getAmount() == 0) {
+            throw new RuntimeException("The transaction amount can not be zero.");
         }
 
         switch (transaction.getTransactionType()) {
@@ -79,14 +130,12 @@ public class TransactionService {
 
                 //Check if the transaction amount didn't exceed the transaction limit
                 if (fromAccount.getTransactionLimit() < transaction.getAmount()) {
-                    throw new RuntimeException("The daily limit for this account has been exceeded.");
+                    throw new RuntimeException("The transaction limit for this account has been exceeded.");
                 }
-
-                System.out.println("kaas");
 
                 //Check if the transaction amount didn't exceed the total limit
                 if (fromAccount.getDailyLimit() < getTodaysAccumulatedTransactionAmount(fromAccount.getIban()) + transaction.getAmount()) {
-                    throw new RuntimeException("This account exceded the daily limit.");
+                    throw new RuntimeException("This account exceeded the daily limit.");
                 }
 
                 //Update the account balance
@@ -99,20 +148,25 @@ public class TransactionService {
                     throw new RuntimeException("The to or from account can't be empty.");
                 }
 
+                //Check if the user owns this account or is an admin
+                if (!user.getUserType().equals(UserType.EMPLOYEE) && !fromAccount.getUser().getUsername().equals(user.getUsername())) {
+                    throw new RuntimeException("This account does not belong to this user.");
+                }
+
                 //Check if the transaction amount didn't exceed the transaction limit
                 if (fromAccount.getTransactionLimit() < transaction.getAmount()) {
-                    throw new RuntimeException("The daily limit for this account has been exceeded.");
+                    throw new RuntimeException("The transaction limit for this account has been exceeded.");
                 }
 
                 //Check if the transaction amount didn't exceed the total limit
                 if (fromAccount.getDailyLimit() < getTodaysAccumulatedTransactionAmount(fromAccount.getIban()) + transaction.getAmount()) {
-                    throw new RuntimeException("This account exceded the daily limit.");
+                    throw new RuntimeException("This account exceeded the daily limit.");
                 }
 
                 //Update the account balance
                 fromAccount.setBalance(fromAccount.getBalance() - transaction.getAmount());
-                accountRepository.save(fromAccount);
                 toAccount.setBalance(toAccount.getBalance() + transaction.getAmount());
+                accountRepository.save(fromAccount);
                 accountRepository.save(toAccount);
                 break;
             default:
@@ -120,6 +174,7 @@ public class TransactionService {
         }
 
         transaction.setUser(user);
+
         transaction.setCreatedAt(java.sql.Timestamp.valueOf(LocalDateTime.now()));
 
         return transactionRepository.save(transaction);
@@ -136,17 +191,19 @@ public class TransactionService {
     public Transaction getById(long id, String username) {
         User user = userRepository.findUserByUsername(username).get();
 
-        Transaction transaction = transactionRepository.findById(id).get();
+        Transaction transaction = transactionRepository.findById(id).orElseThrow(() -> new RuntimeException("This transaction does not exist."));
 
         //Check if user is not an employee and if the user doesn't own the account
         if (!user.getUserType().equals(UserType.EMPLOYEE) && !user.getAccounts().stream().anyMatch(account -> account.getIban().equals(transaction.getFromAccount().getIban()) || account.getIban().equals(transaction.getToAccount().getIban()))) {
             throw new RuntimeException("This user does not own the specified account");
         }
 
+        System.out.println(transaction.getLabel());
+
         return transaction;
     }
 
-    public List<Transaction> getAllByAccountIban(String iban, Date startDate, Date endDate, String description, String label, String username) {
+    public List<Transaction> getAllByAccountIban(String iban, Date startDate, Date endDate, String search, String username) {
         User user = userRepository.findUserByUsername(username).get();
 
         //Check if user is not an employee and if the user doesn't own the account
@@ -154,6 +211,6 @@ public class TransactionService {
             throw new RuntimeException("This user does not own the specified account");
         }
 
-        return transactionRepository.findAllByCreatedAtLessThanEqualAndCreatedAtGreaterThanEqualAndFromAccountIbanOrToAccountIbanAndDescriptionContainingOrLabelContaining(startDate, endDate, iban, iban, description, label);
+        return transactionRepository.findAllByIban(endDate, startDate, iban, search);
     }
 }
