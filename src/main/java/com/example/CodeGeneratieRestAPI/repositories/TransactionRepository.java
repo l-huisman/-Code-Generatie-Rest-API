@@ -1,6 +1,8 @@
 package com.example.CodeGeneratieRestAPI.repositories;
 
 import com.example.CodeGeneratieRestAPI.models.Transaction;
+
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
@@ -9,11 +11,13 @@ import java.util.List;
 
 @Repository
 public interface TransactionRepository extends CrudRepository<Transaction, Long> {
-    List<Transaction> findAllByFromAccountIban(String iban);
-
     List<Transaction> findAllByCreatedAtLessThanEqualAndCreatedAtGreaterThanEqualAndFromAccountIbanAndDescriptionContainingOrLabelContaining(Date startDate, Date endDate, String fromAccountIban, String description, String label);
 
-    List<Transaction> findAllByCreatedAtLessThanEqualAndCreatedAtGreaterThanEqualAndFromAccountIbanOrToAccountIbanAndDescriptionContainingOrLabelContaining(Date startDate, Date endDate, String fromAccountIban, String toAccountIban, String description, String label);
+    @Query("SELECT t FROM Transaction t WHERE t.createdAt <= :endDate AND t.createdAt >= :startDate AND (t.description LIKE CONCAT('%', :search, '%') OR t.label LIKE CONCAT('%', :search, '%'))")
+    List<Transaction> findAll(Date endDate, Date startDate, String search);
 
-    List<Transaction> findAllByCreatedAtBetweenAndFromAccountIban(Date startOfDay, Date endOfDay, String fromAccountIban);
+    @Query("SELECT t FROM Transaction t LEFT JOIN t.toAccount LEFT JOIN t.fromAccount WHERE t.createdAt <= :endDate AND t.createdAt >= :startDate AND ((t.fromAccount IS NOT null AND t.fromAccount.iban = :iban ) OR (t.toAccount IS NOT null and t.toAccount.iban = :iban)) AND (t.description LIKE CONCAT('%', :search, '%') OR t.label LIKE CONCAT('%', :search, '%'))")
+    List<Transaction> findAllByIban(Date endDate, Date startDate, String iban, String search);
+    
+    List<Transaction> findAllByCreatedAtBetweenAndFromAccountIban(Date startOfDay, Date endOfDay, String search);
 }

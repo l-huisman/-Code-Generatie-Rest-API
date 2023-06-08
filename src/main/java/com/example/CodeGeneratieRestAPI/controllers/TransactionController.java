@@ -1,12 +1,15 @@
 package com.example.CodeGeneratieRestAPI.controllers;
 
+import com.example.CodeGeneratieRestAPI.dtos.AccountResponseDTO;
 import com.example.CodeGeneratieRestAPI.dtos.TransactionRequestDTO;
 import com.example.CodeGeneratieRestAPI.dtos.TransactionResponseDTO;
+import com.example.CodeGeneratieRestAPI.models.Account;
 import com.example.CodeGeneratieRestAPI.models.Transaction;
 import com.example.CodeGeneratieRestAPI.services.TransactionService;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.config.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -30,40 +33,72 @@ public class TransactionController {
     }
 
     @GetMapping
-    public List<TransactionResponseDTO> getAll(@RequestParam Date startDate, @RequestParam Date endDate, @RequestParam String fromAccountIban, @RequestParam String search) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String username = ((UserDetails) authentication.getPrincipal()).getUsername();
+    public List<TransactionResponseDTO> getAll(@RequestParam @DateTimeFormat(pattern="yyyy-MM-dd") Date start_date, @RequestParam @DateTimeFormat(pattern="yyyy-MM-dd") Date end_date, @RequestParam String search) {
+        try {
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            String username = ((UserDetails) authentication.getPrincipal()).getUsername();
 
-        List<Transaction> transactions = transactionService.getAll(startDate, endDate, fromAccountIban, search, search, username);
+            List<Transaction> transactions = transactionService.getAll(start_date, end_date, search, username);
 
-        return Arrays.asList(modelMapper.map(transactions, TransactionResponseDTO[].class));
+            return Arrays.asList(modelMapper.map(transactions, TransactionResponseDTO[].class));
+        } catch (Exception e) {
+            //TODO: handle exception
+            System.out.println(e);
+            return null;
+        }
     }
 
     @GetMapping("/{id}")
-    public Transaction getById(@PathVariable long id) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String username = ((UserDetails) authentication.getPrincipal()).getUsername();
+    public TransactionResponseDTO getById(@PathVariable long id) {
+        try {
+            //  Retrieve the data
+            Transaction transaction = transactionService.getById(id, "admin");
 
-        return transactionService.getById(id, username);
+            //  Return the data
+            return modelMapper.map(transaction, TransactionResponseDTO.class);
+        } catch (Exception e) {
+            //TODO: handle exception
+            System.out.println(e);
+            return null;
+        }
     }
 
     @GetMapping("/accounts/{iban}")
-    public List<TransactionResponseDTO> getByAccountIban(@PathVariable String iban, @RequestParam Date startDate, @RequestParam Date endDate, @RequestParam String search) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String username = ((UserDetails) authentication.getPrincipal()).getUsername();
+    public List<TransactionResponseDTO> getByAccountIban(@PathVariable String iban, @RequestParam @DateTimeFormat(pattern="yyyy-MM-dd") Date start_date, @RequestParam @DateTimeFormat(pattern="yyyy-MM-dd") Date end_date, @RequestParam String search) {
+        try {
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            String username = ((UserDetails) authentication.getPrincipal()).getUsername();
 
-        List<Transaction> transactions = transactionService.getAllByAccountIban(iban, startDate, endDate, search, search, username);
+            System.out.println(iban);
 
-        return Arrays.asList(modelMapper.map(transactions, TransactionResponseDTO[].class));
+            List<Transaction> transactions = transactionService.getAllByAccountIban(iban, start_date, end_date, search, username);
+
+            return Arrays.asList(modelMapper.map(transactions, TransactionResponseDTO[].class));
+        } catch (Exception e) {
+            //TODO: handle exception
+            System.out.println(e);
+            return null;
+        }
     }
 
     @PostMapping
-    public Transaction add(@RequestBody TransactionRequestDTO transactionIn) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String username = ((UserDetails) authentication.getPrincipal()).getUsername();
+    public TransactionResponseDTO add(@RequestBody(required = true) TransactionRequestDTO transactionIn) {
+        try {
+            System.out.println("test");
 
-        Transaction transaction = modelMapper.map(transactionIn, Transaction.class);
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            String username = ((UserDetails) authentication.getPrincipal()).getUsername();
 
-        return transactionService.add(transaction, username);
+            System.out.println(transactionIn.getAmount());
+            //  Retrieve the data
+            Transaction transaction = transactionService.add(transactionIn, username);
+
+            //  Return the data
+            return modelMapper.map(transaction, TransactionResponseDTO.class);
+        } catch (Exception e) {
+            //TODO: handle exception
+            System.out.println(e.getMessage());
+            return null;
+        }
     }
 }
