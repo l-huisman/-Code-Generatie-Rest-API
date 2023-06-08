@@ -1,6 +1,10 @@
 package com.example.CodeGeneratieRestAPI.services;
 
 import com.example.CodeGeneratieRestAPI.dtos.AccountRequestDTO;
+import com.example.CodeGeneratieRestAPI.exceptions.AccountCreationException;
+import com.example.CodeGeneratieRestAPI.exceptions.AccountNotAccessibleException;
+import com.example.CodeGeneratieRestAPI.exceptions.AccountNotFoundException;
+import com.example.CodeGeneratieRestAPI.exceptions.UserNotFoundException;
 import com.example.CodeGeneratieRestAPI.helpers.ServiceHelper;
 import com.example.CodeGeneratieRestAPI.models.Account;
 import com.example.CodeGeneratieRestAPI.models.User;
@@ -19,6 +23,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 import static com.example.CodeGeneratieRestAPI.helpers.IBANGenerator.getUniqueIban;
 
@@ -39,12 +44,14 @@ public class AccountService {
 
             //  Check if the IBAN has not been set yet
             if (accountRequestDTO.getIban() != null) {
-                throw new IllegalArgumentException("You cannot set the IBAN of a new account");
+                throw new AccountCreationException("You cannot set the IBAN of a new account");
             }
 
             //  If the user is an employee, check if the user id is set
+            //  It is possible for an employee to add an account for itself, but it is also possible for an employee to add an account for another user
+            //  Hence why we check if the user id is set if the user is an employee
             if (currentLoggedInUser.getUserType().equals("EMPLOYEE") && accountRequestDTO.getUserId() == null) {
-                throw new IllegalArgumentException("You cannot add an account as an employee without setting the user id");
+                throw new AccountCreationException("You cannot add an account as an employee without selecting a user (if you are adding an account for yourself, select yourself as the user)");
             } else {
                 //  If the user is not an employee, set the user id to the id of the current logged in user
                 accountRequestDTO.setUserId(currentLoggedInUser.getId());
@@ -53,7 +60,7 @@ public class AccountService {
             //  Get the user
             User user = userRepository.findById(accountRequestDTO.getUserId()).orElse(null);
 
-            ////  Set the userId on the account
+            //  Set the userId on the account
             accountRequestDTO.setUserId(currentLoggedInUser.getId());
 
             //  Generate a new unique IBAN
@@ -81,13 +88,10 @@ public class AccountService {
         return Date.from(LocalDateTime.now(zone).atZone(zone).toInstant());
     }
 
-    private void checkIfAccountRequestDTOIsValid(AccountRequestDTO accountRequestDTO, User loggedInUser) {
+    private void checkIfAccountRequestDTOIsValid(AccountRequestDTO accountRequestDTO) {
         if (accountRequestDTO == null) {
             throw new IllegalArgumentException("AccountRequest object is null");
         }
-//        if (!accountRequestDTO.getUserId().equals(loggedInUser.getId()) && accountRequestDTO.getUserId() != null) {
-//            throw new AccessDeniedException("The id of the owner of the account you are trying to add/edit does not match the id of the authenticated user and the authenticated user is not an employee");
-//        }
     }
 
     private User getLoggedInUser() {
@@ -96,7 +100,7 @@ public class AccountService {
 
         User user = userRepository.findUserByUsername(username).orElse(null);
         if (user == null)
-            throw new EntityNotFoundException("User with username '" + username + "' does not exist");
+            throw new UserNotFoundException("User with username '" + username + "' does not exist");
         return user;
     }
 
@@ -105,6 +109,22 @@ public class AccountService {
             return true;
         }
         return accountRepository.checkIfAccountBelongsToUser(iban, loggedInUser.getId());
+    }
+    private Boolean checkAccount(String iban){
+
+
+        // Check if the iban is valid
+        if (!ServiceHelper.checkIfObjectExistsByIdentifier(iban, new Account())) {
+            throw new AccountNotFoundException("Account with IBAN: " + iban + " does not exist");
+        }
+
+        User currentLoggedInUser = getLoggedInUser();
+
+        // Check if the account belongs to the user or if the user is an employee
+        if (!accountRepository.checkIfAccountBelongsToUser(iban, currentLoggedInUser.getId()) && !currentLoggedInUser.getUserType().getAuthority().equals("EMPLOYEE")) {
+            throw new AccountNotAccessibleException("Account with IBAN " + iban + " does not belong to you!");
+        }
+        return true;
     }
 //    public Float retrieveBalance(String iban) {
 //        User currentLoggedInUser = getLoggedInUser();
@@ -136,32 +156,30 @@ public class AccountService {
         return allActiveAccountsBalance;
     }
 
-    public List<Account> getAllAccountsForLoggedInUser(String accountName) {
-        // Get the current logged in user
-        User currentLoggedInUser = getLoggedInUser();
+//    public List<Account> getAllAccountsForLoggedInUser(String accountName) {
+//        // Get the current logged in user
+//        User currentLoggedInUser = getLoggedInUser();
+//
+//        // Get the balance of all accounts of the user and return it
+//        List<Account> accounts = accountRepository.findAllByNameContainingAndUser_Id(accountName, currentLoggedInUser.getId());
+//
+//        // Return the accounts
+//        return accounts;
+//    }
 
-        // Get the balance of all accounts of the user and return it
-        List<Account> accounts = accountRepository.findAllByNameContainingAndUser_Id(accountName, currentLoggedInUser.getId());
-
-        // Return the accounts
-        return accounts;
-    }
-
-    public List<Account> getAllAccounts(String search) {
+    public List<Account> getAllAccounts(String search, boolean active) {
         // Get the current logged in user
         User currentLoggedInUser = getLoggedInUser();
 
         // Check if the user is an employee
-        if (!currentLoggedInUser.getUserType().getAuthority().equals("EMPLOYEE")) {
-            throw new IllegalArgumentException("You are not authorized to perform this action");
+        if (currentLoggedInUser.getUserType().getAuthority().equals("EMPLOYEE")) {
+            //  Get all accounts
+            return accountRepository.findAllBySearchTerm(search, active);
         }
-
-        // Get all accounts that match the search query
-        //accounts = accountRepository.findAll();
-        //List<Account> accounts = accountRepository.findAllByUserUsernameContainingOrNameContaining(search, search);
-        //List<Account> accounts = accountRepository.findAllBySearchTerm(search);
-        List<Account> accounts = accountRepository.findAll();
-        return accounts;
+        else {
+            //  Get all accounts of the user
+            return accountRepository.findAllBySearchTermAndUserId(search, active, currentLoggedInUser.getId());
+        }
     }
 
     //    public Float getBalanceByIban(String iban) {
@@ -204,18 +222,14 @@ public class AccountService {
         // Get the current logged in user
         User currentLoggedInUser = getLoggedInUser();
 
-        // Check if the iban is valid
-        if (!ServiceHelper.checkIfObjectExistsByIdentifier(iban, new Account())) {
-            throw new EntityNotFoundException("Account with IBAN: " + iban + " does not exist");
-        }
+        //  Check account
+        this.checkAccount(iban);
 
-        // Check if the account belongs to the user or if the user is an employee
-        if (!accountRepository.checkIfAccountBelongsToUser(iban, currentLoggedInUser.getId())) {
-            throw new IllegalArgumentException("Account with IBAN " + iban + " does not belong to user with id " + currentLoggedInUser.getId());
-        }
+        // Get the account
+        Account account = accountRepository.getAccountByIban(iban).orElseThrow(() -> new EntityNotFoundException("Account with IBAN: " + iban + " does not exist"));
 
-        //  Get the account details by iban and return it
-        return accountRepository.findByIban(iban);
+        //  Return the account
+        return account;
     }
 
     public Account update(AccountRequestDTO account) {
@@ -223,7 +237,7 @@ public class AccountService {
         User loggedInUser = getLoggedInUser();
 
         // Check if the accountRequestDTO is valid
-        this.checkIfAccountRequestDTOIsValid(account, loggedInUser);
+        this.checkIfAccountRequestDTOIsValid(account);
 
         // Check if the account exists
         if (!ServiceHelper.checkIfObjectExistsByIdentifier(account.getIban(), new Account())) {
@@ -276,28 +290,26 @@ public class AccountService {
         return accountToUpdate;
     }
 
-    public Boolean delete(String iban) {
+    public String delete(String iban) {
         // Get the current logged-in user
         User loggedInUser = getLoggedInUser();
 
-        // Check if the account exists
-        if (ServiceHelper.checkIfObjectExistsByIdentifier(iban, new Account())) {
-            throw new EntityNotFoundException("Account with IBAN: " + iban + " does not exist");
-        }
-
-        // Check if the account belongs to the user
-        if (checkIfAccountBelongsToUser(iban, loggedInUser)) {
-            throw new IllegalArgumentException("The account with IBAN " + iban + " does not belong to the user with id " + loggedInUser.getId());
-        }
+        // Check account
+        this.checkAccount(iban);
 
         // Get the account
-        Account accountToDelete = accountRepository.findByIban(iban);
+        Account account = accountRepository.getAccountByIban(iban).orElseThrow(() -> new EntityNotFoundException("Account with IBAN: " + iban + " does not exist"));
+
+        // Check if the account is active
+        if (!account.getIsActive()) {
+            throw new IllegalArgumentException("Account with IBAN: " + iban + " is already inactive");
+        }
 
         // Delete the account
-        accountToDelete.setIsActive(false);
-        accountRepository.save(accountToDelete);
+        account.setIsActive(false);
+        accountRepository.save(account);
 
-        return true;
+        return "Account with IBAN: " + iban + " has been set to inactive";
     }
 
     public void addSeededAccount(Account account) {

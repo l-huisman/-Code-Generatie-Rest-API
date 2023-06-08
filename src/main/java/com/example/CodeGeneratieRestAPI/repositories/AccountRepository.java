@@ -29,12 +29,37 @@ public interface AccountRepository extends CrudRepository<Account, Long> {
     List<Account> findAllByUserUsernameContainingOrNameContaining(Optional<String> userUsername, Optional<String> accountName);
     //List<Account> findAllByUserUsernameContainingOrUserFirst_nameContainingOrUserLast_nameContainingOrNameContainingOrIbanContaining(String search);
 
-    @Query("SELECT a FROM Account a WHERE a.user.username LIKE %:search% " +
-            "OR a.user.firstName LIKE %:search% " +
-            "OR a.user.lastName LIKE %:search% " +
-            "OR a.name LIKE %:search% " +
-            "OR a.iban LIKE %:search%")
-    List<Account> findAllBySearchTerm(String search);
+//     @Query("SELECT a FROM Account a WHERE (a.isActive = :isActive OR :isActive IS NULL) AND (a.user.username ILIKE %:search% " +
+//             "OR a.user.firstName ILIKE %:search% " +
+//             "OR a.user.lastName ILIKE %:search% " +
+//             "OR a.name ILIKE %:search% " +
+//             "OR a.iban ILIKE %:search%)")
+//     List<Account> findAllBySearchTerm(String search, Boolean isActive);
+
+//    @Query("SELECT a FROM Account a WHERE (:isActive IS NULL OR a.isActive = :isActive) AND " +
+//            "(COALESCE(:search, '') = '' OR a.user.username ILIKE %:search% " +
+//            "OR a.user.firstName ILIKE %:search% " +
+//            "OR a.user.lastName ILIKE %:search% " +
+//            "OR a.name ILIKE %:search% " +
+//            "OR a.iban ILIKE %:search%)")
+    @Query("SELECT a FROM Account a WHERE (:isActive IS NULL OR a.isActive = :isActive) " +
+            "AND (a.user.username ILIKE CONCAT('%', :search, '%') " +
+            "OR a.user.firstName ILIKE CONCAT('%', :search, '%') " +
+            "OR a.user.lastName ILIKE CONCAT('%', :search, '%') " +
+            "OR a.name ILIKE CONCAT('%', :search, '%') " +
+            "OR a.iban ILIKE CONCAT('%', :search, '%'))")
+List<Account> findAllBySearchTerm(String search, Boolean isActive);
+
+    @Query("SELECT a FROM Account a WHERE a.user.id = :userId AND (:isActive IS NULL OR a.isActive = :isActive) AND (a.user.username ILIKE %:search% " +
+            "OR a.user.firstName ILIKE %:search% " +
+            "OR a.user.lastName ILIKE %:search% " +
+            "OR a.name ILIKE %:search% " +
+            "OR a.iban ILIKE %:search%)")
+    List<Account> findAllBySearchTermAndUserId(String search, Boolean isActive, Long userId);
+
+
+    List<Account> findByUserUsernameContainingIgnoreCaseOrUserFirstNameContainingIgnoreCaseOrUserLastNameContainingIgnoreCaseOrNameContainingIgnoreCaseOrIbanContainingIgnoreCaseAndIsActive(String username, String firstName, String lastName, String name, String iban, Boolean isActive);
+
 
     //List<Account> findAllByUser_Id(Long userId);
     @Query("SELECT COUNT(a) > 0 FROM Account a WHERE a.iban = :iban AND a.user.id = :userId")

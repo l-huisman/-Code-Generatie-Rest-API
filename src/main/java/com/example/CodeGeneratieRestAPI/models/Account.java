@@ -170,4 +170,24 @@ public class Account {
         allTransactions.addAll(this.receivedTransactions);
         return allTransactions;
     }
+
+    // OVERRIDE METHODS
+    @Override
+    public String toString() {
+        return "Account{" +
+                "id=" + id +
+                ", iban='" + iban + '\'' +
+                ", userId=" + userId +
+                ", name='" + name + '\'' +
+                ", dailyLimit=" + dailyLimit +
+                ", transactionLimit=" + transactionLimit +
+                ", absoluteLimit=" + absoluteLimit +
+                ", balance=" + balance +
+                ", isSavings=" + isSavings +
+                ", createdAt=" + createdAt +
+                ", isActive=" + isActive +
+                ", sentTransactions=" + sentTransactions +
+                ", receivedTransactions=" + receivedTransactions +
+                '}';
+    }
 }
