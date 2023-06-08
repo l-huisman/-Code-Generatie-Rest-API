@@ -11,7 +11,7 @@ public class IBANGenerator {
     private static final int IBAN_LENGTH = 18; //   18 is the standard length of an IBAN in the Netherlands + all the dashes is 22
     private static final String COUNTRY_CODE = "NL";
     private static final int CHECKSUM_LENGTH = 2;
-    private static final String BANK_CODE = "MRBA";
+    private static final String BANK_CODE = "INHO"; // This is the bank code for the bank that is used in this project MRBA
 
     public static String getUniqueIban() {
         do {
@@ -27,8 +27,9 @@ public class IBANGenerator {
             StringBuilder ibanBuilder = new StringBuilder();
             Random random = new Random();
 
+            ibanBuilder.append("0"); // The first number must be 0 according to user story 3
             // Generate a string of random numbers
-            for (int i = 0; i < IBAN_LENGTH - COUNTRY_CODE.length() - BANK_CODE.length() - CHECKSUM_LENGTH; i++) {
+            for (int i = 0; i < IBAN_LENGTH - COUNTRY_CODE.length() - BANK_CODE.length() - CHECKSUM_LENGTH - 1; i++) { // -1 because the first number must be 0
                 ibanBuilder.append(random.nextInt(10));
             }
 

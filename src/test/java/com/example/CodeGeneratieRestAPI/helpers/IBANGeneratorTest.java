@@ -17,7 +17,7 @@ class IBANGeneratorTest {
         // Check if the generated IBAN has the correct format
         Assertions.assertEquals(22, iban.length());
         Assertions.assertEquals("NL", iban.substring(0, 2));
-        Assertions.assertEquals("MRBA", iban.substring(5, 9));
+        Assertions.assertEquals("INHO", iban.substring(5, 9));
 
         // Print the generated IBAN to the console
         System.out.println("Generated IBAN: " + iban);

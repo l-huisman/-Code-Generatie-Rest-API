@@ -1,6 +1,7 @@
 package com.example.CodeGeneratieRestAPI.models;
 
 import com.example.CodeGeneratieRestAPI.dtos.AccountRequestDTO;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -166,5 +167,25 @@ public class Account {
         allTransactions.addAll(this.sentTransactions);
         allTransactions.addAll(this.receivedTransactions);
         return allTransactions;
+    }
+
+    // OVERRIDE METHODS
+    @Override
+    public String toString() {
+        return "Account{" +
+                "id=" + id +
+                ", iban='" + iban + '\'' +
+                ", userId=" + userId +
+                ", name='" + name + '\'' +
+                ", dailyLimit=" + dailyLimit +
+                ", transactionLimit=" + transactionLimit +
+                ", absoluteLimit=" + absoluteLimit +
+                ", balance=" + balance +
+                ", isSavings=" + isSavings +
+                ", createdAt=" + createdAt +
+                ", isActive=" + isActive +
+                ", sentTransactions=" + sentTransactions +
+                ", receivedTransactions=" + receivedTransactions +
+                '}';
     }
 }
