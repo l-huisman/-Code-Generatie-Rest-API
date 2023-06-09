@@ -35,9 +35,8 @@ public class AccountService {
     @Autowired
     private UserRepository userRepository;
 
-    public Account add(AccountRequestDTO accountRequestDTO) {
+    public Account add(AccountRequestDTO accountRequestDTO, User loggedInUser) {
         try {
-            User currentLoggedInUser = ServiceHelper.getLoggedInUser();
 
             //  Check if the accountRequestDTO is valid
             //this.checkIfAccountRequestDTOIsValid(accountRequestDTO, currentLoggedInUser);
@@ -50,18 +49,18 @@ public class AccountService {
             //  If the user is an employee, check if the user id is set
             //  It is possible for an employee to add an account for itself, but it is also possible for an employee to add an account for another user
             //  Hence why we check if the user id is set if the user is an employee
-            if (currentLoggedInUser.getUserType().equals("EMPLOYEE") && accountRequestDTO.getUserId() == null) {
+            if (loggedInUser.getUserType().equals("EMPLOYEE") && accountRequestDTO.getUserId() == null) {
                 throw new AccountCreationException("You cannot add an account as an employee without selecting a user (if you are adding an account for yourself, select yourself as the user)");
             } else {
-                //  If the user is not an employee, set the user id to the id of the current logged in user
-                accountRequestDTO.setUserId(currentLoggedInUser.getId());
+                //  If the user is not an employee, set the user id to the id of the current logged-in user
+                accountRequestDTO.setUserId(loggedInUser.getId());
             }
 
             //  Get the user
             User user = userRepository.findById(accountRequestDTO.getUserId()).orElse(null);
 
             //  Set the userId on the account
-            accountRequestDTO.setUserId(currentLoggedInUser.getId());
+            accountRequestDTO.setUserId(loggedInUser.getId());
 
             //  Generate a new unique IBAN
             String iban = getUniqueIban();
@@ -149,34 +148,34 @@ public class AccountService {
         return allActiveAccountsBalance;
     }
 
-    public List<Account> getAllAccounts(String search, boolean active) {
-        // Get the current logged in user
-        User currentLoggedInUser = ServiceHelper.getLoggedInUser();
+    public List<Account> getAllAccounts(String search, boolean active, User loggedInUser) {
 
         // Check if the user is an employee
-        if (currentLoggedInUser.getUserType().getAuthority().equals("EMPLOYEE")) {
+        if (loggedInUser.getUserType().getAuthority().equals("EMPLOYEE")) {
             //  Get all accounts
-            return accountRepository.findAllBySearchTerm();
+            return accountRepository.findAllBySearchTerm(search, active);
         }
         else {
             //  Get all accounts of the user
-            return accountRepository.findAllBySearchTerm();
+            return accountRepository.findAllBySearchTermAndUserId(search, active, loggedInUser.getId());
         }
     }
-    public Account getAccountByIban(String iban) {
-        // Get the current logged in user
-        User currentLoggedInUser = ServiceHelper.getLoggedInUser();
-
+    public Account getAccountByIban(String iban, User loggedInUser) {
         //  Check account and get the account
         Account account = this.checkAndGetAccount(iban);
 
         //  Return the account
         return account;
     }
+    public List<Account> getAllAccountsByUserId(Long userId, User loggedInUser){
+        //  Check if the userId matches the id of the logged in user and throw an exception if it doesn't unless the user is an employee
+        if (!loggedInUser.getUserType().getAuthority().equals("EMPLOYEE") && !userId.equals(loggedInUser.getId())) {
+            throw new AccountNotAccessibleException("You cannot access the accounts of another user");
+        }
+        return accountRepository.findAllByUserId(userId);
+    }
 
-    public Account update(AccountRequestDTO account) {
-        // Get the current logged in user
-        User loggedInUser = ServiceHelper.getLoggedInUser();
+    public Account update(AccountRequestDTO account, User loggedInUser) {
 
         // Check if the accountRequestDTO is valid
         this.checkIfAccountRequestDTOIsValid(account);
@@ -223,9 +222,7 @@ public class AccountService {
         return accountToUpdate;
     }
 
-    public String delete(String iban) {
-        // Get the current logged-in user
-        User loggedInUser = ServiceHelper.getLoggedInUser();
+    public String delete(String iban, User loggedInUser) {
 
         // Check account and get the account
         Account account = this.checkAndGetAccount(iban);
@@ -246,13 +243,4 @@ public class AccountService {
         account.setIban(getUniqueIban());
         accountRepository.save(account);
     }
-
-//    public List<AccountResponseDTO> getAllAccounts() {
-//        List<Account> accounts = accountRepository.findAll();
-//        List<AccountResponseDTO> accountsresponse = new ArrayList<>();
-//        for (Account account : accounts) {
-//            accountsresponse.add(new AccountResponseDTO(account));
-//        }
-//        return accountsresponse;
-//    }
 }

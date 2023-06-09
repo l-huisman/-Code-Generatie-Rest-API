@@ -2,9 +2,11 @@ package com.example.CodeGeneratieRestAPI.controllers;
 
 import com.example.CodeGeneratieRestAPI.dtos.AccountRequestDTO;
 import com.example.CodeGeneratieRestAPI.dtos.AccountResponseDTO;
+import com.example.CodeGeneratieRestAPI.helpers.ServiceHelper;
 import com.example.CodeGeneratieRestAPI.models.Account;
 import com.example.CodeGeneratieRestAPI.models.ApiResponse;
 import com.example.CodeGeneratieRestAPI.models.Transaction;
+import com.example.CodeGeneratieRestAPI.models.User;
 import com.example.CodeGeneratieRestAPI.services.AccountService;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -52,8 +54,11 @@ public class AccountController {
     @PostMapping
     public ResponseEntity<ApiResponse> add(@RequestBody(required = true) AccountRequestDTO accountRequestDTO) {
         try {
+            //  Get the logged-in user
+            User user = ServiceHelper.getLoggedInUser();
+
             //  Retrieve the data
-            Account account = accountService.add(accountRequestDTO);
+            Account account = accountService.add(accountRequestDTO, user);
 
             //  Return the data
             return ResponseEntity.status(HttpStatus.CREATED).body(new ApiResponse<>(true, "Account created successfully", new AccountResponseDTO(account)));
@@ -68,8 +73,11 @@ public class AccountController {
     @GetMapping()
     public ResponseEntity<ApiResponse> getAllAccounts(@RequestParam(required = false) String search, @RequestParam(required = false) boolean active) {
         try {
+            //  Get the logged-in user
+            User user = ServiceHelper.getLoggedInUser();
+
             //  Retrieve the data
-            List<Account> accounts = accountService.getAllAccounts(search, active);
+            List<Account> accounts = accountService.getAllAccounts(search, active, user);
 
             //  Return the data
             return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse(true, accounts.stream().count() + " Accounts retrieved", Arrays.asList(modelMapper.map(accounts, AccountResponseDTO[].class))));
@@ -80,21 +88,47 @@ public class AccountController {
         }
     }
 
+    @GetMapping("/user/{userId}")
+    public ResponseEntity<ApiResponse> getAllAccountsByUserId(@PathVariable(required = true) Long userId){
+        try{
+            //  Get the logged-in user
+            User user = ServiceHelper.getLoggedInUser();
+
+            //  Retrieve the data
+            List<Account> accounts = accountService.getAllAccountsByUserId(userId, user);
+
+            //  Return the data
+            return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse(true, accounts.stream().count() + " Accounts retrieved", Arrays.asList(modelMapper.map(accounts, AccountResponseDTO[].class))));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ApiResponse<>(false, e.getMessage()));
+        }
+    }
+
     @GetMapping("/{iban}")
     public ResponseEntity<ApiResponse> getAccountByIban(@PathVariable(required = true) String iban) {
+        try{
+        //  Get the logged-in user
+        User user = ServiceHelper.getLoggedInUser();
+
         //  Retrieve the data
-        AccountResponseDTO account = modelMapper.map(accountService.getAccountByIban(iban), AccountResponseDTO.class);
+        AccountResponseDTO account = modelMapper.map(accountService.getAccountByIban(iban, user), AccountResponseDTO.class);
 
         //  Return the data
         return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse<>(true, "Account retrieved successfully", account));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ApiResponse<>(false, e.getMessage()));
+        }
     }
     // PUT mappings
 
     @PutMapping()
     public ResponseEntity<ApiResponse> update(@RequestBody(required = true) AccountRequestDTO accountRequestDTO) {
         try {
+            //  Get the logged-in user
+            User user = ServiceHelper.getLoggedInUser();
+
             //  Retrieve the data
-            Account account = accountService.update(accountRequestDTO);
+            Account account = accountService.update(accountRequestDTO, user);
 
             //  Return the data
             return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse<>(true, "Account updated successfully", new AccountResponseDTO(account)));
@@ -110,8 +144,11 @@ public class AccountController {
     @DeleteMapping("/{iban}")
     public ResponseEntity<ApiResponse<String>> delete(@PathVariable(required = true) String iban) {
         try {
-            //  Convert the JSON to a POJO, so we can use the iban and perform the delete action
-            String responseBody = accountService.delete(iban);
+            //  Get the logged-in user
+            User user = ServiceHelper.getLoggedInUser();
+
+            //  Perform the delete
+            String responseBody = accountService.delete(iban, user);
 
             // Return a response entity with the response body and the status code
             return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse<>(true, responseBody));

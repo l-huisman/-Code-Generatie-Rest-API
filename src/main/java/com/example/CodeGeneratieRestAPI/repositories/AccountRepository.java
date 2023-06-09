@@ -36,14 +36,14 @@ public interface AccountRepository extends CrudRepository<Account, Long> {
 //             "OR a.iban ILIKE %:search%)")
 //     List<Account> findAllBySearchTerm(String search, Boolean isActive);
 
-//    @Query("SELECT a FROM Account a WHERE (:isActive IS NULL OR a.isActive = :isActive) AND " +
-//            "(COALESCE(:search, '') = '' OR a.user.username ILIKE %:search% " +
-//            "OR a.user.firstName ILIKE %:search% " +
-//            "OR a.user.lastName ILIKE %:search% " +
-//            "OR a.name ILIKE %:search% " +
-//            "OR a.iban ILIKE %:search%)")
-    @Query("SELECT a FROM Account a")
-List<Account> findAllBySearchTerm();
+    @Query("SELECT a FROM Account a WHERE (:isActive IS NULL OR a.isActive = :isActive) AND " +
+            "(COALESCE(:search, '') = '' OR a.user.username ILIKE %:search% " +
+            "OR a.user.firstName ILIKE %:search% " +
+            "OR a.user.lastName ILIKE %:search% " +
+            "OR a.name ILIKE %:search% " +
+            "OR a.iban ILIKE %:search%)")
+//    @Query("SELECT a FROM Account a")
+List<Account> findAllBySearchTerm(String search, Boolean isActive);
 
     @Query("SELECT a FROM Account a WHERE a.user.id = :userId AND (:isActive IS NULL OR a.isActive = :isActive) AND (a.user.username ILIKE %:search% " +
             "OR a.user.firstName ILIKE %:search% " +
@@ -51,6 +51,8 @@ List<Account> findAllBySearchTerm();
             "OR a.name ILIKE %:search% " +
             "OR a.iban ILIKE %:search%)")
     List<Account> findAllBySearchTermAndUserId(String search, Boolean isActive, Long userId);
+
+    List<Account> findAllByUserId(Long userId);
 
 
     List<Account> findByUserUsernameContainingIgnoreCaseOrUserFirstNameContainingIgnoreCaseOrUserLastNameContainingIgnoreCaseOrNameContainingIgnoreCaseOrIbanContainingIgnoreCaseAndIsActive(String username, String firstName, String lastName, String name, String iban, Boolean isActive);
