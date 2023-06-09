@@ -131,11 +131,11 @@ public class AccountService {
         // Check if the user is an employee
         if (currentLoggedInUser.getUserType().getAuthority().equals("EMPLOYEE")) {
             //  Get all accounts
-            return accountRepository.findAllBySearchTerm(search, active);
+            return accountRepository.findAllBySearchTerm();
         }
         else {
             //  Get all accounts of the user
-            return accountRepository.findAllBySearchTermAndUserId(search, active, currentLoggedInUser.getId());
+            return accountRepository.findAllBySearchTerm();
         }
     }
     public Account getAccountByIban(String iban) {

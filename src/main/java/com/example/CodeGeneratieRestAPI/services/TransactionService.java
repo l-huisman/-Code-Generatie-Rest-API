@@ -1,8 +1,8 @@
 package com.example.CodeGeneratieRestAPI.services;
 
 import com.example.CodeGeneratieRestAPI.dtos.TransactionRequestDTO;
-import com.example.CodeGeneratieRestAPI.exceptions.TransactionNotFoundException;
-import com.example.CodeGeneratieRestAPI.exceptions.TransactionNotOwnedException;
+import com.example.CodeGeneratieRestAPI.exceptions.*;
+import com.example.CodeGeneratieRestAPI.helpers.ServiceHelper;
 import com.example.CodeGeneratieRestAPI.models.Account;
 import com.example.CodeGeneratieRestAPI.models.Transaction;
 import com.example.CodeGeneratieRestAPI.models.User;
@@ -19,7 +19,6 @@ import java.time.LocalTime;
 import java.time.ZoneId;
 import java.util.Date;
 import java.util.List;
-import java.util.NoSuchElementException;
 
 @Service
 public class TransactionService {
@@ -33,27 +32,20 @@ public class TransactionService {
     @Autowired
     private UserRepository userRepository;
 
-    public List<Transaction> getAll(Date startDate, Date endDate, String search, String username) {
-        User user = userRepository.findUserByUsername(username).get();
+    public List<Transaction> getAll(User user, Date startDate, Date endDate, String search) {
 
-        Date startOfDay = Date.from(startDate.toInstant()
-                .atZone(ZoneId.systemDefault())
-                .toLocalDate().atStartOfDay(ZoneId.systemDefault()).toInstant());
-        Date endOfDay = Date.from(endDate.toInstant()
-                .atZone(ZoneId.systemDefault())
-                .toLocalDate().atTime(LocalTime.MAX).atZone(ZoneId.systemDefault()).toInstant());
+        Date startOfDay = getStartOfDay(startDate);
+        Date endOfDay = getEndOfDay(endDate);
 
         //Check if user is not an employee and if the doesn't user owns the account
         if (!user.getUserType().equals(UserType.EMPLOYEE)) {
-            throw new RuntimeException("This user is not an employee.");
+            throw new EmployeeOnlyException("This user is not an employee.");
         }
 
         return transactionRepository.findAll(endOfDay, startOfDay, search);
     }
 
-    public List<Transaction> getAllByUserId(String username) {
-        User user = userRepository.findUserByUsername(username).get();
-
+    public List<Transaction> getAllByUser(User user) {
         return transactionRepository.findAllByUserId(user.getId());
     }
 
@@ -63,25 +55,24 @@ public class TransactionService {
         User user = userRepository.findUserByUsername(username).get();
 
         switch (transaction.getTransactionType()) {
-            case DEPOSIT:
+            case DEPOSIT -> {
                 //Update the account balance
                 toAccount.setBalance(toAccount.getBalance() + transaction.getAmount());
                 accountRepository.save(toAccount);
-                break;
-            case WITHDRAW:
+            }
+            case WITHDRAW -> {
                 //Update the account balance
                 fromAccount.setBalance(fromAccount.getBalance() - transaction.getAmount());
                 accountRepository.save(fromAccount);
-                break;
-            case TRANSFER:
+            }
+            case TRANSFER -> {
                 //Update the account balance
                 fromAccount.setBalance(fromAccount.getBalance() - transaction.getAmount());
                 toAccount.setBalance(toAccount.getBalance() + transaction.getAmount());
                 accountRepository.save(fromAccount);
                 accountRepository.save(toAccount);
-                break;
-            default:
-                throw new RuntimeException("The transaction type is not valid.");
+            }
+            default -> throw new TransactionTypeNotValidException("The transaction type is not valid.");
         }
 
         transaction.setUser(user);
@@ -91,104 +82,72 @@ public class TransactionService {
         return transactionRepository.save(transaction);
     }
 
-    public Transaction add(TransactionRequestDTO transactionIn, String username) {
+    public Transaction add(User user, TransactionRequestDTO transactionIn) {
         String transactionToAccount = transactionIn.getToAccountIban();
         String transactionFromAccount = transactionIn.getFromAccountIban();
         Account fromAccount = transactionFromAccount != null ? accountRepository.findByIban(transactionIn.getFromAccountIban()) : null;
         Account toAccount = transactionToAccount != null ? accountRepository.findByIban(transactionIn.getToAccountIban()) : null;
-        User user = userRepository.findUserByUsername(username).get();
 
         Transaction transaction = new Transaction(fromAccount, toAccount, transactionIn.getAmount(), transactionIn.getLabel(), transactionIn.getDescription(), transactionIn.getTransactionType());
 
-        //Check negative amount
-        if (transaction.getAmount() < 0) {
-            throw new RuntimeException("The transaction amount can not be negative.");
-        }
-
-        //Check zero amount
-        if (transaction.getAmount() == 0) {
-            throw new RuntimeException("The transaction amount can not be zero.");
-        }
+        validateTransactionAmount(transaction);
 
         switch (transaction.getTransactionType()) {
-            case DEPOSIT:
+            case DEPOSIT -> {
                 if (toAccount == null) {
-                    throw new RuntimeException("The to account can't be empty.");
+                    throw new TransactionAccountNotValidException("The to account can't be empty.");
                 }
-
-                //Check if the user owns this account or is an admin
-                if (!user.getUserType().equals(UserType.EMPLOYEE) && !toAccount.getUser().getUsername().equals(user.getUsername())) {
-                    throw new RuntimeException("This account does not belong to this user.");
-                }
+                validateUserOwnsAccount(user, toAccount);
 
                 //Update the account balance
                 toAccount.setBalance(toAccount.getBalance() + transaction.getAmount());
                 accountRepository.save(toAccount);
-                break;
-            case WITHDRAW:
-                //Check if the user owns this account or is an admin
-                if (!user.getUserType().equals(UserType.EMPLOYEE) && !fromAccount.getUser().getUsername().equals(user.getUsername())) {
-                    throw new RuntimeException("This account does not belong to this user.");
+            }
+            case WITHDRAW -> {
+                if (fromAccount == null) {
+                    throw new TransactionAccountNotValidException("The from account can't be empty.");
                 }
 
-                //Check if transactions amount doesn't exceed the absolute limit of the account
-                if (fromAccount.getAbsoluteLimit() > fromAccount.getBalance() - transaction.getAmount()) {
-                    throw new RuntimeException("This transaction exceeds the absolute limit of this account.");
-                }
+                System.out.print(fromAccount.getTransactionLimit());
+                System.out.print(transaction.getAmount());
 
-                //Check if the transaction amount didn't exceed the transaction limit
-                if (fromAccount.getTransactionLimit() < transaction.getAmount()) {
-                    throw new RuntimeException("The transaction limit for this account has been exceeded.");
-                }
-
-                //Check if the transaction amount didn't exceed the total limit
-                if (fromAccount.getDailyLimit() < getTodaysAccumulatedTransactionAmount(fromAccount.getIban()) + transaction.getAmount()) {
-                    throw new RuntimeException("This account exceeded the daily limit.");
-                }
+                validateUserOwnsAccount(user, fromAccount);
+                validateAbsoluteLimit(fromAccount, transaction);
+                validateTransactionLimit(fromAccount, transaction);
+                validateDailyLimit(fromAccount, transaction);
 
                 //Update the account balance
                 fromAccount.setBalance(fromAccount.getBalance() - transaction.getAmount());
                 accountRepository.save(fromAccount);
-                break;
-            case TRANSFER:
-                //Check if there is a to and from account
+            }
+            case TRANSFER -> {
                 if (toAccount == null || fromAccount == null) {
-                    throw new RuntimeException("The to or from account can't be empty.");
+                    throw new TransactionAccountNotValidException("The to or from account can't be empty.");
                 }
 
                 //Check if the user owns this account or is an admin
-                if (!user.getUserType().equals(UserType.EMPLOYEE) && !fromAccount.getUser().getUsername().equals(user.getUsername())) {
-                    throw new RuntimeException("This account does not belong to this user.");
-                }
+                validateUserOwnsAccount(user, fromAccount);
 
                 //Check if to account is not a savings account and if the user of from account also owns the to account
                 if (fromAccount.getIsSavings() && !toAccount.getUser().getUsername().equals(fromAccount.getUser().getUsername())) {
-                    throw new RuntimeException("It is not possible to transfer from a savings account to an account that is not your account.");
+                    throw new TransactionTransferSavingsException("It is not possible to transfer from a savings account to an account that is not your account.");
                 }
 
                 //Check if to account is not a savings account and if the user of from account also owns the to account
                 if (toAccount.getIsSavings() && !fromAccount.getUser().getUsername().equals(toAccount.getUser().getUsername())) {
-                    throw new RuntimeException("It is not possible to transfer to a savings account from an account that is not your account.");
+                    throw new TransactionTransferSavingsException("It is not possible to transfer to a savings account from an account that is not your account.");
                 }
-
-                //Check if the transaction amount didn't exceed the transaction limit
-                if (fromAccount.getTransactionLimit() < transaction.getAmount()) {
-                    throw new RuntimeException("The transaction limit for this account has been exceeded.");
-                }
-
-                //Check if the transaction amount didn't exceed the total limit
-                if (fromAccount.getDailyLimit() < getTodaysAccumulatedTransactionAmount(fromAccount.getIban()) + transaction.getAmount()) {
-                    throw new RuntimeException("This account exceeded the daily limit.");
-                }
+                validateAbsoluteLimit(fromAccount, transaction);
+                validateTransactionLimit(fromAccount, transaction);
+                validateDailyLimit(fromAccount, transaction);
 
                 //Update the account balance
                 fromAccount.setBalance(fromAccount.getBalance() - transaction.getAmount());
                 toAccount.setBalance(toAccount.getBalance() + transaction.getAmount());
                 accountRepository.save(fromAccount);
                 accountRepository.save(toAccount);
-                break;
-            default:
-                throw new RuntimeException("The transaction type is not valid.");
+            }
+            default -> throw new TransactionTypeNotValidException("The transaction type is not valid.");
         }
 
         transaction.setUser(user);
@@ -198,7 +157,36 @@ public class TransactionService {
         return transactionRepository.save(transaction);
     }
 
-    private double getTodaysAccumulatedTransactionAmount(String iban) {
+    public Transaction getById(User user, Long id) {
+        transactionIsOwnedByUser(user, id);
+
+        return transactionRepository.findById(id).orElseThrow(() -> new TransactionNotFoundException("This transaction does not exist."));
+    }
+
+    public void transactionIsOwnedByUser(User user, Long id) {
+        Transaction transaction = transactionRepository.findById(id).orElseThrow(() -> new TransactionNotFoundException("This transaction does not exist."));
+
+        if (transaction.getFromAccount() != null && !transaction.getFromAccount().getUser().getId().equals(user.getId())) {
+            throw new TransactionNotOwnedException("This user does not own the specified account");
+        } else if (transaction.getToAccount() != null && transaction.getToAccount().getUser().getId().equals(user.getId())) {
+            throw new TransactionNotOwnedException("This user does not own the specified account");
+        }
+    }
+
+    public List<Transaction> getAllByAccountIban(User user, String iban, Date startDate, Date endDate, String search) {
+
+        Date startOfDay = getStartOfDay(startDate);
+        Date endOfDay = getEndOfDay(endDate);
+
+        //Check if user is not an employee and if the user doesn't own the account
+        if (!user.getUserType().equals(UserType.EMPLOYEE) && !user.getAccounts().stream().anyMatch(account -> account.getIban().equals(iban))) {
+            throw new AccountNotOwnedException("This user does not own the specified account");
+        }
+
+        return transactionRepository.findAllByIban(endOfDay, startOfDay, iban, search);
+    }
+
+    private Double getTodaysAccumulatedTransactionAmount(String iban) {
         LocalDate today = LocalDate.now();
         Date startOfDay = Date.from(today.atStartOfDay(ZoneId.systemDefault()).toInstant());
         Date endOfDay = Date.from(today.atTime(LocalTime.MAX).atZone(ZoneId.systemDefault()).toInstant());
@@ -206,47 +194,52 @@ public class TransactionService {
         return transactions.stream().mapToDouble(Transaction::getAmount).sum();
     }
 
-    public Transaction getById(long id, String username) {
-        User user = userRepository.findUserByUsername(username).get();
-
-        Transaction transaction = transactionRepository.findById(id).orElseThrow(() -> new RuntimeException("This transaction does not exist."));
-
-        //Check if user is not an employee and if the user doesn't own the account
-        if (!user.getUserType().equals(UserType.EMPLOYEE) && !user.getAccounts().stream().anyMatch(account -> account.getIban().equals(transaction.getFromAccount().getIban()) || account.getIban().equals(transaction.getToAccount().getIban()))) {
-            throw new RuntimeException("This user does not own the specified account");
+    private void validateTransactionAmount(Transaction transaction) {
+        //Check if the transaction amount is not negative
+        if (transaction.getAmount() < 0) {
+            throw new TransactionAmountNotValidException("The transaction amount can't be negative.");
         }
 
-        System.out.println(transaction.getLabel());
-
-        return transaction;
-    }
-
-    public void transactionIsOwnedByUser(String username, Long id) {
-        User user = userRepository.findUserByUsername(username).get();
-        Transaction transaction = transactionRepository.findById(id).orElseThrow(() -> new TransactionNotFoundException("This transaction does not exist."));
-
-        if (transaction.getFromAccount() != null && !user.getAccounts().stream().anyMatch(account -> account.getIban().equals(transaction.getFromAccount().getIban()))) {
-            throw new TransactionNotOwnedException("This user does not own the specified account");
-        } else if (transaction.getToAccount() != null && !user.getAccounts().stream().anyMatch(account -> account.getIban().equals(transaction.getToAccount().getIban()))) {
-            throw new TransactionNotOwnedException("This user does not own the specified account");
+        //Check if the transaction amount is not zero
+        if (transaction.getAmount() == 0) {
+            throw new TransactionAmountNotValidException("The transaction amount can't be zero.");
         }
     }
 
-    public List<Transaction> getAllByAccountIban(String iban, Date startDate, Date endDate, String search, String username) {
-        User user = userRepository.findUserByUsername(username).get();
+    private void validateTransactionLimit(Account account, Transaction transaction) {
+        //Check if the transaction amount didn't exceed the transaction limit
+        if (account.getTransactionLimit() < transaction.getAmount()) {
+            throw new TransactionExceededTransactionLimitException("The transaction limit for this account has been exceeded.");
+        }
+    }
+    private void validateUserOwnsAccount(User user, Account account) {
+        //Check if the user owns this account or is an admin
+        if (!user.getUserType().equals(UserType.EMPLOYEE) && !account.getUser().getUsername().equals(user.getUsername())) {
+            throw new AccountNotOwnedException("This account does not belong to this user.");
+        }
+    }
+    private void validateDailyLimit(Account account, Transaction transaction) {
+        //Check if the transaction amount didn't exceed the total limit
+        if (account.getDailyLimit() < getTodaysAccumulatedTransactionAmount(account.getIban()) + transaction.getAmount()) {
+            throw new TransactionExceededDailyLimitException("This account exceeded the daily limit.");
+        }
+    }
 
-        Date startOfDay = Date.from(startDate.toInstant()
+    private void validateAbsoluteLimit(Account account, Transaction transaction) {
+        //Check if transactions amount doesn't exceed the absolute limit of the account
+        if (account.getAbsoluteLimit() > account.getBalance() - transaction.getAmount()) {
+            throw new TransactionExceededAbsoluteLimitException("This transaction exceeds the absolute limit of this account.");
+        }
+    }
+
+    private Date getStartOfDay(Date date) {
+        return Date.from(date.toInstant()
                 .atZone(ZoneId.systemDefault())
                 .toLocalDate().atStartOfDay(ZoneId.systemDefault()).toInstant());
-        Date endOfDay = Date.from(endDate.toInstant()
+    }
+    private Date getEndOfDay(Date date) {
+        return Date.from(date.toInstant()
                 .atZone(ZoneId.systemDefault())
                 .toLocalDate().atTime(LocalTime.MAX).atZone(ZoneId.systemDefault()).toInstant());
-
-        //Check if user is not an employee and if the user doesn't own the account
-        if (!user.getUserType().equals(UserType.EMPLOYEE) && !user.getAccounts().stream().anyMatch(account -> account.getIban().equals(iban))) {
-            throw new RuntimeException("This user does not own the specified account");
-        }
-
-        return transactionRepository.findAllByIban(endOfDay, startOfDay, iban, search);
     }
 }

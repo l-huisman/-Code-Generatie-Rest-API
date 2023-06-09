@@ -42,13 +42,8 @@ public interface AccountRepository extends CrudRepository<Account, Long> {
 //            "OR a.user.lastName ILIKE %:search% " +
 //            "OR a.name ILIKE %:search% " +
 //            "OR a.iban ILIKE %:search%)")
-    @Query("SELECT a FROM Account a WHERE (:isActive IS NULL OR a.isActive = :isActive) " +
-            "AND (a.user.username ILIKE CONCAT('%', :search, '%') " +
-            "OR a.user.firstName ILIKE CONCAT('%', :search, '%') " +
-            "OR a.user.lastName ILIKE CONCAT('%', :search, '%') " +
-            "OR a.name ILIKE CONCAT('%', :search, '%') " +
-            "OR a.iban ILIKE CONCAT('%', :search, '%'))")
-List<Account> findAllBySearchTerm(String search, Boolean isActive);
+    @Query("SELECT a FROM Account a")
+List<Account> findAllBySearchTerm();
 
     @Query("SELECT a FROM Account a WHERE a.user.id = :userId AND (:isActive IS NULL OR a.isActive = :isActive) AND (a.user.username ILIKE %:search% " +
             "OR a.user.firstName ILIKE %:search% " +
