@@ -1,6 +1,8 @@
 package com.example.CodeGeneratieRestAPI.helpers;
 
 import com.example.CodeGeneratieRestAPI.exceptions.UserNotFoundException;
+import com.example.CodeGeneratieRestAPI.models.Account;
+import com.example.CodeGeneratieRestAPI.models.Transaction;
 import com.example.CodeGeneratieRestAPI.models.User;
 import com.example.CodeGeneratieRestAPI.repositories.AccountRepository;
 import com.example.CodeGeneratieRestAPI.repositories.TransactionRepository;
@@ -15,6 +17,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.util.Collections;
 import java.util.Optional;
 
 import static org.mockito.Mockito.when;
@@ -44,19 +47,19 @@ class ServiceHelperTest {
         // Test case for Account object
         String iban = "NL01INHO0000000001";
         when(accountRepository.existsByIban(iban)).thenReturn(true);
-        boolean result = ServiceHelper.checkIfObjectExistsByIdentifier(iban, new Object());
+        boolean result = ServiceHelper.checkIfObjectExistsByIdentifier(iban, new Account());
         Assertions.assertTrue(result);
 
         // Test case for User object
         Long userId = 1L;
         when(userRepository.existsById(userId)).thenReturn(true);
-        result = ServiceHelper.checkIfObjectExistsByIdentifier(userId, new Object());
+        result = ServiceHelper.checkIfObjectExistsByIdentifier(userId, new User());
         Assertions.assertTrue(result);
 
         // Test case for Transaction object
         Long transactionId = 1L;
         when(transactionRepository.existsById(transactionId)).thenReturn(true);
-        result = ServiceHelper.checkIfObjectExistsByIdentifier(transactionId, new Object());
+        result = ServiceHelper.checkIfObjectExistsByIdentifier(transactionId, new Transaction());
         Assertions.assertTrue(result);
 
         // Test case for invalid object type
@@ -69,7 +72,7 @@ class ServiceHelperTest {
         // Set up mock authentication and user details
         String username = "testuser";
         String password = "testpassword";
-        UserDetails userDetails = new org.springframework.security.core.userdetails.User(username, password, null);
+        UserDetails userDetails = new org.springframework.security.core.userdetails.User(username, password, Collections.emptyList());
         Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails, password);
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
