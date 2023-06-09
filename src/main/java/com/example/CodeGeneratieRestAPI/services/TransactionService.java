@@ -3,10 +3,7 @@ package com.example.CodeGeneratieRestAPI.services;
 import com.example.CodeGeneratieRestAPI.dtos.TransactionRequestDTO;
 import com.example.CodeGeneratieRestAPI.exceptions.*;
 import com.example.CodeGeneratieRestAPI.helpers.ServiceHelper;
-import com.example.CodeGeneratieRestAPI.models.Account;
-import com.example.CodeGeneratieRestAPI.models.Transaction;
-import com.example.CodeGeneratieRestAPI.models.User;
-import com.example.CodeGeneratieRestAPI.models.UserType;
+import com.example.CodeGeneratieRestAPI.models.*;
 import com.example.CodeGeneratieRestAPI.repositories.AccountRepository;
 import com.example.CodeGeneratieRestAPI.repositories.TransactionRepository;
 import com.example.CodeGeneratieRestAPI.repositories.UserRepository;
@@ -49,46 +46,20 @@ public class TransactionService {
         return transactionRepository.findAllByUserId(user.getId());
     }
 
-    public Transaction addSeed(Transaction transaction, String username) {
-        Account fromAccount = transaction.getFromAccount();
-        Account toAccount = transaction.getToAccount();
-        User user = userRepository.findUserByUsername(username).get();
-
-        switch (transaction.getTransactionType()) {
-            case DEPOSIT -> {
-                //Update the account balance
-                toAccount.setBalance(toAccount.getBalance() + transaction.getAmount());
-                accountRepository.save(toAccount);
-            }
-            case WITHDRAW -> {
-                //Update the account balance
-                fromAccount.setBalance(fromAccount.getBalance() - transaction.getAmount());
-                accountRepository.save(fromAccount);
-            }
-            case TRANSFER -> {
-                //Update the account balance
-                fromAccount.setBalance(fromAccount.getBalance() - transaction.getAmount());
-                toAccount.setBalance(toAccount.getBalance() + transaction.getAmount());
-                accountRepository.save(fromAccount);
-                accountRepository.save(toAccount);
-            }
-            default -> throw new TransactionTypeNotValidException("The transaction type is not valid.");
-        }
-
-        transaction.setUser(user);
-
-        transaction.setCreatedAt(java.sql.Timestamp.valueOf(LocalDateTime.now()));
-
-        return transactionRepository.save(transaction);
-    }
-
     public Transaction add(User user, TransactionRequestDTO transactionIn) {
         String transactionToAccount = transactionIn.getToAccountIban();
         String transactionFromAccount = transactionIn.getFromAccountIban();
         Account fromAccount = transactionFromAccount != null ? accountRepository.findByIban(transactionIn.getFromAccountIban()) : null;
         Account toAccount = transactionToAccount != null ? accountRepository.findByIban(transactionIn.getToAccountIban()) : null;
 
-        Transaction transaction = new Transaction(fromAccount, toAccount, transactionIn.getAmount(), transactionIn.getLabel(), transactionIn.getDescription(), transactionIn.getTransactionType());
+        TransactionType transactionType = null;
+        try {
+            transactionType = TransactionType.valueOf(transactionIn.getTransactionType());
+        } catch (IllegalArgumentException e) {
+            throw new TransactionTypeNotValidException("The transaction type is not valid.");
+        }
+
+        Transaction transaction = new Transaction(fromAccount, toAccount, transactionIn.getAmount(), transactionIn.getLabel(), transactionIn.getDescription(), transactionType);
 
         validateTransactionAmount(transaction);
 
@@ -107,9 +78,6 @@ public class TransactionService {
                 if (fromAccount == null) {
                     throw new TransactionAccountNotValidException("The from account can't be empty.");
                 }
-
-                System.out.print(fromAccount.getTransactionLimit());
-                System.out.print(transaction.getAmount());
 
                 validateUserOwnsAccount(user, fromAccount);
                 validateAbsoluteLimit(fromAccount, transaction);
@@ -158,28 +126,26 @@ public class TransactionService {
     }
 
     public Transaction getById(User user, Long id) {
-        transactionIsOwnedByUser(user, id);
-
-        return transactionRepository.findById(id).orElseThrow(() -> new TransactionNotFoundException("This transaction does not exist."));
+        return transactionIsOwnedByUser(user, id);
     }
 
-    public void transactionIsOwnedByUser(User user, Long id) {
+    public Transaction transactionIsOwnedByUser(User user, Long id) {
         Transaction transaction = transactionRepository.findById(id).orElseThrow(() -> new TransactionNotFoundException("This transaction does not exist."));
 
         if (transaction.getFromAccount() != null && !transaction.getFromAccount().getUser().getId().equals(user.getId())) {
             throw new TransactionNotOwnedException("This user does not own the specified account");
-        } else if (transaction.getToAccount() != null && transaction.getToAccount().getUser().getId().equals(user.getId())) {
+        } else if (transaction.getToAccount() != null && !transaction.getToAccount().getUser().getId().equals(user.getId())) {
             throw new TransactionNotOwnedException("This user does not own the specified account");
         }
+        return transaction;
     }
 
     public List<Transaction> getAllByAccountIban(User user, String iban, Date startDate, Date endDate, String search) {
-
         Date startOfDay = getStartOfDay(startDate);
         Date endOfDay = getEndOfDay(endDate);
 
         //Check if user is not an employee and if the user doesn't own the account
-        if (!user.getUserType().equals(UserType.EMPLOYEE) && !user.getAccounts().stream().anyMatch(account -> account.getIban().equals(iban))) {
+        if (!user.getUserType().equals(UserType.EMPLOYEE) && (user.getAccounts() == null || !user.getAccounts().stream().anyMatch(account -> account.getIban().equals(iban)))) {
             throw new AccountNotOwnedException("This user does not own the specified account");
         }
 
