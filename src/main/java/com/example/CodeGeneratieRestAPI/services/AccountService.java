@@ -2,8 +2,10 @@ package com.example.CodeGeneratieRestAPI.services;
 
 import com.example.CodeGeneratieRestAPI.dtos.AccountRequestDTO;
 import com.example.CodeGeneratieRestAPI.exceptions.AccountCreationException;
+import com.example.CodeGeneratieRestAPI.exceptions.AccountNoDataChangedException;
 import com.example.CodeGeneratieRestAPI.exceptions.AccountNotAccessibleException;
 import com.example.CodeGeneratieRestAPI.exceptions.AccountNotFoundException;
+import com.example.CodeGeneratieRestAPI.exceptions.AccountUpdateException;
 import com.example.CodeGeneratieRestAPI.exceptions.UserNotFoundException;
 import com.example.CodeGeneratieRestAPI.helpers.ServiceHelper;
 import com.example.CodeGeneratieRestAPI.models.Account;
@@ -33,9 +35,8 @@ public class AccountService {
     @Autowired
     private UserRepository userRepository;
 
-    public Account add(AccountRequestDTO accountRequestDTO) {
+    public Account add(AccountRequestDTO accountRequestDTO, User loggedInUser) {
         try {
-            User currentLoggedInUser = ServiceHelper.getLoggedInUser();
 
             //  Check if the accountRequestDTO is valid
             //this.checkIfAccountRequestDTOIsValid(accountRequestDTO, currentLoggedInUser);
@@ -48,18 +49,18 @@ public class AccountService {
             //  If the user is an employee, check if the user id is set
             //  It is possible for an employee to add an account for itself, but it is also possible for an employee to add an account for another user
             //  Hence why we check if the user id is set if the user is an employee
-            if (currentLoggedInUser.getUserType().equals("EMPLOYEE") && accountRequestDTO.getUserId() == null) {
+            if (loggedInUser.getUserType().equals("EMPLOYEE") && accountRequestDTO.getUserId() == null) {
                 throw new AccountCreationException("You cannot add an account as an employee without selecting a user (if you are adding an account for yourself, select yourself as the user)");
             } else {
-                //  If the user is not an employee, set the user id to the id of the current logged in user
-                accountRequestDTO.setUserId(currentLoggedInUser.getId());
+                //  If the user is not an employee, set the user id to the id of the current logged-in user
+                accountRequestDTO.setUserId(loggedInUser.getId());
             }
 
             //  Get the user
             User user = userRepository.findById(accountRequestDTO.getUserId()).orElse(null);
 
             //  Set the userId on the account
-            accountRequestDTO.setUserId(currentLoggedInUser.getId());
+            accountRequestDTO.setUserId(loggedInUser.getId());
 
             //  Generate a new unique IBAN
             String iban = getUniqueIban();
@@ -87,9 +88,32 @@ public class AccountService {
     }
 
     private void checkIfAccountRequestDTOIsValid(AccountRequestDTO accountRequestDTO) {
+        //  Check if the accountRequestDTO is null
         if (accountRequestDTO == null) {
-            throw new IllegalArgumentException("AccountRequest object is null");
+            throw new IllegalArgumentException("The provided data cannot be null");
         }
+
+        //  Check if any fields other than iban are set, if not, throw an exception because there is nothing to update
+        //  This code can throw an IllegalAccessException, which is why this piece of code is in a try catch block
+        try {
+            boolean allFieldsNull = true;
+            for (Field field : accountRequestDTO.getClass().getDeclaredFields()) {
+                field.setAccessible(true);
+                if (!field.getName().equals("iban")) {
+                    if (field.get(accountRequestDTO) != null) {
+                        allFieldsNull = false;
+                        break;
+                    }
+                }
+            }
+            if (allFieldsNull) {
+                throw new AccountNoDataChangedException("At least one field (other then the IBAN) must be filled out");
+            }
+        } catch (IllegalAccessException e) {
+            throw new AccountUpdateException(e.getMessage());
+        }
+
+
     }
 
     private Boolean checkIfAccountBelongsToUser(String iban, User loggedInUser) {
@@ -124,34 +148,34 @@ public class AccountService {
         return allActiveAccountsBalance;
     }
 
-    public List<Account> getAllAccounts(String search, boolean active) {
-        // Get the current logged in user
-        User currentLoggedInUser = ServiceHelper.getLoggedInUser();
+    public List<Account> getAllAccounts(String search, boolean active, User loggedInUser) {
 
         // Check if the user is an employee
-        if (currentLoggedInUser.getUserType().getAuthority().equals("EMPLOYEE")) {
+        if (loggedInUser.getUserType().getAuthority().equals("EMPLOYEE")) {
             //  Get all accounts
-            return accountRepository.findAllBySearchTerm();
+            return accountRepository.findAllBySearchTerm(search, active);
         }
         else {
             //  Get all accounts of the user
-            return accountRepository.findAllBySearchTerm();
+            return accountRepository.findAllBySearchTermAndUserId(search, active, loggedInUser.getId());
         }
     }
-    public Account getAccountByIban(String iban) {
-        // Get the current logged in user
-        User currentLoggedInUser = ServiceHelper.getLoggedInUser();
-
+    public Account getAccountByIban(String iban, User loggedInUser) {
         //  Check account and get the account
         Account account = this.checkAndGetAccount(iban);
 
         //  Return the account
         return account;
     }
+    public List<Account> getAllAccountsByUserId(Long userId, User loggedInUser){
+        //  Check if the userId matches the id of the logged in user and throw an exception if it doesn't unless the user is an employee
+        if (!loggedInUser.getUserType().getAuthority().equals("EMPLOYEE") && !userId.equals(loggedInUser.getId())) {
+            throw new AccountNotAccessibleException("You cannot access the accounts of another user");
+        }
+        return accountRepository.findAllByUserId(userId);
+    }
 
-    public Account update(AccountRequestDTO account) {
-        // Get the current logged in user
-        User loggedInUser = ServiceHelper.getLoggedInUser();
+    public Account update(AccountRequestDTO account, User loggedInUser) {
 
         // Check if the accountRequestDTO is valid
         this.checkIfAccountRequestDTOIsValid(account);
@@ -173,33 +197,32 @@ public class AccountService {
         // Loop through all the fields of the accountWithNewValues object
         // If the field is not null and the value is different from the one in the accountToUpdate object
         // Set the new value to the accountToUpdate object
-        for (Field field : accountWithNewValues.getClass().getDeclaredFields()) {
-            // Skip the iban field (it cannot be updated
-            if (field.getName().equals("iban"))
-                continue;
+        try {
+            for (Field field : accountWithNewValues.getClass().getDeclaredFields()) {
+                // Skip the iban and userId fields (they cannot be updated)
+                if (field.getName().equals("iban") || field.getName().equals("userId"))
+                    continue;
 
-            // Set the field to accessible
-            field.setAccessible(true);
-            try {
+                // Check if the field exists in the Account class
+                Field accountField = accountToUpdate.getClass().getDeclaredField(field.getName());
+                // Set the field to accessible
+                field.setAccessible(true);
+                accountField.setAccessible(true);
                 Object newValue = field.get(accountWithNewValues);
-                Object oldValue = field.get(accountToUpdate);
+                Object oldValue = accountField.get(accountToUpdate);
 
                 if (newValue != null && !newValue.equals(oldValue)) {
-                    field.set(accountToUpdate, newValue);
+                    accountField.set(accountToUpdate, newValue);
                 }
-            } catch (IllegalAccessException e) {
-                e.printStackTrace();
             }
+        } catch (NoSuchFieldException | IllegalAccessException e) {
+            throw new AccountUpdateException(e.getMessage());
         }
-
-
         // Return the updated account
         return accountToUpdate;
     }
 
-    public String delete(String iban) {
-        // Get the current logged-in user
-        User loggedInUser = ServiceHelper.getLoggedInUser();
+    public String delete(String iban, User loggedInUser) {
 
         // Check account and get the account
         Account account = this.checkAndGetAccount(iban);
@@ -220,13 +243,4 @@ public class AccountService {
         account.setIban(getUniqueIban());
         accountRepository.save(account);
     }
-
-//    public List<AccountResponseDTO> getAllAccounts() {
-//        List<Account> accounts = accountRepository.findAll();
-//        List<AccountResponseDTO> accountsresponse = new ArrayList<>();
-//        for (Account account : accounts) {
-//            accountsresponse.add(new AccountResponseDTO(account));
-//        }
-//        return accountsresponse;
-//    }
 }

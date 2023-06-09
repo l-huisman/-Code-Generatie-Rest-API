@@ -1,4 +1,4 @@
-package com.example.CodeGeneratieRestAPI.helpers;
+package com.example.CodeGeneratieRestAPI.exceptions;
 
 import com.example.CodeGeneratieRestAPI.exceptions.*;
 import com.example.CodeGeneratieRestAPI.models.ApiResponse;
