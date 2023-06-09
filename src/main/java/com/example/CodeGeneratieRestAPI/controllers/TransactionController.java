@@ -3,9 +3,11 @@ package com.example.CodeGeneratieRestAPI.controllers;
 import com.example.CodeGeneratieRestAPI.dtos.AccountResponseDTO;
 import com.example.CodeGeneratieRestAPI.dtos.TransactionRequestDTO;
 import com.example.CodeGeneratieRestAPI.dtos.TransactionResponseDTO;
+import com.example.CodeGeneratieRestAPI.helpers.ServiceHelper;
 import com.example.CodeGeneratieRestAPI.models.Account;
 import com.example.CodeGeneratieRestAPI.models.ApiResponse;
 import com.example.CodeGeneratieRestAPI.models.Transaction;
+import com.example.CodeGeneratieRestAPI.models.User;
 import com.example.CodeGeneratieRestAPI.services.TransactionService;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.config.Configuration;
@@ -36,77 +38,63 @@ public class TransactionController {
     }
 
     @GetMapping
-    public List<TransactionResponseDTO> getAll(@RequestParam @DateTimeFormat(pattern="yyyy-MM-dd") Date start_date, @RequestParam @DateTimeFormat(pattern="yyyy-MM-dd") Date end_date, @RequestParam String search) {
+    public ResponseEntity<ApiResponse> getAll(@RequestParam @DateTimeFormat(pattern="yyyy-MM-dd") Date start_date, @RequestParam @DateTimeFormat(pattern="yyyy-MM-dd") Date end_date, @RequestParam String search) {
         try {
-            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            String username = ((UserDetails) authentication.getPrincipal()).getUsername();
+            User user = ServiceHelper.getLoggedInUser();
+            List<Transaction> transactions = transactionService.getAll(user, start_date, end_date, search);
 
-            List<Transaction> transactions = transactionService.getAll(start_date, end_date, search, username);
-
-            return Arrays.asList(modelMapper.map(transactions, TransactionResponseDTO[].class));
+            return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse<>(true, "All transactions retrieved", Arrays.asList(modelMapper.map(transactions, TransactionResponseDTO[].class))));
         } catch (Exception e) {
-            //TODO: handle exception
-            System.out.println(e);
-            return null;
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ApiResponse<>(false, e.getMessage()));
         }
     }
 
     @GetMapping("/user")
-    public List<TransactionResponseDTO> getAllByUserId() {
+    public ResponseEntity<ApiResponse> getAllByUserId() {
         try {
-            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            String username = ((UserDetails) authentication.getPrincipal()).getUsername();
+            User user = ServiceHelper.getLoggedInUser();
 
-            List<Transaction> transactions = transactionService.getAllByUserId(username);
+            List<Transaction> transactions = transactionService.getAllByUser(user);
 
-            return Arrays.asList(modelMapper.map(transactions, TransactionResponseDTO[].class));
+            return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse<>(true, "All transactions retrieved", Arrays.asList(modelMapper.map(transactions, TransactionResponseDTO[].class))));
         } catch (Exception e) {
-            //TODO: handle exception
-            System.out.println(e);
-            return null;
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ApiResponse<>(false, e.getMessage()));
         }
     }
 
     @GetMapping("/{id}")
-    public TransactionResponseDTO getById(@PathVariable long id) {
+    public ResponseEntity<ApiResponse> getById(@PathVariable Long id) {
         try {
+            User user = ServiceHelper.getLoggedInUser();
             //  Retrieve the data
-            Transaction transaction = transactionService.getById(id, "admin");
+            Transaction transaction = transactionService.getById(user, id);
 
             //  Return the data
-            return modelMapper.map(transaction, TransactionResponseDTO.class);
+            return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse<>(true, "Transaction retrieved", new TransactionResponseDTO(transaction)));
         } catch (Exception e) {
-            //TODO: handle exception
-            System.out.println(e);
-            return null;
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ApiResponse<>(false, e.getMessage()));
         }
     }
 
     @GetMapping("/accounts/{iban}")
-    public List<TransactionResponseDTO> getByAccountIban(@PathVariable String iban, @RequestParam @DateTimeFormat(pattern="yyyy-MM-dd") Date start_date, @RequestParam @DateTimeFormat(pattern="yyyy-MM-dd") Date end_date, @RequestParam String search) {
+    public ResponseEntity<ApiResponse> getByAccountIban(@PathVariable String iban, @RequestParam @DateTimeFormat(pattern="yyyy-MM-dd") Date start_date, @RequestParam @DateTimeFormat(pattern="yyyy-MM-dd") Date end_date, @RequestParam String search) {
         try {
-            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            String username = ((UserDetails) authentication.getPrincipal()).getUsername();
+            User user = ServiceHelper.getLoggedInUser();
 
-            System.out.println(iban);
+            List<Transaction> transactions = transactionService.getAllByAccountIban(user, iban, start_date, end_date, search);
 
-            List<Transaction> transactions = transactionService.getAllByAccountIban(iban, start_date, end_date, search, username);
-
-            return Arrays.asList(modelMapper.map(transactions, TransactionResponseDTO[].class));
+            return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse<>(true, "All transactions retrieved", Arrays.asList(modelMapper.map(transactions, TransactionResponseDTO[].class))));
         } catch (Exception e) {
-            //TODO: handle exception
-            System.out.println(e);
-            return null;
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ApiResponse<>(false, e.getMessage()));
         }
     }
 
     @GetMapping("/owns/{id}")
     public ResponseEntity<ApiResponse<String>> transactionIsOwnedByUser(@PathVariable Long id) {
         try {
-            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            String username = ((UserDetails) authentication.getPrincipal()).getUsername();
+            User user = ServiceHelper.getLoggedInUser();
 
-            transactionService.transactionIsOwnedByUser(username, id);
+            transactionService.transactionIsOwnedByUser(user, id);
 
             return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse<>(true, "You own this transaction"));
         } catch (Exception e) {
@@ -115,21 +103,17 @@ public class TransactionController {
     }
 
     @PostMapping
-    public TransactionResponseDTO add(@RequestBody(required = true) TransactionRequestDTO transactionIn) {
+    public ResponseEntity<ApiResponse> add(@RequestBody(required = true) TransactionRequestDTO transactionIn) {
         try {
-            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            String username = ((UserDetails) authentication.getPrincipal()).getUsername();
+            User user = ServiceHelper.getLoggedInUser();
 
-            System.out.println(transactionIn.getAmount());
             //  Retrieve the data
-            Transaction transaction = transactionService.add(transactionIn, username);
+            Transaction transaction = transactionService.add(user, transactionIn);
 
             //  Return the data
-            return modelMapper.map(transaction, TransactionResponseDTO.class);
+            return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse<>(true, "Transaction retrieved", new TransactionResponseDTO(transaction)));
         } catch (Exception e) {
-            //TODO: handle exception
-            System.out.println(e.getMessage());
-            return null;
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ApiResponse<>(false, e.getMessage()));
         }
     }
 }

@@ -1,5 +1,6 @@
 package com.example.CodeGeneratieRestAPI.cucumber.steps;
 
+import com.example.CodeGeneratieRestAPI.dtos.TransactionRequestDTO;
 import com.example.CodeGeneratieRestAPI.models.*;
 import com.example.CodeGeneratieRestAPI.repositories.AccountRepository;
 import com.example.CodeGeneratieRestAPI.repositories.TransactionRepository;
@@ -48,7 +49,9 @@ public class TransactionStepDefinitions extends BaseStepDefinitions {
 
     private Account account, anotherAccount;
     private User user, anotherUser;
+    private TransactionRequestDTO transactionDTO, anotherTransactionDTO;
     private Transaction transaction, anotherTransaction;
+
     private RuntimeException exception;
 
     @Given("The endpoint for {string} is available for method {string}")
@@ -159,12 +162,12 @@ public class TransactionStepDefinitions extends BaseStepDefinitions {
 
     @When("a withdraw transaction of {float} is added to the account")
     public void aWithdrawTransactionIsAddedToTheAccount(float amount) {
-        transaction = new Transaction();
-        transaction.setAmount(amount);
-        transaction.setFromAccount(account);
-        transaction.setTransactionType(TransactionType.WITHDRAW);
+        transactionDTO = new TransactionRequestDTO();
+        transactionDTO.setAmount(amount);
+        transactionDTO.setFromAccountIban(account.getIban());
+        transactionDTO.setTransactionType("WITHDRAW");
         try {
-            transaction = transactionService.add(transaction, user.getUsername());
+            transaction = transactionService.add(user, transactionDTO);
         } catch (RuntimeException e) {
             exception = e;
         }
@@ -172,12 +175,12 @@ public class TransactionStepDefinitions extends BaseStepDefinitions {
 
     @When("a deposit transaction of {float} is added to the account")
     public void aDepositTransactionIsAddedToTheAccount(float amount) {
-        transaction = new Transaction();
-        transaction.setAmount(amount);
-        transaction.setToAccount(account);
-        transaction.setTransactionType(TransactionType.DEPOSIT);
+        transactionDTO = new TransactionRequestDTO();
+        transactionDTO.setAmount(amount);
+        transactionDTO.setToAccountIban(account.getIban());
+        transactionDTO.setTransactionType("DEPOSIT");
         try {
-            transaction = transactionService.add(transaction, user.getUsername());
+            transaction = transactionService.add(user, transactionDTO);
         } catch (RuntimeException e) {
             System.out.println(e.getMessage());
             exception = e;
@@ -188,14 +191,14 @@ public class TransactionStepDefinitions extends BaseStepDefinitions {
     public void aTransferTransactionToIBANIsAddedToTheAccount(float amount, String toAccountIban) {
         anotherAccount = accountRepository.findByIban(toAccountIban);
 
-        transaction = new Transaction();
-        transaction.setAmount(amount);
-        transaction.setFromAccount(account);
-        transaction.setToAccount(anotherAccount);
-        transaction.setTransactionType(TransactionType.TRANSFER);
+        transactionDTO = new TransactionRequestDTO();
+        transactionDTO.setAmount(amount);
+        transactionDTO.setFromAccountIban(account.getIban());
+        transactionDTO.setToAccountIban(anotherAccount.getIban());
+        transactionDTO.setTransactionType("TRANSFER");
         //print transaction
         try {
-            transaction = transactionService.add(transaction, user.getUsername());
+            transaction = transactionService.add(user, transactionDTO);
         } catch (RuntimeException e) {
             exception = e;
         }
@@ -205,13 +208,13 @@ public class TransactionStepDefinitions extends BaseStepDefinitions {
     public void aDepositTransactionToIBANIsAddedToTheAccount(float amount, String toAccountIban) {
         account = accountRepository.findByIban(toAccountIban);
 
-        transaction = new Transaction();
-        transaction.setAmount(amount);
-        transaction.setToAccount(account);
-        transaction.setTransactionType(TransactionType.DEPOSIT);
+        transactionDTO = new TransactionRequestDTO();
+        transactionDTO.setAmount(amount);
+        transactionDTO.setToAccountIban(account.getIban());
+        transactionDTO.setTransactionType("DEPOSIT");
         //print transaction
         try {
-            transaction = transactionService.add(transaction, user.getUsername());
+            transaction = transactionService.add(user, transactionDTO);
         } catch (RuntimeException e) {
             exception = e;
         }
@@ -221,13 +224,12 @@ public class TransactionStepDefinitions extends BaseStepDefinitions {
     public void aWithdrawTransactionToIBANIsAddedToTheAccount(float amount, String fromAccountIban) {
         account = accountRepository.findByIban(fromAccountIban);
 
-        transaction = new Transaction();
-        transaction.setAmount(amount);
-        transaction.setFromAccount(account);
-        transaction.setTransactionType(TransactionType.WITHDRAW);
-        //print transaction
+        transactionDTO = new TransactionRequestDTO();
+        transactionDTO.setAmount(amount);
+        transactionDTO.setFromAccountIban(account.getIban());
+        transactionDTO.setTransactionType("WITHDRAW");
         try {
-            transaction = transactionService.add(transaction, user.getUsername());
+            transaction = transactionService.add(user, transactionDTO);
         } catch (RuntimeException e) {
             exception = e;
         }
@@ -238,14 +240,14 @@ public class TransactionStepDefinitions extends BaseStepDefinitions {
         account = accountRepository.findByIban(toAccountIban);
         Account fromAccount = accountRepository.findByIban(fromAccountIban);
 
-        transaction = new Transaction();
-        transaction.setAmount(amount);
-        transaction.setFromAccount(fromAccount);
-        transaction.setToAccount(account);
-        transaction.setTransactionType(TransactionType.TRANSFER);
+        transactionDTO = new TransactionRequestDTO();
+        transactionDTO.setAmount(amount);
+        transactionDTO.setFromAccountIban(fromAccount.getIban());
+        transactionDTO.setToAccountIban(account.getIban());
+        transactionDTO.setTransactionType("TRANSFER");
         //print transaction
         try {
-            transaction = transactionService.add(transaction, user.getUsername());
+            transaction = transactionService.add(user, transactionDTO);
         } catch (RuntimeException e) {
             exception = e;
         }
@@ -253,11 +255,11 @@ public class TransactionStepDefinitions extends BaseStepDefinitions {
 
     @When("a deposit transaction of {float} is added to the account without a toAccountIban")
     public void aDepositTransactionIsAddedToTheAccountWithoutAToAccountIban(float amount) {
-        transaction = new Transaction();
-        transaction.setAmount(amount);
-        transaction.setTransactionType(TransactionType.DEPOSIT);
+        transactionDTO = new TransactionRequestDTO();
+        transactionDTO.setAmount(amount);
+        transactionDTO.setTransactionType("DEPOSIT");
         try {
-            transactionService.add(transaction, user.getUsername());
+            transactionService.add(user, transactionDTO);
         } catch (RuntimeException e) {
             exception = e;
         }
@@ -265,12 +267,12 @@ public class TransactionStepDefinitions extends BaseStepDefinitions {
 
     @When("a transfer transaction of {float} is added to the account without a toAccountIban")
     public void aTransferTransactionIsAddedToTheAccountWithoutAToAccountIban(float amount) {
-        transaction = new Transaction();
-        transaction.setAmount(amount);
-        transaction.setFromAccount(account);
-        transaction.setTransactionType(TransactionType.TRANSFER);
+        transactionDTO = new TransactionRequestDTO();
+        transactionDTO.setAmount(amount);
+        transactionDTO.setFromAccountIban(account.getIban());
+        transactionDTO.setTransactionType("TRANSFER");
         try {
-            transactionService.add(transaction, user.getUsername());
+            transactionService.add(user, transactionDTO);
         } catch (RuntimeException e) {
             exception = e;
         }
@@ -278,12 +280,12 @@ public class TransactionStepDefinitions extends BaseStepDefinitions {
 
     @When("a transfer transaction of {float} is added to the account without a fromAccountIban")
     public void aTransferTransactionIsAddedToTheAccountWithoutAFromAccountIban(float amount) {
-        transaction = new Transaction();
-        transaction.setAmount(amount);
-        transaction.setToAccount(account);
-        transaction.setTransactionType(TransactionType.TRANSFER);
+        transactionDTO = new TransactionRequestDTO();
+        transactionDTO.setAmount(amount);
+        transactionDTO.setToAccountIban(account.getIban());
+        transactionDTO.setTransactionType("TRANSFER");
         try {
-            transactionService.add(transaction, user.getUsername());
+            transactionService.add(user, transactionDTO);
         } catch (RuntimeException e) {
             exception = e;
         }
@@ -291,12 +293,12 @@ public class TransactionStepDefinitions extends BaseStepDefinitions {
 
     @When("another deposit transaction of {float} is added to the account")
     public void anotherDepositTransactionIsAddedToTheAccount(float amount) {
-        anotherTransaction = new Transaction();
-        anotherTransaction.setAmount(amount);
-        anotherTransaction.setToAccount(account);
-        anotherTransaction.setTransactionType(TransactionType.DEPOSIT);
+        anotherTransactionDTO = new TransactionRequestDTO();
+        anotherTransactionDTO.setAmount(amount);
+        anotherTransactionDTO.setToAccountIban(account.getIban());
+        anotherTransactionDTO.setTransactionType("DEPOSIT");
         try {
-            transactionService.add(anotherTransaction, user.getUsername());
+            anotherTransaction = transactionService.add(user, anotherTransactionDTO);
         } catch (RuntimeException e) {
             System.out.println(e.getMessage());
             exception = e;
@@ -305,12 +307,12 @@ public class TransactionStepDefinitions extends BaseStepDefinitions {
 
     @When("another withdraw transaction of {float} is added to the account")
     public void anotherWithdrawTransactionIsAddedToTheAccount(float amount) {
-        anotherTransaction = new Transaction();
-        anotherTransaction.setAmount(amount);
-        anotherTransaction.setFromAccount(account);
-        anotherTransaction.setTransactionType(TransactionType.WITHDRAW);
+        anotherTransactionDTO = new TransactionRequestDTO();
+        anotherTransactionDTO.setAmount(amount);
+        anotherTransactionDTO.setFromAccountIban(account.getIban());
+        anotherTransactionDTO.setTransactionType("WITHDRAW");
         try {
-            transactionService.add(anotherTransaction, user.getUsername());
+            anotherTransaction = transactionService.add(user, anotherTransactionDTO);
         } catch (RuntimeException e) {
             System.out.println(e.getMessage());
             exception = e;
@@ -321,13 +323,13 @@ public class TransactionStepDefinitions extends BaseStepDefinitions {
     public void anotherTransferTransactionIsAddedToTheAccount(float amount, String toAccountIban) {
         anotherAccount = accountRepository.findByIban(toAccountIban);
 
-        anotherTransaction = new Transaction();
-        anotherTransaction.setAmount(amount);
-        anotherTransaction.setFromAccount(account);
-        anotherTransaction.setToAccount(anotherAccount);
-        anotherTransaction.setTransactionType(TransactionType.TRANSFER);
+        anotherTransactionDTO = new TransactionRequestDTO();
+        anotherTransactionDTO.setAmount(amount);
+        anotherTransactionDTO.setFromAccountIban(account.getIban());
+        anotherTransactionDTO.setToAccountIban(anotherAccount.getIban());
+        anotherTransactionDTO.setTransactionType("TRANSFER");
         try {
-            transactionService.add(anotherTransaction, user.getUsername());
+            anotherTransaction = transactionService.add(user, anotherTransactionDTO);
         } catch (RuntimeException e) {
             System.out.println(e.getMessage());
             exception = e;
