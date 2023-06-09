@@ -45,13 +45,13 @@ public class Transaction {
     @Column(name = "created_at")
     private Date createdAt;
 
-    public Transaction(Account fromAccount, Account toAccount, Float amount, String label, String description, String transactionType) {
+    public Transaction(Account fromAccount, Account toAccount, Float amount, String label, String description, TransactionType transactionType) {
         this.fromAccount = fromAccount;
         this.toAccount = toAccount;
         this.amount = amount;
         this.label = label;
         this.description = description;
-        this.transactionType = TransactionType.valueOf(transactionType);
+        this.transactionType = transactionType;
         this.createdAt = new Date();
     }
 }
