@@ -13,8 +13,7 @@ import java.util.List;
 import java.util.Optional;
 
 import com.example.CodeGeneratieRestAPI.dtos.TransactionRequestDTO;
-import com.example.CodeGeneratieRestAPI.exceptions.TransactionNotFoundException;
-import com.example.CodeGeneratieRestAPI.exceptions.TransactionNotOwnedException;
+import com.example.CodeGeneratieRestAPI.exceptions.*;
 import com.example.CodeGeneratieRestAPI.helpers.IBANGenerator;
 import com.example.CodeGeneratieRestAPI.models.*;
 import com.example.CodeGeneratieRestAPI.repositories.AccountRepository;
@@ -26,7 +25,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import com.example.CodeGeneratieRestAPI.exceptions.EmployeeOnlyException;
 import com.example.CodeGeneratieRestAPI.repositories.TransactionRepository;
 
 public class TransactionServiceTest {
@@ -44,29 +42,30 @@ public class TransactionServiceTest {
         MockitoAnnotations.openMocks(this);
     }
 
-    private User getMockUser(UserType userType) {
+    private User getMockUser(Long id, UserType userType, String username) {
         User user = new User();
-        user.setId(1L);
+        user.setId(id);
         user.setUserType(userType);
-        user.setUsername("john");
+        user.setUsername(username);
         return user;
     }
 
-    private Account getMockAccount(User user) {
+    private Account getMockAccount(String iban, Float balance, User user, Boolean isSavings) {
         Account account = new Account();
-        account.setIban("1234567890");
+        account.setIban(iban);
         account.setUser(user);
-        account.setBalance(1000.0F);
+        account.setBalance(balance);
         account.setAbsoluteLimit(10F);
-        account.setDailyLimit(500F);
+        account.setDailyLimit(200F);
         account.setTransactionLimit(100F);
+        account.setIsSavings(isSavings);
         return account;
     }
 
-    private Transaction getMockTransaction(User user, TransactionType transactionType, Account fromAccount, Account toAccount) {
+    private Transaction getMockTransaction(User user, Float amount, TransactionType transactionType, Account fromAccount, Account toAccount) {
         Transaction transaction = new Transaction();
         transaction.setId(1L);
-        transaction.setAmount(60F);
+        transaction.setAmount(amount);
         transaction.setFromAccount(fromAccount);
         transaction.setToAccount(toAccount);
         transaction.setTransactionType(transactionType);
@@ -74,10 +73,23 @@ public class TransactionServiceTest {
     }
 
     @Test
+    public void testAddWrongTransactionType() {
+        User user = getMockUser(1L, UserType.USER, "john");
+        Account toAccount = getMockAccount("123456", 1000F, user, false);
+        Transaction transaction = getMockTransaction(user, 60F, null, null, toAccount);
+        TransactionRequestDTO transactionRequestDTO = new TransactionRequestDTO(null, toAccount.getIban(), "", transaction.getAmount() , transaction.getLabel(), transaction.getDescription());
+
+        when(accountRepository.findByIban(toAccount.getIban())).thenReturn(toAccount);
+        when(transactionRepository.save(transaction)).thenReturn(transaction);
+
+        Assertions.assertThrows(TransactionTypeNotValidException.class, () -> transactionService.add(user, transactionRequestDTO));
+    }
+
+    @Test
     public void testAddDeposit() {
-        User user = getMockUser(UserType.USER);
-        Account toAccount = getMockAccount(user);
-        Transaction transaction = getMockTransaction(user, TransactionType.DEPOSIT, null, toAccount);
+        User user = getMockUser(1L, UserType.USER, "john");
+        Account toAccount = getMockAccount("123456", 1000F, user, false);
+        Transaction transaction = getMockTransaction(user, 60F, TransactionType.DEPOSIT, null, toAccount);
         TransactionRequestDTO transactionRequestDTO = new TransactionRequestDTO(null, toAccount.getIban(), "DEPOSIT", transaction.getAmount() , transaction.getLabel(), transaction.getDescription());
 
         when(accountRepository.findByIban(toAccount.getIban())).thenReturn(toAccount);
@@ -87,16 +99,275 @@ public class TransactionServiceTest {
     }
 
     @Test
+    public void testAddDepositAmountZero() {
+        User user = getMockUser(1L, UserType.USER, "john");
+        Account toAccount = getMockAccount("123456", 1000F, user, false);
+        Transaction transaction = getMockTransaction(user, 0F, TransactionType.DEPOSIT, null, toAccount);
+        TransactionRequestDTO transactionRequestDTO = new TransactionRequestDTO(null, toAccount.getIban(), "DEPOSIT", transaction.getAmount() , transaction.getLabel(), transaction.getDescription());
+
+        when(accountRepository.findByIban(toAccount.getIban())).thenReturn(toAccount);
+        when(transactionRepository.save(transaction)).thenReturn(transaction);
+
+        Assertions.assertThrows(TransactionAmountNotValidException.class, () -> transactionService.add(user, transactionRequestDTO));
+    }
+
+    @Test
+    public void testAddDepositAmountNegative() {
+        User user = getMockUser(1L, UserType.USER, "john");
+        Account toAccount = getMockAccount("123456", 1000F, user, false);
+        Transaction transaction = getMockTransaction(user, -10F, TransactionType.DEPOSIT, null, toAccount);
+        TransactionRequestDTO transactionRequestDTO = new TransactionRequestDTO(null, toAccount.getIban(), "DEPOSIT", transaction.getAmount() , transaction.getLabel(), transaction.getDescription());
+
+        when(accountRepository.findByIban(toAccount.getIban())).thenReturn(toAccount);
+        when(transactionRepository.save(transaction)).thenReturn(transaction);
+
+        Assertions.assertThrows(TransactionAmountNotValidException.class, () -> transactionService.add(user, transactionRequestDTO));
+    }
+
+    @Test
+    public void testAddDepositMissingToAccount() {
+        User user = getMockUser(1L, UserType.USER, "john");
+        Account toAccount = getMockAccount("123456", 1000F, user, false);
+        Transaction transaction = getMockTransaction(user, 60F, TransactionType.DEPOSIT, null, null);
+        TransactionRequestDTO transactionRequestDTO = new TransactionRequestDTO(null, null, "DEPOSIT", transaction.getAmount() , transaction.getLabel(), transaction.getDescription());
+
+        when(accountRepository.findByIban(toAccount.getIban())).thenReturn(toAccount);
+        when(transactionRepository.save(transaction)).thenReturn(transaction);
+
+        Assertions.assertThrows(TransactionAccountNotValidException.class, () -> transactionService.add(user, transactionRequestDTO));
+    }
+
+    @Test
+    public void testAddDepositNotYourAccount() {
+        User user = getMockUser(1L, UserType.USER, "john");
+        User user1 = getMockUser(2L, UserType.USER, "doe");
+        Account toAccount = getMockAccount("123456", 1000F, user1, false);
+        Transaction transaction = getMockTransaction(user1, 60F, TransactionType.DEPOSIT, null, toAccount);
+        TransactionRequestDTO transactionRequestDTO = new TransactionRequestDTO(null, toAccount.getIban(), "DEPOSIT", transaction.getAmount() , transaction.getLabel(), transaction.getDescription());
+
+        when(accountRepository.findByIban(toAccount.getIban())).thenReturn(toAccount);
+        when(transactionRepository.save(transaction)).thenReturn(transaction);
+
+        Assertions.assertThrows(AccountNotOwnedException.class, () -> transactionService.add(user, transactionRequestDTO));
+    }
+
+    @Test
     public void testAddWithdraw() {
-        User user = getMockUser(UserType.USER);
-        Account fromAccount = getMockAccount(user);
-        Transaction transaction = getMockTransaction(user, TransactionType.WITHDRAW, fromAccount, null);
+        User user = getMockUser(1L, UserType.USER, "john");
+        Account fromAccount = getMockAccount("123456", 1000F, user, false);
+        Transaction transaction = getMockTransaction(user, 60F, TransactionType.WITHDRAW, fromAccount, null);
         TransactionRequestDTO transactionRequestDTO = new TransactionRequestDTO(fromAccount.getIban(), null, "WITHDRAW", transaction.getAmount() , transaction.getLabel(), transaction.getDescription());
 
         when(accountRepository.findByIban(fromAccount.getIban())).thenReturn(fromAccount);
         when(transactionRepository.save(transaction)).thenReturn(transaction);
 
         Assertions.assertDoesNotThrow(() -> transactionService.add(user, transactionRequestDTO));
+    }
+
+    @Test
+    public void testAddWithdrawMissingFromAccount() {
+        User user = getMockUser(1L, UserType.USER, "john");
+        Account fromAccount = getMockAccount("123456", 1000F, user, false);
+        Transaction transaction = getMockTransaction(user, 60F, TransactionType.WITHDRAW, null, null);
+        TransactionRequestDTO transactionRequestDTO = new TransactionRequestDTO(null, null, "WITHDRAW", transaction.getAmount() , transaction.getLabel(), transaction.getDescription());
+
+        when(accountRepository.findByIban(fromAccount.getIban())).thenReturn(fromAccount);
+        when(transactionRepository.save(transaction)).thenReturn(transaction);
+
+        Assertions.assertThrows(TransactionAccountNotValidException.class, () -> transactionService.add(user, transactionRequestDTO));
+    }
+
+    @Test
+    public void testAddWithdrawExceedTransactionLimit() {
+        User user = getMockUser(1L, UserType.USER, "john");
+        Account fromAccount = getMockAccount("123456", 1000F, user, false);
+        Transaction transaction = getMockTransaction(user, 200F, TransactionType.WITHDRAW, fromAccount, null);
+        TransactionRequestDTO transactionRequestDTO = new TransactionRequestDTO(fromAccount.getIban(), null, "WITHDRAW", transaction.getAmount() , transaction.getLabel(), transaction.getDescription());
+
+        when(accountRepository.findByIban(fromAccount.getIban())).thenReturn(fromAccount);
+        when(transactionRepository.save(transaction)).thenReturn(transaction);
+
+        Assertions.assertThrows(TransactionExceededTransactionLimitException.class, () -> transactionService.add(user, transactionRequestDTO));
+    }
+
+    @Test
+    public void testAddWithdrawExceedAbsoluteLimit() {
+        User user = getMockUser(1L, UserType.USER, "john");
+        Account fromAccount = getMockAccount("123456", 100F, user, false);
+        Transaction transaction = getMockTransaction(user, 950F, TransactionType.WITHDRAW, fromAccount, null);
+        TransactionRequestDTO transactionRequestDTO = new TransactionRequestDTO(fromAccount.getIban(), null, "WITHDRAW", transaction.getAmount() , transaction.getLabel(), transaction.getDescription());
+
+        when(accountRepository.findByIban(fromAccount.getIban())).thenReturn(fromAccount);
+        when(transactionRepository.save(transaction)).thenReturn(transaction);
+
+        Assertions.assertThrows(TransactionExceededAbsoluteLimitException.class, () -> transactionService.add(user, transactionRequestDTO));
+    }
+
+    @Test
+    public void testAddWithdrawExceedDailyLimit() {
+        User user = getMockUser(1L, UserType.USER, "john");
+        Account fromAccount = getMockAccount("123456", 1000F, user, false);
+        Transaction transaction = getMockTransaction(user, 90F, TransactionType.WITHDRAW, fromAccount, null);
+        TransactionRequestDTO transactionRequestDTO = new TransactionRequestDTO(fromAccount.getIban(), null, "WITHDRAW", transaction.getAmount() , transaction.getLabel(), transaction.getDescription());
+
+        List<Transaction> transactions = new ArrayList<>();
+        transactions.add(transaction);
+        transactions.add(getMockTransaction(user, 90F, TransactionType.WITHDRAW, fromAccount, null));
+        transactions.add(getMockTransaction(user, 90F, TransactionType.WITHDRAW, fromAccount, null));
+
+        LocalDate today = LocalDate.now();
+        Date startOfDay = Date.from(today.atStartOfDay(ZoneId.systemDefault()).toInstant());
+        Date endOfDay = Date.from(today.atTime(LocalTime.MAX).atZone(ZoneId.systemDefault()).toInstant());
+
+        when(accountRepository.findByIban(fromAccount.getIban())).thenReturn(fromAccount);
+        when(accountRepository.findByIban(fromAccount.getIban())).thenReturn(fromAccount);
+        when(transactionRepository.findAllByCreatedAtBetweenAndFromAccountIban(startOfDay, endOfDay, fromAccount.getIban())).thenReturn(transactions);
+        when(transactionRepository.save(transaction)).thenReturn(transaction);
+
+        Assertions.assertThrows(TransactionExceededDailyLimitException.class, () -> transactionService.add(user, transactionRequestDTO));
+    }
+
+    @Test
+    public void testAddTransferFromNotOwn() {
+        User user = getMockUser(1L, UserType.USER, "john");
+        User user1 = getMockUser(2L, UserType.USER, "doe");
+        Account fromAccount = getMockAccount("123456", 1000F, user1, false);
+        Account toAccount = getMockAccount("123457", 1000F, user, false);
+
+        Transaction transaction = getMockTransaction(user, 60F, TransactionType.TRANSFER, fromAccount, toAccount);
+        TransactionRequestDTO transactionRequestDTO = new TransactionRequestDTO(fromAccount.getIban(), toAccount.getIban(), "TRANSFER", transaction.getAmount() , transaction.getLabel(), transaction.getDescription());
+
+        when(accountRepository.findByIban(fromAccount.getIban())).thenReturn(fromAccount);
+        when(accountRepository.findByIban(toAccount.getIban())).thenReturn(toAccount);
+        when(transactionRepository.save(transaction)).thenReturn(transaction);
+
+        Assertions.assertThrows(AccountNotOwnedException.class, () -> transactionService.add(user, transactionRequestDTO));
+    }
+
+    @Test
+    public void testAddTransferFromOwnSavingsToPayment() {
+        User user = getMockUser(1L, UserType.USER, "john");
+        Account fromAccount = getMockAccount("123456", 1000F, user, true);
+        Account toAccount = getMockAccount("123457", 1000F, user, false);
+
+        Transaction transaction = getMockTransaction(user, 60F, TransactionType.TRANSFER, fromAccount, toAccount);
+        TransactionRequestDTO transactionRequestDTO = new TransactionRequestDTO(fromAccount.getIban(), toAccount.getIban(), "TRANSFER", transaction.getAmount() , transaction.getLabel(), transaction.getDescription());
+
+        when(accountRepository.findByIban(fromAccount.getIban())).thenReturn(fromAccount);
+        when(accountRepository.findByIban(toAccount.getIban())).thenReturn(toAccount);
+        when(transactionRepository.save(transaction)).thenReturn(transaction);
+
+        Assertions.assertDoesNotThrow(() -> transactionService.add(user, transactionRequestDTO));
+    }
+
+    @Test
+    public void testAddTransferFromOwnPaymentToSavings() {
+        User user = getMockUser(1L, UserType.USER, "john");
+        Account fromAccount = getMockAccount("123456", 1000F, user, false);
+        Account toAccount = getMockAccount("123457", 1000F, user, true);
+
+        Transaction transaction = getMockTransaction(user, 60F, TransactionType.TRANSFER, fromAccount, toAccount);
+        TransactionRequestDTO transactionRequestDTO = new TransactionRequestDTO(fromAccount.getIban(), toAccount.getIban(), "TRANSFER", transaction.getAmount() , transaction.getLabel(), transaction.getDescription());
+
+        when(accountRepository.findByIban(fromAccount.getIban())).thenReturn(fromAccount);
+        when(accountRepository.findByIban(toAccount.getIban())).thenReturn(toAccount);
+        when(transactionRepository.save(transaction)).thenReturn(transaction);
+
+        Assertions.assertDoesNotThrow(() -> transactionService.add(user, transactionRequestDTO));
+    }
+
+    @Test
+    public void testAddTransferFromPaymentToSavings() {
+        User user = getMockUser(1L, UserType.USER, "john");
+        User user1 = getMockUser(2L, UserType.USER, "doe");
+
+        Account fromAccount = getMockAccount("123456", 1000F, user, false);
+        Account toAccount = getMockAccount("123457", 1000F, user1, true);
+
+        Transaction transaction = getMockTransaction(user, 60F, TransactionType.TRANSFER, fromAccount, toAccount);
+        TransactionRequestDTO transactionRequestDTO = new TransactionRequestDTO(fromAccount.getIban(), toAccount.getIban(), "TRANSFER", transaction.getAmount() , transaction.getLabel(), transaction.getDescription());
+
+        when(accountRepository.findByIban(fromAccount.getIban())).thenReturn(fromAccount);
+        when(accountRepository.findByIban(toAccount.getIban())).thenReturn(toAccount);
+        when(transactionRepository.save(transaction)).thenReturn(transaction);
+
+        Assertions.assertThrows(TransactionTransferSavingsException.class, () -> transactionService.add(user, transactionRequestDTO));
+    }
+
+    @Test
+    public void testAddTransferFromSavingsToPayment() {
+        User user = getMockUser(1L, UserType.USER, "john");
+        User user1 = getMockUser(2L, UserType.USER, "doe");
+
+        Account fromAccount = getMockAccount("123456", 1000F, user, true);
+        Account toAccount = getMockAccount("123457", 1000F, user1, false);
+
+        Transaction transaction = getMockTransaction(user, 60F, TransactionType.TRANSFER, fromAccount, toAccount);
+        TransactionRequestDTO transactionRequestDTO = new TransactionRequestDTO(fromAccount.getIban(), toAccount.getIban(), "TRANSFER", transaction.getAmount() , transaction.getLabel(), transaction.getDescription());
+
+        when(accountRepository.findByIban(fromAccount.getIban())).thenReturn(fromAccount);
+        when(accountRepository.findByIban(toAccount.getIban())).thenReturn(toAccount);
+        when(transactionRepository.save(transaction)).thenReturn(transaction);
+
+        Assertions.assertThrows(TransactionTransferSavingsException.class, () -> transactionService.add(user, transactionRequestDTO));
+    }
+
+    @Test
+    public void testAddTransferExceedingTransactionLimit() {
+        User user = getMockUser(1L, UserType.USER, "john");
+        Account fromAccount = getMockAccount("123456", 1000F, user, false);
+        Account toAccount = getMockAccount("123457", 1000F, user, false);
+
+        Transaction transaction = getMockTransaction(user, 110F, TransactionType.TRANSFER, fromAccount, toAccount);
+        TransactionRequestDTO transactionRequestDTO = new TransactionRequestDTO(fromAccount.getIban(), toAccount.getIban(), "TRANSFER", transaction.getAmount() , transaction.getLabel(), transaction.getDescription());
+
+        when(accountRepository.findByIban(fromAccount.getIban())).thenReturn(fromAccount);
+        when(accountRepository.findByIban(toAccount.getIban())).thenReturn(toAccount);
+        when(transactionRepository.save(transaction)).thenReturn(transaction);
+
+        Assertions.assertThrows(TransactionExceededTransactionLimitException.class, () -> transactionService.add(user, transactionRequestDTO));
+    }
+
+    @Test
+    public void testAddTransferExceedingAbsoluteLimit() {
+        User user = getMockUser(1L, UserType.USER, "john");
+        Account fromAccount = getMockAccount("123456", 60F, user, false);
+        Account toAccount = getMockAccount("123457", 60F, user, false);
+
+        Transaction transaction = getMockTransaction(user, 90F, TransactionType.TRANSFER, fromAccount, toAccount);
+        TransactionRequestDTO transactionRequestDTO = new TransactionRequestDTO(fromAccount.getIban(), toAccount.getIban(), "TRANSFER", transaction.getAmount() , transaction.getLabel(), transaction.getDescription());
+
+        when(accountRepository.findByIban(fromAccount.getIban())).thenReturn(fromAccount);
+        when(accountRepository.findByIban(toAccount.getIban())).thenReturn(toAccount);
+        when(transactionRepository.save(transaction)).thenReturn(transaction);
+
+        Assertions.assertThrows(TransactionExceededAbsoluteLimitException.class, () -> transactionService.add(user, transactionRequestDTO));
+    }
+
+    @Test
+    public void testAddTransferExceedingDailyLimit() {
+        User user = getMockUser(1L, UserType.USER, "john");
+        Account fromAccount = getMockAccount("123456", 1000F, user, false);
+        Account toAccount = getMockAccount("123457", 1000F, user, false);
+
+        Transaction transaction = getMockTransaction(user, 90F, TransactionType.TRANSFER, fromAccount, toAccount);
+        TransactionRequestDTO transactionRequestDTO = new TransactionRequestDTO(fromAccount.getIban(), toAccount.getIban(), "TRANSFER", transaction.getAmount() , transaction.getLabel(), transaction.getDescription());
+
+        List<Transaction> transactions = new ArrayList<>();
+        transactions.add(getMockTransaction(user, 90F, TransactionType.WITHDRAW, fromAccount, toAccount));
+        transactions.add(getMockTransaction(user, 90F, TransactionType.WITHDRAW, fromAccount, toAccount));
+        transactions.add(getMockTransaction(user, 90F, TransactionType.WITHDRAW, fromAccount, toAccount));
+
+        LocalDate today = LocalDate.now();
+        Date startOfDay = Date.from(today.atStartOfDay(ZoneId.systemDefault()).toInstant());
+        Date endOfDay = Date.from(today.atTime(LocalTime.MAX).atZone(ZoneId.systemDefault()).toInstant());
+
+        when(accountRepository.findByIban(fromAccount.getIban())).thenReturn(fromAccount);
+        when(accountRepository.findByIban(toAccount.getIban())).thenReturn(toAccount);
+        when(transactionRepository.findAllByCreatedAtBetweenAndFromAccountIban(startOfDay, endOfDay, fromAccount.getIban())).thenReturn(transactions);
+        when(transactionRepository.save(transaction)).thenReturn(transaction);
+
+        Assertions.assertThrows(TransactionExceededDailyLimitException.class, () -> transactionService.add(user, transactionRequestDTO));
     }
 
     @Test
@@ -198,30 +469,27 @@ public class TransactionServiceTest {
     }
 
     @Test
-    public void testTransactionIsNotOwnedByUser() {
-        User user = new User();
-        user.setId(1L);
-        user.setUserType(UserType.USER);
-        user.setUsername("john");
+    public void testTransactionToAccountIsNotOwnedByUser() {
+        User user = getMockUser(1L, UserType.USER, "john");
+        User user1 = getMockUser(2L, UserType.USER, "john1");
 
-        User user1 = new User();
-        user1.setId(2L);
-        user1.setUserType(UserType.USER);
-        user1.setUsername("john1");
+        Account toAccount = getMockAccount("1234567890", 1000F, user1, false);
 
-        Account account = new Account();
-        account.setIban("1234567890");
-        account.setUser(user);
+        Transaction transaction = getMockTransaction(user1, 90F, TransactionType.DEPOSIT, null, toAccount);
 
-        Account account1 = new Account();
-        account1.setIban("1234567891");
-        account1.setUser(user1);
+        when(transactionRepository.findById(transaction.getId())).thenReturn(Optional.of(transaction));
 
-        Transaction transaction = new Transaction();
-        transaction.setId(1L);
-        transaction.setAmount(100.0F);
-        transaction.setTransactionType(TransactionType.WITHDRAW);
-        transaction.setFromAccount(account1);
+        Assertions.assertThrows(TransactionNotOwnedException.class, () -> transactionService.transactionIsOwnedByUser(user, transaction.getId()));
+    }
+
+    @Test
+    public void testTransactionFromAccountIsNotOwnedByUser() {
+        User user = getMockUser(1L, UserType.USER, "john");
+        User user1 = getMockUser(2L, UserType.USER, "john1");
+
+        Account toAccount = getMockAccount("1234567890", 1000F, user1, false);
+
+        Transaction transaction = getMockTransaction(user1, 90F, TransactionType.WITHDRAW, toAccount, null);
 
         when(transactionRepository.findById(transaction.getId())).thenReturn(Optional.of(transaction));
 
@@ -243,42 +511,59 @@ public class TransactionServiceTest {
 
     @Test
     public void testGetAllByAccountIban() {
-        User user = new User();
-        user.setId(1L);
-        user.setUserType(UserType.USER);
-        user.setUsername("john");
+        User user = getMockUser(1L, UserType.USER, "john");
 
         String iban = "1234567890";
         LocalDate today = LocalDate.now();
         Date startDate = Date.from(today.atStartOfDay(ZoneId.systemDefault()).toInstant());
         Date endDate = Date.from(today.atTime(LocalTime.MAX).atZone(ZoneId.systemDefault()).toInstant());
-
         String search = "test";
+
         List<Account> accounts = new ArrayList<>();
-        Account account = new Account();
-        account.setIban(iban);
-        account.setUser(user);
+        Account account = getMockAccount(iban, 1000F, user, false);
         accounts.add(account);
         user.setAccounts(accounts);
+
         List<Transaction> transactions = new ArrayList<>();
 
-        Transaction transaction1 = new Transaction();
-        transaction1.setAmount(100.0F);
-        transaction1.setFromAccount(account);
-
-        Transaction transaction2 = new Transaction();
-        transaction2.setAmount(120.0F);
-        transaction2.setFromAccount(account);
-        transaction2.setLabel("test");
-
-        transactions.add(transaction1);
-        transactions.add(transaction2);
+        Transaction transaction = getMockTransaction(user, 100F, TransactionType.DEPOSIT, null, account);;
+        transaction.setLabel("test");
+        transactions.add(transaction);
+        transactions.add(getMockTransaction(user, 100F, TransactionType.DEPOSIT, null, account));
 
         when(transactionRepository.findAllByIban(endDate, startDate, iban, search)).thenReturn(transactions);
 
         List<Transaction> result = transactionService.getAllByAccountIban(user, iban, startDate, endDate, search);
 
         Assertions.assertEquals(transactions, result);
+    }
+
+    @Test
+    public void testGetAllByAccountIbanNotOwns() {
+        User user = getMockUser(1L, UserType.USER, "john");
+        User user1 = getMockUser(2L, UserType.USER, "john1");
+
+        String iban = "1234567890";
+        LocalDate today = LocalDate.now();
+        Date startDate = Date.from(today.atStartOfDay(ZoneId.systemDefault()).toInstant());
+        Date endDate = Date.from(today.atTime(LocalTime.MAX).atZone(ZoneId.systemDefault()).toInstant());
+        String search = "test";
+
+        List<Account> accounts = new ArrayList<>();
+        Account account = getMockAccount(iban, 1000F, user1, false);
+        accounts.add(account);
+        user1.setAccounts(accounts);
+
+        List<Transaction> transactions = new ArrayList<>();
+
+        Transaction transaction = getMockTransaction(user1, 100F, TransactionType.DEPOSIT, null, account);;
+        transaction.setLabel("test");
+        transactions.add(transaction);
+        transactions.add(getMockTransaction(user1, 100F, TransactionType.DEPOSIT, null, account));
+
+        when(transactionRepository.findAllByIban(endDate, startDate, iban, search)).thenReturn(transactions);
+
+        Assertions.assertThrows(AccountNotOwnedException.class, () -> transactionService.getAllByAccountIban(user, iban, startDate, endDate, search));
     }
 
     @Test

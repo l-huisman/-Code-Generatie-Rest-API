@@ -1,5 +1,6 @@
 package com.example.CodeGeneratieRestAPI.configuration;
 
+import com.example.CodeGeneratieRestAPI.dtos.TransactionRequestDTO;
 import com.example.CodeGeneratieRestAPI.models.*;
 import com.example.CodeGeneratieRestAPI.services.AccountService;
 import com.example.CodeGeneratieRestAPI.services.TransactionService;
@@ -84,22 +85,22 @@ public class DataSeeder implements ApplicationRunner {
             account.setIsActive(true);
             accountService.addSeededAccount(account);
 
-            Transaction transaction = new Transaction();
-            transaction.setTransactionType(TransactionType.DEPOSIT);
-            transaction.setToAccount(account);
+            TransactionRequestDTO transaction = new TransactionRequestDTO();
+            transaction.setTransactionType("DEPOSIT");
+            transaction.setToAccountIban(account.getIban());
             transaction.setAmount(180f);
             transaction.setLabel("Initial deposit");
             transaction.setDescription("Initial deposit");
 
-            Transaction transaction2 = new Transaction();
-            transaction2.setTransactionType(TransactionType.WITHDRAW);
-            transaction2.setFromAccount(account);
+            TransactionRequestDTO transaction2 = new TransactionRequestDTO();
+            transaction2.setTransactionType("WITHDRAW");
+            transaction2.setFromAccountIban(account.getIban());
             transaction2.setAmount(40f);
             transaction2.setLabel("Initial withdraw");
             transaction2.setDescription("Initial withdraw");
 
-            transactionService.addSeed(transaction, user.getUsername());
-            transactionService.addSeed(transaction2, user.getUsername());
+            transactionService.add(user, transaction);
+            transactionService.add(user, transaction2);
         });
     }
 }
