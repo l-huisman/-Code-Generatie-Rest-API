@@ -81,13 +81,12 @@ public class AccountController {
     }
 
     @GetMapping("/{iban}")
-    public ResponseEntity<AccountResponseDTO> getAccountByIban(@PathVariable(required = true) String iban) {
+    public ResponseEntity<ApiResponse> getAccountByIban(@PathVariable(required = true) String iban) {
         //  Retrieve the data
         AccountResponseDTO account = modelMapper.map(accountService.getAccountByIban(iban), AccountResponseDTO.class);
 
         //  Return the data
-        return ResponseEntity.status(HttpStatus.OK).body(account);
-
+        return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse<>(true, "Account retrieved successfully", account));
     }
     // PUT mappings
 

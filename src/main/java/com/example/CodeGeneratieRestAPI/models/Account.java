@@ -53,7 +53,7 @@ public class Account {
     public Account(AccountRequestDTO accountRequestDTO) {
         this.userId = accountRequestDTO.getUserId();
         this.iban = accountRequestDTO.getIban();
-        this.name = accountRequestDTO.getAccountName();
+        this.name = accountRequestDTO.getName();
         this.dailyLimit = accountRequestDTO.getDailyLimit();
         this.transactionLimit = accountRequestDTO.getTransactionLimit();
         this.absoluteLimit = accountRequestDTO.getAbsoluteLimit();
@@ -66,7 +66,7 @@ public class Account {
     public Account(AccountRequestDTO accountRequestDTO, User user) {
         this.userId = accountRequestDTO.getUserId();
         this.iban = accountRequestDTO.getIban();
-        this.name = accountRequestDTO.getAccountName();
+        this.name = accountRequestDTO.getName();
         this.dailyLimit = accountRequestDTO.getDailyLimit();
         this.transactionLimit = accountRequestDTO.getTransactionLimit();
         this.absoluteLimit = accountRequestDTO.getAbsoluteLimit();
@@ -177,7 +177,6 @@ public class Account {
         return "Account{" +
                 "id=" + id +
                 ", iban='" + iban + '\'' +
-                ", userId=" + userId +
                 ", name='" + name + '\'' +
                 ", dailyLimit=" + dailyLimit +
                 ", transactionLimit=" + transactionLimit +
@@ -186,8 +185,6 @@ public class Account {
                 ", isSavings=" + isSavings +
                 ", createdAt=" + createdAt +
                 ", isActive=" + isActive +
-                ", sentTransactions=" + sentTransactions +
-                ", receivedTransactions=" + receivedTransactions +
                 '}';
     }
 }

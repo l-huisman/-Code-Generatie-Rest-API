@@ -2,8 +2,10 @@ package com.example.CodeGeneratieRestAPI.services;
 
 import com.example.CodeGeneratieRestAPI.dtos.AccountRequestDTO;
 import com.example.CodeGeneratieRestAPI.exceptions.AccountCreationException;
+import com.example.CodeGeneratieRestAPI.exceptions.AccountNoDataChangedException;
 import com.example.CodeGeneratieRestAPI.exceptions.AccountNotAccessibleException;
 import com.example.CodeGeneratieRestAPI.exceptions.AccountNotFoundException;
+import com.example.CodeGeneratieRestAPI.exceptions.AccountUpdateException;
 import com.example.CodeGeneratieRestAPI.exceptions.UserNotFoundException;
 import com.example.CodeGeneratieRestAPI.helpers.ServiceHelper;
 import com.example.CodeGeneratieRestAPI.models.Account;
@@ -87,9 +89,32 @@ public class AccountService {
     }
 
     private void checkIfAccountRequestDTOIsValid(AccountRequestDTO accountRequestDTO) {
+        //  Check if the accountRequestDTO is null
         if (accountRequestDTO == null) {
-            throw new IllegalArgumentException("AccountRequest object is null");
+            throw new IllegalArgumentException("The provided data cannot be null");
         }
+
+        //  Check if any fields other than iban are set, if not, throw an exception because there is nothing to update
+        //  This code can throw an IllegalAccessException, which is why this piece of code is in a try catch block
+        try {
+            boolean allFieldsNull = true;
+            for (Field field : accountRequestDTO.getClass().getDeclaredFields()) {
+                field.setAccessible(true);
+                if (!field.getName().equals("iban")) {
+                    if (field.get(accountRequestDTO) != null) {
+                        allFieldsNull = false;
+                        break;
+                    }
+                }
+            }
+            if (allFieldsNull) {
+                throw new AccountNoDataChangedException("At least one field (other then the IBAN) must be filled out");
+            }
+        } catch (IllegalAccessException e) {
+            throw new AccountUpdateException(e.getMessage());
+        }
+
+
     }
 
     private Boolean checkIfAccountBelongsToUser(String iban, User loggedInUser) {
@@ -173,26 +198,27 @@ public class AccountService {
         // Loop through all the fields of the accountWithNewValues object
         // If the field is not null and the value is different from the one in the accountToUpdate object
         // Set the new value to the accountToUpdate object
-        for (Field field : accountWithNewValues.getClass().getDeclaredFields()) {
-            // Skip the iban field (it cannot be updated
-            if (field.getName().equals("iban"))
-                continue;
+        try {
+            for (Field field : accountWithNewValues.getClass().getDeclaredFields()) {
+                // Skip the iban and userId fields (they cannot be updated)
+                if (field.getName().equals("iban") || field.getName().equals("userId"))
+                    continue;
 
-            // Set the field to accessible
-            field.setAccessible(true);
-            try {
+                // Check if the field exists in the Account class
+                Field accountField = accountToUpdate.getClass().getDeclaredField(field.getName());
+                // Set the field to accessible
+                field.setAccessible(true);
+                accountField.setAccessible(true);
                 Object newValue = field.get(accountWithNewValues);
-                Object oldValue = field.get(accountToUpdate);
+                Object oldValue = accountField.get(accountToUpdate);
 
                 if (newValue != null && !newValue.equals(oldValue)) {
-                    field.set(accountToUpdate, newValue);
+                    accountField.set(accountToUpdate, newValue);
                 }
-            } catch (IllegalAccessException e) {
-                e.printStackTrace();
             }
+        } catch (NoSuchFieldException | IllegalAccessException e) {
+            throw new AccountUpdateException(e.getMessage());
         }
-
-
         // Return the updated account
         return accountToUpdate;
     }
