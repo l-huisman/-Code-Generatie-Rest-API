@@ -1,6 +1,8 @@
 package com.example.CodeGeneratieRestAPI.services;
 
 import com.example.CodeGeneratieRestAPI.dtos.TransactionRequestDTO;
+import com.example.CodeGeneratieRestAPI.exceptions.TransactionNotFoundException;
+import com.example.CodeGeneratieRestAPI.exceptions.TransactionNotOwnedException;
 import com.example.CodeGeneratieRestAPI.models.Account;
 import com.example.CodeGeneratieRestAPI.models.Transaction;
 import com.example.CodeGeneratieRestAPI.models.User;
@@ -159,6 +161,16 @@ public class TransactionService {
                     throw new RuntimeException("This account does not belong to this user.");
                 }
 
+                //Check if to account is not a savings account and if the user of from account also owns the to account
+                if (fromAccount.getIsSavings() && !toAccount.getUser().getUsername().equals(fromAccount.getUser().getUsername())) {
+                    throw new RuntimeException("It is not possible to transfer from a savings account to an account that is not your account.");
+                }
+
+                //Check if to account is not a savings account and if the user of from account also owns the to account
+                if (toAccount.getIsSavings() && !fromAccount.getUser().getUsername().equals(toAccount.getUser().getUsername())) {
+                    throw new RuntimeException("It is not possible to transfer to a savings account from an account that is not your account.");
+                }
+
                 //Check if the transaction amount didn't exceed the transaction limit
                 if (fromAccount.getTransactionLimit() < transaction.getAmount()) {
                     throw new RuntimeException("The transaction limit for this account has been exceeded.");
@@ -207,6 +219,17 @@ public class TransactionService {
         System.out.println(transaction.getLabel());
 
         return transaction;
+    }
+
+    public void transactionIsOwnedByUser(String username, Long id) {
+        User user = userRepository.findUserByUsername(username).get();
+        Transaction transaction = transactionRepository.findById(id).orElseThrow(() -> new TransactionNotFoundException("This transaction does not exist."));
+
+        if (transaction.getFromAccount() != null && !user.getAccounts().stream().anyMatch(account -> account.getIban().equals(transaction.getFromAccount().getIban()))) {
+            throw new TransactionNotOwnedException("This user does not own the specified account");
+        } else if (transaction.getToAccount() != null && !user.getAccounts().stream().anyMatch(account -> account.getIban().equals(transaction.getToAccount().getIban()))) {
+            throw new TransactionNotOwnedException("This user does not own the specified account");
+        }
     }
 
     public List<Transaction> getAllByAccountIban(String iban, Date startDate, Date endDate, String search, String username) {
