@@ -1,9 +1,6 @@
 package com.example.CodeGeneratieRestAPI.helpers;
 
-import com.example.CodeGeneratieRestAPI.exceptions.AccountCreationException;
-import com.example.CodeGeneratieRestAPI.exceptions.AccountNotAccessibleException;
-import com.example.CodeGeneratieRestAPI.exceptions.AccountNotFoundException;
-import com.example.CodeGeneratieRestAPI.exceptions.IBANGenerationException;
+import com.example.CodeGeneratieRestAPI.exceptions.*;
 import com.example.CodeGeneratieRestAPI.models.ApiResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -32,6 +29,50 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ApiResponse<>(false, "Error whilst generating the IBAN: " + e.getMessage()));
     }
 
+    @ExceptionHandler(AccountNotOwnedException.class)
+    public ResponseEntity<ApiResponse<String>> handleAccountNotOwnedException(AccountNotOwnedException e) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ApiResponse<>(false, e.getMessage()));
+    }
+    @ExceptionHandler(TransactionNotFoundException.class)
+    public ResponseEntity<ApiResponse<String>> handleTransactionNotFoundException(TransactionNotFoundException e) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ApiResponse<>(false, e.getMessage()));
+    }
+    @ExceptionHandler(TransactionNotOwnedException.class)
+    public ResponseEntity<ApiResponse<String>> handleTransactionNotOwnedException(TransactionNotOwnedException e) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ApiResponse<>(false, e.getMessage()));
+    }
+    @ExceptionHandler(TransactionTransferSavingsException.class)
+    public ResponseEntity<ApiResponse<String>> handleTransactionTransferSavingsException(TransactionTransferSavingsException e) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ApiResponse<>(false, e.getMessage()));
+    }
+    @ExceptionHandler(TransactionExceededDailyLimitException.class)
+    public ResponseEntity<ApiResponse<String>> handleTransactionExceededDailyLimitException(TransactionExceededDailyLimitException e) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ApiResponse<>(false, e.getMessage()));
+    }
+    @ExceptionHandler(TransactionExceededAbsoluteLimitException.class)
+    public ResponseEntity<ApiResponse<String>> handleTransactionExceededAbsoluteLimitException(TransactionExceededAbsoluteLimitException e) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ApiResponse<>(false, e.getMessage()));
+    }
+    @ExceptionHandler(TransactionExceededTransactionLimitException.class)
+    public ResponseEntity<ApiResponse<String>> handleTransactionExceededTransactionLimitException(TransactionExceededTransactionLimitException e) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ApiResponse<>(false, e.getMessage()));
+    }
+    @ExceptionHandler(EmployeeOnlyException.class)
+    public ResponseEntity<ApiResponse<String>> handleEmployeeOnlyException(EmployeeOnlyException e) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ApiResponse<>(false, e.getMessage()));
+    }
+    @ExceptionHandler(TransactionAmountNotValidException.class)
+    public ResponseEntity<ApiResponse<String>> handleTransactionAmountNotValidException(TransactionAmountNotValidException e) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ApiResponse<>(false, e.getMessage()));
+    }
+    @ExceptionHandler(TransactionAccountNotValidException.class)
+    public ResponseEntity<ApiResponse<String>> handleTransactionAccountNotValidException(TransactionAccountNotValidException e) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ApiResponse<>(false, e.getMessage()));
+    }
+    @ExceptionHandler(TransactionTypeNotValidException.class)
+    public ResponseEntity<ApiResponse<String>> handleTransactionTypeNotValidException(TransactionTypeNotValidException e) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ApiResponse<>(false, e.getMessage()));
+    }
 
     //  Handle all exceptions that are not handled by other handlers
     @ExceptionHandler(Exception.class)
