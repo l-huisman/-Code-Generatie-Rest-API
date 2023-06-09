@@ -50,67 +50,33 @@ public class AccountController {
 
     //  POST mappings
     @PostMapping
-    public AccountResponseDTO add(@RequestBody(required = true) AccountRequestDTO accountRequestDTO) {
+    public ResponseEntity<ApiResponse> add(@RequestBody(required = true) AccountRequestDTO accountRequestDTO) {
         try {
             //  Retrieve the data
             Account account = accountService.add(accountRequestDTO);
 
             //  Return the data
-            return new AccountResponseDTO(account);
+            return ResponseEntity.status(HttpStatus.CREATED).body(new ApiResponse<>(true, "Account created successfully", new AccountResponseDTO(account)));
         } catch (Exception e) {
             //TODO: handle exception
-            System.out.println(e);
-            return null;
+            //System.out.println(e);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ApiResponse<>(false, e.getMessage()));
         }
     }
 
     //  GET mappings
-
-    //  Get all active accounts
-//    @GetMapping("/active")
-//    public List<AccountResponseDTO> getAllActiveAccountsForLoggedInUser(@RequestParam(required = false) String search) {
-//        try {
-//            //  Retrieve the data
-//            List<Account> accounts = accountService.getAllActiveAccountsForLoggedInUser(search);
-//
-//            //  Return the data
-//            return Arrays.asList(modelMapper.map(accounts, AccountResponseDTO[].class));
-//        } catch (Exception e) {
-//            //TODO: handle exception
-//            System.out.println(e);
-//            return null;
-//        }
-//    }
-
-    //  Get all active AND non-active accounts
-//    @GetMapping("/all")
-//    public List<AccountResponseDTO> getAllAccountsForLoggedInUser(@RequestParam(required = false) String search) {
-//        try {
-//            //  Retrieve the required data
-//            List<Account> accounts = accountService.getAllAccountsForLoggedInUser(search);
-//
-//            //  Return the data
-//            return Arrays.asList(modelMapper.map(accounts, AccountResponseDTO[].class));
-//        } catch (Exception e) {
-//            //TODO: handle exception
-//            System.out.println(e);
-//            return null;
-//        }
-//    }
-
     @GetMapping()
-    public List<AccountResponseDTO> getAllAccounts(@RequestParam(required = false) String search, @RequestParam(required = false) boolean active) {
+    public ResponseEntity<ApiResponse> getAllAccounts(@RequestParam(required = false) String search, @RequestParam(required = false) boolean active) {
         try {
             //  Retrieve the data
             List<Account> accounts = accountService.getAllAccounts(search, active);
 
             //  Return the data
-
-            return Arrays.asList(modelMapper.map(accounts, AccountResponseDTO[].class));
+            return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse(true, accounts.stream().count() + " Accounts retrieved", Arrays.asList(modelMapper.map(accounts, AccountResponseDTO[].class))));
         } catch (Exception e) {
             //TODO: handle exception
-            System.out.println(e);
-            return null;
+            //System.out.println(e);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ApiResponse<>(false, e.getMessage()));
         }
     }
 
@@ -126,17 +92,17 @@ public class AccountController {
     // PUT mappings
 
     @PutMapping()
-    public AccountResponseDTO update(@RequestBody(required = true) AccountRequestDTO accountRequestDTO) {
+    public ResponseEntity<ApiResponse> update(@RequestBody(required = true) AccountRequestDTO accountRequestDTO) {
         try {
             //  Retrieve the data
             Account account = accountService.update(accountRequestDTO);
 
             //  Return the data
-            return modelMapper.map(account, AccountResponseDTO.class);
+            return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse<>(true, "Account updated successfully", new AccountResponseDTO(account)));
         } catch (Exception e) {
             //TODO: handle exception
-            System.out.println(e);
-            return null;
+            //System.out.println(e);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ApiResponse<>(false, e.getMessage()));
         }
     }
     //  DELETE mappings
