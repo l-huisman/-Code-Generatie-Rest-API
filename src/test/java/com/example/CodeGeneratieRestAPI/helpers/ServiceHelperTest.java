@@ -32,14 +32,13 @@ class ServiceHelperTest {
 
     @Mock
     private TransactionRepository transactionRepository;
+    @Mock
+    private ServiceHelper serviceHelper;
 
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-        ServiceHelper serviceHelper = new ServiceHelper();
-        serviceHelper.setAccountRepository(accountRepository);
-        serviceHelper.setUserRepository(userRepository);
-        serviceHelper.setTransactionRepository(transactionRepository);
+        serviceHelper = new ServiceHelper(accountRepository, userRepository, transactionRepository);
     }
 
     @Test
@@ -47,24 +46,24 @@ class ServiceHelperTest {
         // Test case for Account object
         String iban = "NL01INHO0000000001";
         when(accountRepository.existsByIban(iban)).thenReturn(true);
-        boolean result = ServiceHelper.checkIfObjectExistsByIdentifier(iban, new Account());
+        boolean result = serviceHelper.checkIfObjectExistsByIdentifier(iban, new Account());
         Assertions.assertTrue(result);
 
         // Test case for User object
         Long userId = 1L;
         when(userRepository.existsById(userId)).thenReturn(true);
-        result = ServiceHelper.checkIfObjectExistsByIdentifier(userId, new User());
+        result = serviceHelper.checkIfObjectExistsByIdentifier(userId, new User());
         Assertions.assertTrue(result);
 
         // Test case for Transaction object
         Long transactionId = 1L;
         when(transactionRepository.existsById(transactionId)).thenReturn(true);
-        result = ServiceHelper.checkIfObjectExistsByIdentifier(transactionId, new Transaction());
+        result = serviceHelper.checkIfObjectExistsByIdentifier(transactionId, new Transaction());
         Assertions.assertTrue(result);
 
         // Test case for invalid object type
         Object invalidObject = new Object();
-        Assertions.assertThrows(IllegalArgumentException.class, () -> ServiceHelper.checkIfObjectExistsByIdentifier(iban, invalidObject));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> serviceHelper.checkIfObjectExistsByIdentifier(iban, invalidObject));
     }
 
     @Test
@@ -82,11 +81,11 @@ class ServiceHelperTest {
         when(userRepository.findUserByUsername(username)).thenReturn(Optional.of(user));
 
         // Test the getLoggedInUser method
-        User loggedInUser = ServiceHelper.getLoggedInUser();
+        User loggedInUser = serviceHelper.getLoggedInUser();
         Assertions.assertEquals(user, loggedInUser);
 
         // Test case for user not found
         when(userRepository.findUserByUsername(username)).thenReturn(Optional.empty());
-        Assertions.assertThrows(UserNotFoundException.class, () -> ServiceHelper.getLoggedInUser());
+        Assertions.assertThrows(UserNotFoundException.class, () -> serviceHelper.getLoggedInUser());
     }
 }

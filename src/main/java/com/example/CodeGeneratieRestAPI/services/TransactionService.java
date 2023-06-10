@@ -33,10 +33,10 @@ public class TransactionService {
         Date startOfDay = getStartOfDay(startDate);
         Date endOfDay = getEndOfDay(endDate);
 
-        //Check if user is not an employee and if the doesn't user owns the account
-        if (!user.getUserType().equals(UserType.EMPLOYEE)) {
-            throw new EmployeeOnlyException("This user is not an employee.");
-        }
+//        //Check if user is not an employee and if the doesn't user owns the account
+//        if (!user.getUserType().equals(UserType.EMPLOYEE)) {
+//            throw new EmployeeOnlyException("This user is not an employee.");
+//        }
 
         return transactionRepository.findAll(endOfDay, startOfDay, search);
     }

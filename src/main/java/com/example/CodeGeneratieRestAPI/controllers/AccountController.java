@@ -30,8 +30,11 @@ public class AccountController {
     private final ObjectMapper objectMapper;
     @Autowired
     private AccountService accountService;
+    @Autowired
+    private final ServiceHelper serviceHelper;
 
-    public AccountController() {
+    public AccountController(ServiceHelper serviceHelper) {
+        this.serviceHelper = serviceHelper;
         modelMapper = new ModelMapper();
 
         //  Set the field matching to strict
@@ -51,7 +54,7 @@ public class AccountController {
     public ResponseEntity<ApiResponse> add(@RequestBody(required = true) AccountRequestDTO accountRequestDTO) {
         try {
             //  Get the logged-in user
-            User user = ServiceHelper.getLoggedInUser();
+            User user = serviceHelper.getLoggedInUser();
 
             //  Retrieve the data
             Account account = accountService.add(accountRequestDTO, user);
@@ -70,7 +73,7 @@ public class AccountController {
     public ResponseEntity<ApiResponse> getAllAccounts(@RequestParam(required = false) String search, @RequestParam(required = false) boolean active) {
         try {
             //  Get the logged-in user
-            User user = ServiceHelper.getLoggedInUser();
+            User user = serviceHelper.getLoggedInUser();
 
             //  Retrieve the data
             List<Account> accounts = accountService.getAllAccounts(search, active, user);
@@ -88,7 +91,7 @@ public class AccountController {
     public ResponseEntity<ApiResponse> getAllAccountsByUserId(@PathVariable(required = true) Long userId) {
         try {
             //  Get the logged-in user
-            User user = ServiceHelper.getLoggedInUser();
+            User user = serviceHelper.getLoggedInUser();
 
             //  Retrieve the data
             List<Account> accounts = accountService.getAllAccountsByUserId(userId, user);
@@ -102,9 +105,10 @@ public class AccountController {
 
     @GetMapping("/{iban}")
     public ResponseEntity<ApiResponse> getAccountByIban(@PathVariable(required = true) String iban) {
-        try {
-            //  Get the logged-in user
-            User user = ServiceHelper.getLoggedInUser();
+
+        try{
+        //  Get the logged-in user
+        User user = serviceHelper.getLoggedInUser();
 
             //  Retrieve the data
             AccountResponseDTO account = modelMapper.map(accountService.getAccountByIban(iban, user), AccountResponseDTO.class);
@@ -121,7 +125,7 @@ public class AccountController {
     public ResponseEntity<ApiResponse> update(@RequestBody(required = true) AccountRequestDTO accountRequestDTO) {
         try {
             //  Get the logged-in user
-            User user = ServiceHelper.getLoggedInUser();
+            User user = serviceHelper.getLoggedInUser();
 
             //  Retrieve the data
             Account account = accountService.update(accountRequestDTO, user);
@@ -141,7 +145,7 @@ public class AccountController {
     public ResponseEntity<ApiResponse<String>> delete(@PathVariable(required = true) String iban) {
         try {
             //  Get the logged-in user
-            User user = ServiceHelper.getLoggedInUser();
+            User user = serviceHelper.getLoggedInUser();
 
             //  Perform the delete
             String responseBody = accountService.delete(iban, user);

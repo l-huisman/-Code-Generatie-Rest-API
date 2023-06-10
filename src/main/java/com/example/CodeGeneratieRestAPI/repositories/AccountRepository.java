@@ -55,11 +55,11 @@ public interface AccountRepository extends CrudRepository<Account, Long> {
 
     List<Account> findAllByUserId(Long userId);
 
-
     List<Account> findByUserUsernameContainingIgnoreCaseOrUserFirstNameContainingIgnoreCaseOrUserLastNameContainingIgnoreCaseOrNameContainingIgnoreCaseOrIbanContainingIgnoreCaseAndIsActive(String username, String firstName, String lastName, String name, String iban, Boolean isActive);
 
 
     //List<Account> findAllByUser_Id(Long userId);
     @Query("SELECT COUNT(a) > 0 FROM Account a WHERE a.iban = :iban AND a.user.id = :userId")
     boolean checkIfAccountBelongsToUser(@Param("iban") String iban, @Param("userId") Long userId);
+
 }

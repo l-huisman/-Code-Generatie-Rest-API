@@ -2,27 +2,35 @@ package com.example.CodeGeneratieRestAPI.helpers;
 
 import com.example.CodeGeneratieRestAPI.exceptions.IBANGenerationException;
 import com.example.CodeGeneratieRestAPI.models.Account;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.math.BigInteger;
 import java.util.Random;
 
+@Service
 public class IBANGenerator {
     private static final BigInteger MODULUS = BigInteger.valueOf(97);
-    private static final int IBAN_LENGTH = 18; //   18 is the standard length of an IBAN in the Netherlands + all the dashes is 22
-    private static final String COUNTRY_CODE = "NL";
-    private static final int CHECKSUM_LENGTH = 2;
-    private static final String BANK_CODE = "INHO"; // This is the bank code for the bank that is used in this project MRBA
+    private final int IBAN_LENGTH = 18; //   18 is the standard length of an IBAN in the Netherlands + all the dashes is 22
+    private final String COUNTRY_CODE = "NL";
+    private final int CHECKSUM_LENGTH = 2;
+    private final String BANK_CODE = "INHO"; // This is the bank code for the bank that is used in this project MRBA
+    private ServiceHelper serviceHelper;
 
-    public static String getUniqueIban() {
+    public IBANGenerator(ServiceHelper serviceHelper) {
+        this.serviceHelper = serviceHelper;
+    }
+
+    public String getUniqueIban() {
         do {
             String iban = generateIban();
-            if (!ServiceHelper.checkIfObjectExistsByIdentifier(iban, new Account())) {
+            if (!serviceHelper.checkIfObjectExistsByIdentifier(iban, new Account())) {
                 return iban;
             }
         } while (true);
     }
 
-    public static String generateIban() {
+    public String generateIban() {
         try {
             StringBuilder ibanBuilder = new StringBuilder();
             Random random = new Random();
