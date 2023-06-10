@@ -29,6 +29,8 @@ import java.util.List;
 public class TransactionController {
 
     ModelMapper modelMapper;
+    @Autowired
+
     private TransactionService transactionService;
     @Autowired
     private LoggedInUserHelper loggedInUserHelper;
