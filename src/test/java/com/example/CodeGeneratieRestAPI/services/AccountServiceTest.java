@@ -131,9 +131,9 @@ public class AccountServiceTest {
         Account accountToCheck = accountService.add(account, user);
 
         Optional<Account> expectedAccountOptional = Optional.of(accountToCheck);
-        when(accountRepository.getAccountByIban(anyString())).thenReturn(expectedAccountOptional);
-
-        final Account actualAccount = accountService.getAccountByIban(account.getIban(), user);
+        when(accountRepository.getAccountByIban(accountToCheck.getIban())).thenReturn(expectedAccountOptional);
+        when(accountRepository.checkIfAccountBelongsToUser(accountToCheck.getIban(), user.getId())).thenReturn(true);
+        Account actualAccount = accountService.getAccountByIban(account.getIban(), user);
 
         assertEquals(expectedAccountOptional.orElse(null), actualAccount);
     }
