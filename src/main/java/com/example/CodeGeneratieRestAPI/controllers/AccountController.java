@@ -2,11 +2,12 @@ package com.example.CodeGeneratieRestAPI.controllers;
 
 import com.example.CodeGeneratieRestAPI.dtos.AccountRequestDTO;
 import com.example.CodeGeneratieRestAPI.dtos.AccountResponseDTO;
-import com.example.CodeGeneratieRestAPI.helpers.ServiceHelper;
+import com.example.CodeGeneratieRestAPI.helpers.LoggedInUserHelper;
 import com.example.CodeGeneratieRestAPI.models.Account;
 import com.example.CodeGeneratieRestAPI.models.ApiResponse;
 import com.example.CodeGeneratieRestAPI.models.User;
 import com.example.CodeGeneratieRestAPI.services.AccountService;
+import com.example.CodeGeneratieRestAPI.services.UserService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.PropertyMap;
@@ -31,10 +32,10 @@ public class AccountController {
     @Autowired
     private AccountService accountService;
     @Autowired
-    private final ServiceHelper serviceHelper;
+    private final LoggedInUserHelper loggedInUserHelper;
 
-    public AccountController(ServiceHelper serviceHelper) {
-        this.serviceHelper = serviceHelper;
+    public AccountController() {
+        this.loggedInUserHelper = new LoggedInUserHelper();
         modelMapper = new ModelMapper();
 
         //  Set the field matching to strict
@@ -54,7 +55,7 @@ public class AccountController {
     public ResponseEntity<ApiResponse> add(@RequestBody(required = true) AccountRequestDTO accountRequestDTO) {
         try {
             //  Get the logged-in user
-            User user = serviceHelper.getLoggedInUser();
+            User user = loggedInUserHelper.getLoggedInUser();
 
             //  Retrieve the data
             Account account = accountService.add(accountRequestDTO, user);
@@ -73,7 +74,7 @@ public class AccountController {
     public ResponseEntity<ApiResponse> getAllAccounts(@RequestParam(required = false) String search, @RequestParam(required = false) boolean active) {
         try {
             //  Get the logged-in user
-            User user = serviceHelper.getLoggedInUser();
+            User user = loggedInUserHelper.getLoggedInUser();
 
             //  Retrieve the data
             List<Account> accounts = accountService.getAllAccounts(search, active, user);
@@ -91,7 +92,7 @@ public class AccountController {
     public ResponseEntity<ApiResponse> getAllAccountsByUserId(@PathVariable(required = true) Long userId){
         try{
             //  Get the logged-in user
-            User user = serviceHelper.getLoggedInUser();
+            User user = loggedInUserHelper.getLoggedInUser();
 
             //  Retrieve the data
             List<Account> accounts = accountService.getAllAccountsByUserId(userId, user);
@@ -107,7 +108,7 @@ public class AccountController {
     public ResponseEntity<ApiResponse> getAccountByIban(@PathVariable(required = true) String iban) {
         try{
         //  Get the logged-in user
-        User user = serviceHelper.getLoggedInUser();
+        User user = loggedInUserHelper.getLoggedInUser();
 
         //  Retrieve the data
         AccountResponseDTO account = modelMapper.map(accountService.getAccountByIban(iban, user), AccountResponseDTO.class);
@@ -124,7 +125,7 @@ public class AccountController {
     public ResponseEntity<ApiResponse> update(@RequestBody(required = true) AccountRequestDTO accountRequestDTO) {
         try {
             //  Get the logged-in user
-            User user = serviceHelper.getLoggedInUser();
+            User user = loggedInUserHelper.getLoggedInUser();
 
             //  Retrieve the data
             Account account = accountService.update(accountRequestDTO, user);
@@ -144,7 +145,7 @@ public class AccountController {
     public ResponseEntity<ApiResponse<String>> delete(@PathVariable(required = true) String iban) {
         try {
             //  Get the logged-in user
-            User user = serviceHelper.getLoggedInUser();
+            User user = loggedInUserHelper.getLoggedInUser();
 
             //  Perform the delete
             String responseBody = accountService.delete(iban, user);

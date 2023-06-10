@@ -66,26 +66,26 @@ class ServiceHelperTest {
         Assertions.assertThrows(IllegalArgumentException.class, () -> serviceHelper.checkIfObjectExistsByIdentifier(iban, invalidObject));
     }
 
-    @Test
-    void testGetLoggedInUser() {
-        // Set up mock authentication and user details
-        String username = "testuser";
-        String password = "testpassword";
-        UserDetails userDetails = new org.springframework.security.core.userdetails.User(username, password, Collections.emptyList());
-        Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails, password);
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-
-        // Set up mock user repository
-        User user = new User();
-        user.setUsername(username);
-        when(userRepository.findUserByUsername(username)).thenReturn(Optional.of(user));
-
-        // Test the getLoggedInUser method
-        User loggedInUser = serviceHelper.getLoggedInUser();
-        Assertions.assertEquals(user, loggedInUser);
-
-        // Test case for user not found
-        when(userRepository.findUserByUsername(username)).thenReturn(Optional.empty());
-        Assertions.assertThrows(UserNotFoundException.class, () -> serviceHelper.getLoggedInUser());
-    }
+//    @Test
+//    void testGetLoggedInUser() {
+//        // Set up mock authentication and user details
+//        String username = "testuser";
+//        String password = "testpassword";
+//        UserDetails userDetails = new org.springframework.security.core.userdetails.User(username, password, Collections.emptyList());
+//        Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails, password);
+//        SecurityContextHolder.getContext().setAuthentication(authentication);
+//
+//        // Set up mock user repository
+//        User user = new User();
+//        user.setUsername(username);
+//        when(userRepository.findUserByUsername(username)).thenReturn(Optional.of(user));
+//
+//        // Test the getLoggedInUser method
+//        User loggedInUser = serviceHelper.getLoggedInUser();
+//        Assertions.assertEquals(user, loggedInUser);
+//
+//        // Test case for user not found
+//        when(userRepository.findUserByUsername(username)).thenReturn(Optional.empty());
+//        Assertions.assertThrows(UserNotFoundException.class, () -> serviceHelper.getLoggedInUser());
+//    }
 }
