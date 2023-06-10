@@ -103,8 +103,6 @@ public class AccountService {
         } catch (IllegalAccessException e) {
             throw new AccountUpdateException(e.getMessage());
         }
-
-
     }
 
     private Boolean checkIfAccountBelongsToUser(String iban, User loggedInUser) {

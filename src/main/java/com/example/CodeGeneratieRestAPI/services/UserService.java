@@ -1,52 +1,88 @@
 package com.example.CodeGeneratieRestAPI.services;
 
-import com.example.CodeGeneratieRestAPI.dtos.LoginRequestDTO;
-import com.example.CodeGeneratieRestAPI.dtos.LoginResponseDTO;
+import com.example.CodeGeneratieRestAPI.dtos.UserRequestDTO;
 import com.example.CodeGeneratieRestAPI.dtos.UserResponseDTO;
-import com.example.CodeGeneratieRestAPI.jwt.JwTokenProvider;
+import com.example.CodeGeneratieRestAPI.exceptions.UserNotFoundException;
+import com.example.CodeGeneratieRestAPI.models.HashedPassword;
 import com.example.CodeGeneratieRestAPI.models.User;
-import com.example.CodeGeneratieRestAPI.models.UserType;
-import com.example.CodeGeneratieRestAPI.repositories.LoginRepository;
 import com.example.CodeGeneratieRestAPI.repositories.UserRepository;
-import org.hibernate.cfg.NotYetImplementedException;
+import org.modelmapper.ModelMapper;
+import org.modelmapper.TypeMap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class UserService {
 
-    @Autowired
-    JwTokenProvider tokenProvider;
+    private final ModelMapper modelMapper;
     @Autowired
     JwtService jwtService;
     @Autowired
     private UserRepository userRepository;
-    @Autowired
-    private LoginRepository loginRepository;
 
-    public List<User> getAll() {
-        return (List<User>) userRepository.findAll();
+    public UserService() {
+        this.modelMapper = new ModelMapper();
+        configureModelMapper();
     }
 
-    public User getMe(String bearerToken) {
+    private void configureModelMapper() {
+        TypeMap<UserRequestDTO, User> typeMap = modelMapper.getTypeMap(UserRequestDTO.class, User.class);
+        if (typeMap == null) {
+            typeMap = modelMapper.createTypeMap(UserRequestDTO.class, User.class);
+        }
+        typeMap.addMappings(mapper -> mapper.skip(User::setPassword));
+    }
+
+    public List<UserResponseDTO> getAll() {
+        Iterable<User> users = userRepository.findAll();
+        if (users == null) {
+            throw new UserNotFoundException("No users found");
+        }
+        List<UserResponseDTO> userResponseDTOs = new ArrayList<>();
+        for (User user : users) {
+            userResponseDTOs.add(modelMapper.map(user, UserResponseDTO.class));
+        }
+        return userResponseDTOs;
+    }
+
+    public UserResponseDTO getMe(String bearerToken) {
         Long id = jwtService.getUserIdFromJwtToken(bearerToken);
-        return userRepository.findById(id).get();
+        User user = userRepository.findById(id).get();
+        if (user == null) {
+            throw new UserNotFoundException("No user found");
+        }
+        return modelMapper.map(user, UserResponseDTO.class);
     }
 
-    public User add(User user) {
-        user.setCreatedAt(this.CreationDate());
-        return userRepository.save(user);
+    public UserResponseDTO add(UserRequestDTO user) {
+        User userToSave = modelMapper.map(user, User.class);
+        userToSave.setPassword(new HashedPassword(user.getPassword()));
+        userToSave.setCreatedAt(CreationDate());
+        userRepository.save(userToSave);
+        return modelMapper.map(userToSave, UserResponseDTO.class);
     }
 
-    public User update(User user) {
-        return userRepository.save(user);
+    public UserResponseDTO update(Long id, UserRequestDTO user) {
+        User userToUpdate = userRepository.findById(id).get();
+        if (userToUpdate == null) {
+            throw new UserNotFoundException("No user found with id: " + id);
+        }
+        userToUpdate = UpdateFilledFields(user, userToUpdate);
+        userRepository.save(userToUpdate);
+        return modelMapper.map(userToUpdate, UserResponseDTO.class);
     }
 
-    public User getById(long id) {
-        return userRepository.findById(id).get();
+    public UserResponseDTO getById(long id) {
+        User user = userRepository.findById(id).get();
+        if (user == null) {
+            throw new UserNotFoundException("No user found with id: " + id);
+        }
+        return modelMapper.map(user, UserResponseDTO.class);
     }
 
     public void delete(long id) {
@@ -58,22 +94,14 @@ public class UserService {
         return date.toString();
     }
 
-    public LoginResponseDTO login(LoginRequestDTO request) {
-        User user = loginRepository.findByUsername(request.getUsername()).get();
-        if (user == null) {
-            throw new NotYetImplementedException("User not found");
-        }
-        String token = tokenProvider.createToken(user.getId(), user.getUsername(), user.getUserType());
-        UserResponseDTO userResponseDTO = new UserResponseDTO(user.getFirstName(), user.getLastName(),
-                user.getUsername(), user.getEmail(), user.getUserType(), user.getCreatedAt());
-        return new LoginResponseDTO(token, userResponseDTO);
+    private User UpdateFilledFields(UserRequestDTO user, User userToUpdate) {
+        Optional.ofNullable(user.getFirstName()).ifPresent(userToUpdate::setFirstName);
+        Optional.ofNullable(user.getLastName()).ifPresent(userToUpdate::setLastName);
+        Optional.ofNullable(user.getUsername()).ifPresent(userToUpdate::setUsername);
+        Optional.ofNullable(user.getEmail()).ifPresent(userToUpdate::setEmail);
+        Optional.ofNullable(user.getPassword()).map(HashedPassword::new).ifPresent(userToUpdate::setPassword);
+        Optional.ofNullable(user.getUserType()).ifPresent(userToUpdate::setUserType);
+        return userToUpdate;
     }
 
-    public Enum<UserType> validate(String bearerToken) {
-        if (jwtService.validateJwtToken(bearerToken)) {
-            return jwtService.getUserTypeFromJwtToken(bearerToken);
-        } else {
-            return null;
-        }
-    }
 }
