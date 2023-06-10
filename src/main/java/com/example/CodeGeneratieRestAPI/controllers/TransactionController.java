@@ -31,7 +31,6 @@ public class TransactionController {
 
     ModelMapper modelMapper;
     @Autowired
-
     private TransactionService transactionService;
     @Autowired
     private LoggedInUserHelper loggedInUserHelper;
@@ -44,7 +43,9 @@ public class TransactionController {
     @GetMapping
     public ResponseEntity<ApiResponse> getAll(@RequestParam @DateTimeFormat(pattern="yyyy-MM-dd") Date start_date, @RequestParam @DateTimeFormat(pattern="yyyy-MM-dd") Date end_date, @RequestParam String search) {
         try {
+            System.out.println("kaas");
             User user = loggedInUserHelper.getLoggedInUser();
+            System.out.println(user.getUsername());
 
             List<Transaction> transactions = transactionService.getAll(user, start_date, end_date, search);
 

@@ -14,12 +14,19 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class ServiceHelper {
-    private static AccountRepository accountRepository;
-    private static UserRepository userRepository;
-    private static TransactionRepository transactionRepository;
+    private final AccountRepository accountRepository;
+    private final UserRepository userRepository;
+    private final TransactionRepository transactionRepository;
+
+    @Autowired
+    public ServiceHelper(AccountRepository accountRepository, UserRepository userRepository, TransactionRepository transactionRepository) {
+        this.accountRepository = accountRepository;
+        this.userRepository = userRepository;
+        this.transactionRepository = transactionRepository;
+    }
 
     //  This method checks if an object exists by its identifier (IBAN, user id, transaction id) and its data type (Account, User, Transaction)
-    public static <T> boolean checkIfObjectExistsByIdentifier(T identifier, Object objectDataType) {
+    public <T> boolean checkIfObjectExistsByIdentifier(T identifier, Object objectDataType) {
         switch (objectDataType.getClass().getSimpleName()) {
             case "Account":
                 return accountRepository.existsByIban((String) identifier);
