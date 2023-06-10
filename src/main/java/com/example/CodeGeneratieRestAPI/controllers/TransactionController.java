@@ -4,10 +4,7 @@ import com.example.CodeGeneratieRestAPI.dtos.AccountResponseDTO;
 import com.example.CodeGeneratieRestAPI.dtos.TransactionRequestDTO;
 import com.example.CodeGeneratieRestAPI.dtos.TransactionResponseDTO;
 import com.example.CodeGeneratieRestAPI.helpers.ServiceHelper;
-import com.example.CodeGeneratieRestAPI.models.Account;
-import com.example.CodeGeneratieRestAPI.models.ApiResponse;
-import com.example.CodeGeneratieRestAPI.models.Transaction;
-import com.example.CodeGeneratieRestAPI.models.User;
+import com.example.CodeGeneratieRestAPI.models.*;
 import com.example.CodeGeneratieRestAPI.services.TransactionService;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.config.Configuration;
@@ -41,6 +38,7 @@ public class TransactionController {
     public ResponseEntity<ApiResponse> getAll(@RequestParam @DateTimeFormat(pattern="yyyy-MM-dd") Date start_date, @RequestParam @DateTimeFormat(pattern="yyyy-MM-dd") Date end_date, @RequestParam String search) {
         try {
             User user = ServiceHelper.getLoggedInUser();
+
             List<Transaction> transactions = transactionService.getAll(user, start_date, end_date, search);
 
             return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse<>(true, "All transactions retrieved", Arrays.asList(modelMapper.map(transactions, TransactionResponseDTO[].class))));
@@ -77,7 +75,7 @@ public class TransactionController {
     }
 
     @GetMapping("/accounts/{iban}")
-    public ResponseEntity<ApiResponse> getByAccountIban(@PathVariable String iban, @RequestParam @DateTimeFormat(pattern="yyyy-MM-dd") Date start_date, @RequestParam @DateTimeFormat(pattern="yyyy-MM-dd") Date end_date, @RequestParam String search) {
+    public ResponseEntity<ApiResponse> getAllByAccountIban(@PathVariable String iban, @RequestParam @DateTimeFormat(pattern="yyyy-MM-dd") Date start_date, @RequestParam @DateTimeFormat(pattern="yyyy-MM-dd") Date end_date, @RequestParam String search) {
         try {
             User user = ServiceHelper.getLoggedInUser();
 
