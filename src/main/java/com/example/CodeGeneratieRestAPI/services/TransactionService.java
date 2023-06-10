@@ -133,9 +133,9 @@ public class TransactionService {
         Transaction transaction = transactionRepository.findById(id).orElseThrow(() -> new TransactionNotFoundException("This transaction does not exist."));
 
         if (transaction.getFromAccount() != null && !transaction.getFromAccount().getUser().getId().equals(user.getId())) {
-            throw new TransactionNotOwnedException("This user does not own the specified account");
+            throw new TransactionNotOwnedException("This user does not own the specified transaction");
         } else if (transaction.getToAccount() != null && !transaction.getToAccount().getUser().getId().equals(user.getId())) {
-            throw new TransactionNotOwnedException("This user does not own the specified account");
+            throw new TransactionNotOwnedException("This user does not own the specified transaction");
         }
         return transaction;
     }
