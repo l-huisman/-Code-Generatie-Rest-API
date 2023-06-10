@@ -54,4 +54,18 @@ public class User {
     public String getPassword() {
         return password.getPassword();
     }
+
+    @Override
+    public String toString() {
+        return "User{" +
+                "id=" + id +
+                ", firstName='" + firstName +
+                ", lastName='" + lastName +
+                ", username='" + username +
+                ", password='" + password +
+                ", email='" + email +
+                ", userType='" + userType +
+                ", createdAt='" + createdAt +
+                '}';
+    }
 }

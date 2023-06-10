@@ -24,7 +24,7 @@ import java.util.List;
 public class Account {
     @Id
     @GeneratedValue
-    private Integer id;
+    private Long id;
     @Column(unique = true)
     private String iban;
     @ManyToOne(fetch = FetchType.EAGER)

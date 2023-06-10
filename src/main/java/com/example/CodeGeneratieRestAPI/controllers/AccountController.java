@@ -5,12 +5,9 @@ import com.example.CodeGeneratieRestAPI.dtos.AccountResponseDTO;
 import com.example.CodeGeneratieRestAPI.helpers.ServiceHelper;
 import com.example.CodeGeneratieRestAPI.models.Account;
 import com.example.CodeGeneratieRestAPI.models.ApiResponse;
-import com.example.CodeGeneratieRestAPI.models.Transaction;
 import com.example.CodeGeneratieRestAPI.models.User;
 import com.example.CodeGeneratieRestAPI.services.AccountService;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.servlet.http.HttpServletRequest;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.PropertyMap;
 import org.modelmapper.config.Configuration;
@@ -18,7 +15,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Arrays;
 import java.util.List;
@@ -34,8 +30,11 @@ public class AccountController {
     private final ObjectMapper objectMapper;
     @Autowired
     private AccountService accountService;
+    @Autowired
+    private final ServiceHelper serviceHelper;
 
-    public AccountController() {
+    public AccountController(ServiceHelper serviceHelper) {
+        this.serviceHelper = serviceHelper;
         modelMapper = new ModelMapper();
 
         //  Set the field matching to strict
@@ -55,7 +54,7 @@ public class AccountController {
     public ResponseEntity<ApiResponse> add(@RequestBody(required = true) AccountRequestDTO accountRequestDTO) {
         try {
             //  Get the logged-in user
-            User user = ServiceHelper.getLoggedInUser();
+            User user = serviceHelper.getLoggedInUser();
 
             //  Retrieve the data
             Account account = accountService.add(accountRequestDTO, user);
@@ -74,7 +73,7 @@ public class AccountController {
     public ResponseEntity<ApiResponse> getAllAccounts(@RequestParam(required = false) String search, @RequestParam(required = false) boolean active) {
         try {
             //  Get the logged-in user
-            User user = ServiceHelper.getLoggedInUser();
+            User user = serviceHelper.getLoggedInUser();
 
             //  Retrieve the data
             List<Account> accounts = accountService.getAllAccounts(search, active, user);
@@ -92,7 +91,7 @@ public class AccountController {
     public ResponseEntity<ApiResponse> getAllAccountsByUserId(@PathVariable(required = true) Long userId){
         try{
             //  Get the logged-in user
-            User user = ServiceHelper.getLoggedInUser();
+            User user = serviceHelper.getLoggedInUser();
 
             //  Retrieve the data
             List<Account> accounts = accountService.getAllAccountsByUserId(userId, user);
@@ -108,7 +107,7 @@ public class AccountController {
     public ResponseEntity<ApiResponse> getAccountByIban(@PathVariable(required = true) String iban) {
         try{
         //  Get the logged-in user
-        User user = ServiceHelper.getLoggedInUser();
+        User user = serviceHelper.getLoggedInUser();
 
         //  Retrieve the data
         AccountResponseDTO account = modelMapper.map(accountService.getAccountByIban(iban, user), AccountResponseDTO.class);
@@ -125,7 +124,7 @@ public class AccountController {
     public ResponseEntity<ApiResponse> update(@RequestBody(required = true) AccountRequestDTO accountRequestDTO) {
         try {
             //  Get the logged-in user
-            User user = ServiceHelper.getLoggedInUser();
+            User user = serviceHelper.getLoggedInUser();
 
             //  Retrieve the data
             Account account = accountService.update(accountRequestDTO, user);
@@ -145,7 +144,7 @@ public class AccountController {
     public ResponseEntity<ApiResponse<String>> delete(@PathVariable(required = true) String iban) {
         try {
             //  Get the logged-in user
-            User user = ServiceHelper.getLoggedInUser();
+            User user = serviceHelper.getLoggedInUser();
 
             //  Perform the delete
             String responseBody = accountService.delete(iban, user);
