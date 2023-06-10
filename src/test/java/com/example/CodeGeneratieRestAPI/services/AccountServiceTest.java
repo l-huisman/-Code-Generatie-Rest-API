@@ -124,19 +124,37 @@ public class AccountServiceTest {
     }
 
     @Test
-    void testGetAccountByIban() {
-        User user = getMockUser(UserType.USER);
+    void testGetAccountByIbanWithValidUser() {
+        User user1 = getMockUser(UserType.USER);
         AccountRequestDTO account = getMockAccountRequestDTO();
 
-        Account accountToCheck = accountService.add(account, user);
+        Account accountToCheck = accountService.add(account, user1);
 
         Optional<Account> expectedAccountOptional = Optional.of(accountToCheck);
         when(accountRepository.getAccountByIban(accountToCheck.getIban())).thenReturn(expectedAccountOptional);
-        when(accountRepository.checkIfAccountBelongsToUser(accountToCheck.getIban(), user.getId())).thenReturn(true);
-        Account actualAccount = accountService.getAccountByIban(account.getIban(), user);
+        when(accountRepository.checkIfAccountBelongsToUser(accountToCheck.getIban(), user1.getId())).thenReturn(true);
+
+        Account actualAccount = accountService.getAccountByIban(account.getIban(), user1);
 
         assertEquals(expectedAccountOptional.orElse(null), actualAccount);
     }
+    @Test
+    void testGetAccountByIbanThrowsAccountNotAccessibleException() {
+        User user1 = getMockUser(UserType.USER);
+        User user2 = getMockUser(UserType.USER);
+        AccountRequestDTO account = getMockAccountRequestDTO();
+
+        Account accountToCheck = accountService.add(account, user1);
+
+        Optional<Account> expectedAccountOptional = Optional.of(accountToCheck);
+        when(accountRepository.getAccountByIban(accountToCheck.getIban())).thenReturn(expectedAccountOptional);
+        when(accountRepository.checkIfAccountBelongsToUser(accountToCheck.getIban(), user1.getId())).thenReturn(false);
+
+        AccountNotAccessibleException exception = Assertions.assertThrows(AccountNotAccessibleException.class, () -> accountService.getAccountByIban(account.getIban(), user2));
+        assertEquals("Account with IBAN: " + accountToCheck.getIban() + " does not belong to the logged in user", exception.getMessage());
+    }
+
+
 
 
 }

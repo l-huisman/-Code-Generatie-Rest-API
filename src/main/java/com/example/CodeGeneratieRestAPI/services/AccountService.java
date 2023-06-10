@@ -137,7 +137,7 @@ public class AccountService {
 
         //Check if the account belongs to the user, if not, check if the user is an employee and if so, allow the user to access the account
         if (!checkIfAccountBelongsToUser(iban, loggedInUser) && !loggedInUser.getUserType().equals(UserType.EMPLOYEE)) {
-            throw new AccountNotFoundException("Account with IBAN: " + iban + " does not exist");
+            throw new AccountNotAccessibleException("Account with IBAN: " + iban + " does not belong to the logged in user");
         }
 
         return accountRepository.getAccountByIban(iban).orElseThrow(() -> new AccountNotFoundException("Account with IBAN: " + iban + " does not exist"));
