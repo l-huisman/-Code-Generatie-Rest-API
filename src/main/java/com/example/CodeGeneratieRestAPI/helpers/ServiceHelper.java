@@ -32,27 +32,10 @@ public class ServiceHelper {
         }
     }
 
-    //  This method gets the logged in user
-    public static User getLoggedInUser() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-        return userRepository.findUserByUsername(userDetails.getUsername()).orElseThrow(() -> new UserNotFoundException("User with username: " + userDetails.getUsername() + " does not exist"));
-    }
-
-    //  These setters are used to set the repositories in the static methods
-    @Autowired
-    public void setAccountRepository(AccountRepository accountRepository) {
-        ServiceHelper.accountRepository = accountRepository;
-    }
-
-    @Autowired
-    public void setUserRepository(UserRepository userRepository) {
-        ServiceHelper.userRepository = userRepository;
-    }
-
-    @Autowired
-    public void setTransactionRepository(TransactionRepository transactionRepository) {
-        ServiceHelper.transactionRepository = transactionRepository;
-    }
-
+    //  This method gets the logged-in user
+//    public User getLoggedInUser() {
+//        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+//        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+//        return userRepository.findUserByUsername(userDetails.getUsername()).orElseThrow(() -> new UserNotFoundException("User with username: " + userDetails.getUsername() + " does not exist"));
+//    }
 }

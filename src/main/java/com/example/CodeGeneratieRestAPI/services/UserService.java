@@ -3,6 +3,7 @@ package com.example.CodeGeneratieRestAPI.services;
 import com.example.CodeGeneratieRestAPI.dtos.LoginRequestDTO;
 import com.example.CodeGeneratieRestAPI.dtos.LoginResponseDTO;
 import com.example.CodeGeneratieRestAPI.dtos.UserResponseDTO;
+import com.example.CodeGeneratieRestAPI.exceptions.UserNotFoundException;
 import com.example.CodeGeneratieRestAPI.jwt.JwTokenProvider;
 import com.example.CodeGeneratieRestAPI.models.User;
 import com.example.CodeGeneratieRestAPI.models.UserType;
@@ -10,6 +11,9 @@ import com.example.CodeGeneratieRestAPI.repositories.LoginRepository;
 import com.example.CodeGeneratieRestAPI.repositories.UserRepository;
 import org.hibernate.cfg.NotYetImplementedException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
@@ -33,6 +37,11 @@ public class UserService {
         String token = bearerToken.substring(7);
         long id = tokenProvider.getUserIdFromJWT(token);
         return userRepository.findById(id).get();
+    }
+    public User getLoggedInUser() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+        return userRepository.findUserByUsername(userDetails.getUsername()).orElseThrow(() -> new UserNotFoundException("User with username: " + userDetails.getUsername() + " does not exist"));
     }
 
     public User add(User user) {

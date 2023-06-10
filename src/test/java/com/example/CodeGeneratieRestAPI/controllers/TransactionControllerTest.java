@@ -4,6 +4,7 @@ import com.example.CodeGeneratieRestAPI.controllers.TransactionController;
 import com.example.CodeGeneratieRestAPI.dtos.TransactionRequestDTO;
 import com.example.CodeGeneratieRestAPI.exceptions.TransactionAmountNotValidException;
 import com.example.CodeGeneratieRestAPI.exceptions.TransactionNotOwnedException;
+import com.example.CodeGeneratieRestAPI.helpers.LoggedInUserHelper;
 import com.example.CodeGeneratieRestAPI.helpers.ServiceHelper;
 import com.example.CodeGeneratieRestAPI.jwt.JwTokenFilter;
 import com.example.CodeGeneratieRestAPI.jwt.JwTokenProvider;
@@ -88,15 +89,15 @@ class TransactionControllerTest {
     @MockBean
     private JwTokenProvider jwTokenProvider;
 
-    private ServiceHelper serviceHelper;
+    @MockBean
+    private LoggedInUserHelper loggedInUserHelper;
 
     // We could also add ObjectMapper to convert objects to JSON for us
 
     @BeforeEach
     void setUp() {
-        serviceHelper = new ServiceHelper();
-        serviceHelper.setUserRepository(userRepository);
     }
+    
     private User getMockUser(Long id, UserType userType, String username) {
         User user = new User();
         user.setId(id);
