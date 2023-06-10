@@ -1,33 +1,13 @@
 package com.example.CodeGeneratieRestAPI.services;
 
-import com.example.CodeGeneratieRestAPI.dtos.AccountRequestDTO;
-import com.example.CodeGeneratieRestAPI.exceptions.AccountCreationException;
-import com.example.CodeGeneratieRestAPI.exceptions.AccountNoDataChangedException;
-import com.example.CodeGeneratieRestAPI.exceptions.AccountNotAccessibleException;
-import com.example.CodeGeneratieRestAPI.exceptions.AccountNotFoundException;
-import com.example.CodeGeneratieRestAPI.exceptions.AccountUpdateException;
-import com.example.CodeGeneratieRestAPI.exceptions.UserNotFoundException;
 import com.example.CodeGeneratieRestAPI.models.Account;
 import com.example.CodeGeneratieRestAPI.models.User;
 import com.example.CodeGeneratieRestAPI.models.UserType;
 import com.example.CodeGeneratieRestAPI.repositories.AccountRepository;
-import com.example.CodeGeneratieRestAPI.repositories.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
 
 public class AccountServiceTest {
 

@@ -5,12 +5,9 @@ import com.example.CodeGeneratieRestAPI.dtos.AccountResponseDTO;
 import com.example.CodeGeneratieRestAPI.helpers.ServiceHelper;
 import com.example.CodeGeneratieRestAPI.models.Account;
 import com.example.CodeGeneratieRestAPI.models.ApiResponse;
-import com.example.CodeGeneratieRestAPI.models.Transaction;
 import com.example.CodeGeneratieRestAPI.models.User;
 import com.example.CodeGeneratieRestAPI.services.AccountService;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.servlet.http.HttpServletRequest;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.PropertyMap;
 import org.modelmapper.config.Configuration;
@@ -18,7 +15,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Arrays;
 import java.util.List;
@@ -89,8 +85,8 @@ public class AccountController {
     }
 
     @GetMapping("/user/{userId}")
-    public ResponseEntity<ApiResponse> getAllAccountsByUserId(@PathVariable(required = true) Long userId){
-        try{
+    public ResponseEntity<ApiResponse> getAllAccountsByUserId(@PathVariable(required = true) Long userId) {
+        try {
             //  Get the logged-in user
             User user = ServiceHelper.getLoggedInUser();
 
@@ -106,15 +102,15 @@ public class AccountController {
 
     @GetMapping("/{iban}")
     public ResponseEntity<ApiResponse> getAccountByIban(@PathVariable(required = true) String iban) {
-        try{
-        //  Get the logged-in user
-        User user = ServiceHelper.getLoggedInUser();
+        try {
+            //  Get the logged-in user
+            User user = ServiceHelper.getLoggedInUser();
 
-        //  Retrieve the data
-        AccountResponseDTO account = modelMapper.map(accountService.getAccountByIban(iban, user), AccountResponseDTO.class);
+            //  Retrieve the data
+            AccountResponseDTO account = modelMapper.map(accountService.getAccountByIban(iban, user), AccountResponseDTO.class);
 
-        //  Return the data
-        return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse<>(true, "Account retrieved successfully", account));
+            //  Return the data
+            return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse<>(true, "Account retrieved successfully", account));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ApiResponse<>(false, e.getMessage()));
         }

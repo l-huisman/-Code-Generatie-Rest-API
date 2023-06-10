@@ -1,22 +1,13 @@
 package com.example.CodeGeneratieRestAPI.services;
 
 import com.example.CodeGeneratieRestAPI.dtos.AccountRequestDTO;
-import com.example.CodeGeneratieRestAPI.exceptions.AccountCreationException;
-import com.example.CodeGeneratieRestAPI.exceptions.AccountNoDataChangedException;
-import com.example.CodeGeneratieRestAPI.exceptions.AccountNotAccessibleException;
-import com.example.CodeGeneratieRestAPI.exceptions.AccountNotFoundException;
-import com.example.CodeGeneratieRestAPI.exceptions.AccountUpdateException;
-import com.example.CodeGeneratieRestAPI.exceptions.UserNotFoundException;
+import com.example.CodeGeneratieRestAPI.exceptions.*;
 import com.example.CodeGeneratieRestAPI.helpers.ServiceHelper;
 import com.example.CodeGeneratieRestAPI.models.Account;
 import com.example.CodeGeneratieRestAPI.models.User;
 import com.example.CodeGeneratieRestAPI.repositories.AccountRepository;
 import com.example.CodeGeneratieRestAPI.repositories.UserRepository;
-import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import java.lang.reflect.Field;
@@ -122,7 +113,8 @@ public class AccountService {
         }
         return accountRepository.checkIfAccountBelongsToUser(iban, loggedInUser.getId());
     }
-    private Account checkAndGetAccount(String iban){
+
+    private Account checkAndGetAccount(String iban) {
         // Check if the iban is valid
         if (!ServiceHelper.checkIfObjectExistsByIdentifier(iban, new Account())) {
             throw new AccountNotFoundException("Account with IBAN: " + iban + " does not exist");
@@ -154,12 +146,12 @@ public class AccountService {
         if (loggedInUser.getUserType().getAuthority().equals("EMPLOYEE")) {
             //  Get all accounts
             return accountRepository.findAllBySearchTerm(search, active);
-        }
-        else {
+        } else {
             //  Get all accounts of the user
             return accountRepository.findAllBySearchTermAndUserId(search, active, loggedInUser.getId());
         }
     }
+
     public Account getAccountByIban(String iban, User loggedInUser) {
         //  Check account and get the account
         Account account = this.checkAndGetAccount(iban);
@@ -167,7 +159,8 @@ public class AccountService {
         //  Return the account
         return account;
     }
-    public List<Account> getAllAccountsByUserId(Long userId, User loggedInUser){
+
+    public List<Account> getAllAccountsByUserId(Long userId, User loggedInUser) {
         //  Check if the userId matches the id of the logged in user and throw an exception if it doesn't unless the user is an employee
         if (!loggedInUser.getUserType().getAuthority().equals("EMPLOYEE") && !userId.equals(loggedInUser.getId())) {
             throw new AccountNotAccessibleException("You cannot access the accounts of another user");

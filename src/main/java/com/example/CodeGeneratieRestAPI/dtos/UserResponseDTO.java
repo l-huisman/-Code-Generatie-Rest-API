@@ -1,7 +1,6 @@
 package com.example.CodeGeneratieRestAPI.dtos;
 
 import com.example.CodeGeneratieRestAPI.models.UserType;
-
 import lombok.AllArgsConstructor;
 import lombok.Data;
 

@@ -2,16 +2,14 @@ package com.example.CodeGeneratieRestAPI.services;
 
 import com.example.CodeGeneratieRestAPI.jwt.JwtKeyProvider;
 import com.example.CodeGeneratieRestAPI.models.UserType;
-
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
-
-import java.util.Date;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.Date;
 
 @Service
 public class JwtService {
@@ -32,7 +30,7 @@ public class JwtService {
         String token = getJwtToken(bearerToken);
         if (token != null) {
             return Jwts.parserBuilder().setSigningKey(keyProvider.getPrivateKey()).build().parseClaimsJws(token)
-                .getBody().get("userId", Long.class);
+                    .getBody().get("userId", Long.class);
         }
         return -1;
     }
@@ -42,7 +40,7 @@ public class JwtService {
         String token = getJwtToken(bearerToken);
         if (token != null) {
             return Jwts.parserBuilder().setSigningKey(keyProvider.getPrivateKey()).build().parseClaimsJws(token)
-                .getBody().getSubject();
+                    .getBody().getSubject();
         }
         return null;
     }
@@ -52,7 +50,7 @@ public class JwtService {
         String token = getJwtToken(bearerToken);
         if (token != null) {
             return Jwts.parserBuilder().setSigningKey(keyProvider.getPrivateKey()).build().parseClaimsJws(token)
-                .getBody().get("userType", UserType.class);
+                    .getBody().get("userType", UserType.class);
         }
         return null;
     }
@@ -63,7 +61,7 @@ public class JwtService {
         if (token != null) {
             try {
                 Jws<Claims> claims = Jwts.parserBuilder().setSigningKey(keyProvider.getPrivateKey()).build()
-                    .parseClaimsJws(token);
+                        .parseClaimsJws(token);
                 return !claims.getBody().getExpiration().before(new Date());
             } catch (JwtException | IllegalArgumentException e) {
                 throw new JwtException("Expired or invalid JWT token");

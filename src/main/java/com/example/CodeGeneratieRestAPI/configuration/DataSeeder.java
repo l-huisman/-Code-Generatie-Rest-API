@@ -1,7 +1,10 @@
 package com.example.CodeGeneratieRestAPI.configuration;
 
 import com.example.CodeGeneratieRestAPI.dtos.TransactionRequestDTO;
-import com.example.CodeGeneratieRestAPI.models.*;
+import com.example.CodeGeneratieRestAPI.models.Account;
+import com.example.CodeGeneratieRestAPI.models.HashedPassword;
+import com.example.CodeGeneratieRestAPI.models.User;
+import com.example.CodeGeneratieRestAPI.models.UserType;
 import com.example.CodeGeneratieRestAPI.services.AccountService;
 import com.example.CodeGeneratieRestAPI.services.TransactionService;
 import com.example.CodeGeneratieRestAPI.services.UserService;

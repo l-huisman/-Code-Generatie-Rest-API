@@ -1,6 +1,5 @@
 package com.example.CodeGeneratieRestAPI.helpers;
 
-import com.example.CodeGeneratieRestAPI.exceptions.AccountNotFoundException;
 import com.example.CodeGeneratieRestAPI.exceptions.UserNotFoundException;
 import com.example.CodeGeneratieRestAPI.models.User;
 import com.example.CodeGeneratieRestAPI.repositories.AccountRepository;
