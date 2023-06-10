@@ -1,6 +1,8 @@
 package com.example.CodeGeneratieRestAPI.controllers;
 
 import com.example.CodeGeneratieRestAPI.controllers.TransactionController;
+import com.example.CodeGeneratieRestAPI.dtos.TransactionRequestDTO;
+import com.example.CodeGeneratieRestAPI.exceptions.TransactionAmountNotValidException;
 import com.example.CodeGeneratieRestAPI.exceptions.TransactionNotOwnedException;
 import com.example.CodeGeneratieRestAPI.helpers.ServiceHelper;
 import com.example.CodeGeneratieRestAPI.jwt.JwTokenFilter;
@@ -10,6 +12,7 @@ import com.example.CodeGeneratieRestAPI.repositories.AccountRepository;
 import com.example.CodeGeneratieRestAPI.repositories.TransactionRepository;
 import com.example.CodeGeneratieRestAPI.repositories.UserRepository;
 import com.example.CodeGeneratieRestAPI.services.AccountService;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.FilterChain;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -91,7 +94,8 @@ class TransactionControllerTest {
 
     @BeforeEach
     void setUp() {
-        ServiceHelper serviceHelper = new ServiceHelper(accountRepository, userRepository, transactionRepository);
+        serviceHelper = new ServiceHelper();
+        serviceHelper.setUserRepository(userRepository);
     }
     private User getMockUser(Long id, UserType userType, String username) {
         User user = new User();
@@ -121,6 +125,8 @@ class TransactionControllerTest {
         transaction.setFromAccount(fromAccount);
         transaction.setToAccount(toAccount);
         transaction.setTransactionType(transactionType);
+        transaction.setLabel("");
+        transaction.setDescription("");
         return transaction;
     }
 
@@ -249,8 +255,50 @@ class TransactionControllerTest {
         // Check if we get a 200 OK
         // And if the JSON content matches our expectations
         this.mockMvc.perform(get("/transactions/owns/" + transaction.getId()).header("Authorization", "test")).andDo(print())
-                .andExpect(status().isOk())
+                .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message").value("This user does not own the specified transaction"));
+    }
+
+    @Test
+    @WithMockUser(username = "Devon", password = "pwd", roles = "USER")
+    void addTransaction() throws Exception {
+        User user = getMockUser(1L, UserType.USER, "john");
+        Account fromAccount = getMockAccount("123456", 1000F, user, false);
+
+        Transaction transaction = getMockTransaction(1L, user, 60F, TransactionType.WITHDRAW, fromAccount, null);
+        TransactionRequestDTO transactionRequestDTO = new TransactionRequestDTO(fromAccount.getIban(), null, "WITHDRAW", transaction.getAmount() , transaction.getLabel(), transaction.getDescription());
+
+        when(transactionService.add(any(User.class), any(TransactionRequestDTO.class))).thenReturn(transaction);
+        when(userRepository.findUserByUsername(anyString())).thenReturn(Optional.of(user));
+
+        String json = new ObjectMapper().writeValueAsString(transactionRequestDTO).replace("null", "\"\"");
+
+        // Check if we get a 200 OK
+        // And if the JSON content matches our expectations
+        this.mockMvc.perform(post("/transactions").header("Authorization", "test").with(org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf()).contentType(MediaType.APPLICATION_JSON).content(json).accept(MediaType.APPLICATION_JSON)).andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.amount").value("60.0"));
+    }
+
+    @Test
+    @WithMockUser(username = "Devon", password = "pwd", roles = "USER")
+    void addInvalidTransaction() throws Exception {
+        User user = getMockUser(1L, UserType.USER, "john");
+        Account fromAccount = getMockAccount("123456", 1000F, user, false);
+
+        Transaction transaction = getMockTransaction(1L, user, 0F, TransactionType.WITHDRAW, fromAccount, null);
+        TransactionRequestDTO transactionRequestDTO = new TransactionRequestDTO(fromAccount.getIban(), null, "WITHDRAW", transaction.getAmount() , transaction.getLabel(), transaction.getDescription());
+
+        when(transactionService.add(any(User.class), any(TransactionRequestDTO.class))).thenThrow(new TransactionAmountNotValidException("The transaction amount can't be zero."));
+        when(userRepository.findUserByUsername(anyString())).thenReturn(Optional.of(user));
+
+        String json = new ObjectMapper().writeValueAsString(transactionRequestDTO).replace("null", "\"\"");
+
+        // Check if we get a 200 OK
+        // And if the JSON content matches our expectations
+        this.mockMvc.perform(post("/transactions").header("Authorization", "test").with(org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf()).contentType(MediaType.APPLICATION_JSON).content(json).accept(MediaType.APPLICATION_JSON)).andDo(print())
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("The transaction amount can't be zero."));
     }
 
     // @Test
