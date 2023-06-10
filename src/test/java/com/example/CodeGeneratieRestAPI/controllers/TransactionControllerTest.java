@@ -1,10 +1,13 @@
 package com.example.CodeGeneratieRestAPI.controllers;
 
 import com.example.CodeGeneratieRestAPI.controllers.TransactionController;
+import com.example.CodeGeneratieRestAPI.exceptions.TransactionNotOwnedException;
 import com.example.CodeGeneratieRestAPI.helpers.ServiceHelper;
 import com.example.CodeGeneratieRestAPI.jwt.JwTokenFilter;
 import com.example.CodeGeneratieRestAPI.jwt.JwTokenProvider;
 import com.example.CodeGeneratieRestAPI.models.*;
+import com.example.CodeGeneratieRestAPI.repositories.AccountRepository;
+import com.example.CodeGeneratieRestAPI.repositories.TransactionRepository;
 import com.example.CodeGeneratieRestAPI.repositories.UserRepository;
 import com.example.CodeGeneratieRestAPI.services.AccountService;
 import jakarta.servlet.FilterChain;
@@ -74,6 +77,10 @@ class TransactionControllerTest {
 
     @MockBean
     private UserRepository userRepository;
+    @MockBean
+    private TransactionRepository transactionRepository;
+    @MockBean
+    private AccountRepository accountRepository;
 
     @MockBean
     private JwTokenProvider jwTokenProvider;
@@ -84,10 +91,8 @@ class TransactionControllerTest {
 
     @BeforeEach
     void setUp() {
-        ServiceHelper serviceHelper = new ServiceHelper();
-        serviceHelper.setUserRepository(userRepository);
+        ServiceHelper serviceHelper = new ServiceHelper(accountRepository, userRepository, transactionRepository);
     }
-
     private User getMockUser(Long id, UserType userType, String username) {
         User user = new User();
         user.setId(id);
@@ -210,6 +215,42 @@ class TransactionControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data", hasSize(transactions.size())))
                 .andExpect(jsonPath("$.data[0].amount").value("60.0"));
+    }
+
+    @Test
+    @WithMockUser(username = "Devon", password = "pwd", roles = "USER")
+    void transactionIsOwnedByUser() throws Exception {
+        User user = getMockUser(1L, UserType.USER, "john");
+        Account fromAccount = getMockAccount("123456", 1000F, user, false);
+
+        Transaction transaction = getMockTransaction(1L, user, 60F, TransactionType.WITHDRAW, fromAccount, null);
+
+        when(transactionService.transactionIsOwnedByUser(user, transaction.getId())).thenReturn(transaction);
+        when(userRepository.findUserByUsername(anyString())).thenReturn(Optional.of(user));
+
+        // Check if we get a 200 OK
+        // And if the JSON content matches our expectations
+        this.mockMvc.perform(get("/transactions/owns/" + transaction.getId()).header("Authorization", "test")).andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.message").value("You own this transaction"));
+    }
+    @Test
+    @WithMockUser(username = "Devon", password = "pwd", roles = "USER")
+    void transactionIsNotOwnedByUser() throws Exception {
+        User user = getMockUser(1L, UserType.USER, "john");
+        User user1 = getMockUser(2L, UserType.USER, "john1");
+        Account fromAccount = getMockAccount("123456", 1000F, user, false);
+
+        Transaction transaction = getMockTransaction(1L, user1, 60F, TransactionType.WITHDRAW, fromAccount, null);
+
+        when(transactionService.transactionIsOwnedByUser(user, transaction.getId())).thenThrow(new TransactionNotOwnedException("This user does not own the specified transaction"));
+        when(userRepository.findUserByUsername(anyString())).thenReturn(Optional.of(user));
+
+        // Check if we get a 200 OK
+        // And if the JSON content matches our expectations
+        this.mockMvc.perform(get("/transactions/owns/" + transaction.getId()).header("Authorization", "test")).andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.message").value("This user does not own the specified transaction"));
     }
 
     // @Test
