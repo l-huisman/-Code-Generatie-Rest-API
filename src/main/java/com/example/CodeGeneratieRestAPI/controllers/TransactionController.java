@@ -31,6 +31,8 @@ public class TransactionController {
     ModelMapper modelMapper;
     @Autowired
     private TransactionService transactionService;
+    @Autowired
+    private ServiceHelper serviceHelper;
 
     public TransactionController() {
         modelMapper = new ModelMapper();
@@ -40,7 +42,7 @@ public class TransactionController {
     @GetMapping
     public ResponseEntity<ApiResponse> getAll(@RequestParam @DateTimeFormat(pattern="yyyy-MM-dd") Date start_date, @RequestParam @DateTimeFormat(pattern="yyyy-MM-dd") Date end_date, @RequestParam String search) {
         try {
-            User user = ServiceHelper.getLoggedInUser();
+            User user = serviceHelper.getLoggedInUser();
             List<Transaction> transactions = transactionService.getAll(user, start_date, end_date, search);
 
             return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse<>(true, "All transactions retrieved", Arrays.asList(modelMapper.map(transactions, TransactionResponseDTO[].class))));
@@ -52,7 +54,7 @@ public class TransactionController {
     @GetMapping("/user")
     public ResponseEntity<ApiResponse> getAllByUserId() {
         try {
-            User user = ServiceHelper.getLoggedInUser();
+            User user = serviceHelper.getLoggedInUser();
 
             List<Transaction> transactions = transactionService.getAllByUser(user);
 
@@ -65,7 +67,7 @@ public class TransactionController {
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse> getById(@PathVariable Long id) {
         try {
-            User user = ServiceHelper.getLoggedInUser();
+            User user = serviceHelper.getLoggedInUser();
             //  Retrieve the data
             Transaction transaction = transactionService.getById(user, id);
 
@@ -79,7 +81,7 @@ public class TransactionController {
     @GetMapping("/accounts/{iban}")
     public ResponseEntity<ApiResponse> getByAccountIban(@PathVariable String iban, @RequestParam @DateTimeFormat(pattern="yyyy-MM-dd") Date start_date, @RequestParam @DateTimeFormat(pattern="yyyy-MM-dd") Date end_date, @RequestParam String search) {
         try {
-            User user = ServiceHelper.getLoggedInUser();
+            User user = serviceHelper.getLoggedInUser();
 
             List<Transaction> transactions = transactionService.getAllByAccountIban(user, iban, start_date, end_date, search);
 
@@ -92,7 +94,7 @@ public class TransactionController {
     @GetMapping("/owns/{id}")
     public ResponseEntity<ApiResponse<String>> transactionIsOwnedByUser(@PathVariable Long id) {
         try {
-            User user = ServiceHelper.getLoggedInUser();
+            User user = serviceHelper.getLoggedInUser();
 
             transactionService.transactionIsOwnedByUser(user, id);
 
@@ -105,7 +107,7 @@ public class TransactionController {
     @PostMapping
     public ResponseEntity<ApiResponse> add(@RequestBody(required = true) TransactionRequestDTO transactionIn) {
         try {
-            User user = ServiceHelper.getLoggedInUser();
+            User user = serviceHelper.getLoggedInUser();
 
             //  Retrieve the data
             Transaction transaction = transactionService.add(user, transactionIn);
