@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.OptionalInt;
 
 @Service
 public class UserService {
@@ -52,10 +53,9 @@ public class UserService {
 
     public UserResponseDTO getMe(String bearerToken) {
         Long id = jwtService.getUserIdFromJwtToken(bearerToken);
-        Optional<User> optionalUser = userRepository.findById(id);
-        if (optionalUser.isPresent()) {
-            User user = optionalUser.get();
-            return modelMapper.map(user, UserResponseDTO.class);
+        Optional<User> user = userRepository.findById(id);
+        if (user.isPresent()) {
+            return modelMapper.map(user.get(), UserResponseDTO.class);
         } else {
             throw new UserNotFoundException("User not found with id: " + id);
         }
@@ -80,11 +80,12 @@ public class UserService {
     }
 
     public UserResponseDTO getById(long id) {
-        User user = userRepository.findById(id).get();
-        if (user == null) {
-            throw new UserNotFoundException("No user found with id: " + id);
+        Optional<User> user = userRepository.findById(id);
+        if (user.isPresent()) {
+            return modelMapper.map(user.get(), UserResponseDTO.class);
+        } else {
+            throw new UserNotFoundException("User not found with id: " + id);
         }
-        return modelMapper.map(user, UserResponseDTO.class);
     }
 
     public void delete(long id) {

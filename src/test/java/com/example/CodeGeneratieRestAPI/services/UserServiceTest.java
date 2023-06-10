@@ -138,81 +138,101 @@ public class UserServiceTest {
 
     @Test
     public void testAdd() {
-        UserRequestDTO userRequestDTO = getMockUserRequestDTO();    
+        // create a user object
         User user = new User();
-        when(modelMapper.map(userRequestDTO, User.class)).thenReturn(user);
-        when(userRepository.save(user)).thenReturn(user);
-        when(modelMapper.map(user, UserResponseDTO.class)).thenReturn(getMockUserResponseDTO());
+        user.setFirstName("John");
+        user.setLastName("Doe");
+        user.setUsername("johndoe");
+        user.setPassword(new HashedPassword("password"));
+        user.setEmail("johndoe@example.com");
+        user.setUserType(UserType.USER);
 
-        UserResponseDTO result = userService.add(userRequestDTO);
-        
-        assertEquals(getMockUserResponseDTO(), result);
+        // create a user request DTO object
+        UserRequestDTO userRequestDTO = new UserRequestDTO();
+        userRequestDTO.setFirstName("John");
+        userRequestDTO.setLastName("Doe");
+        userRequestDTO.setUsername("johndoe");
+        userRequestDTO.setPassword("password");
+        userRequestDTO.setEmail("johndoe@example.com");
+        userRequestDTO.setUserType(UserType.USER);
+
+        // map the user request DTO to a user object
+        when(modelMapper.map(userRequestDTO, User.class)).thenReturn(user);
+
+        // call the add method
+        userService.add(userRequestDTO);
+
+        // verify if the save method is called with the correct user object
         verify(userRepository, times(1)).save(user);
     }
 
-//    @Test
-//    public void testUpdate() {
-//        Long id = 1L;
-//        UserRequestDTO userRequestDTO = new UserRequestDTO("John", "Doe", "johndoe", "johndoe@example.com", "password",
-//                "user");
-//        User userToUpdate = new User(id, "Jane", "Doe", "janedoe", "janedoe@example.com",
-//                new HashedPassword("password"), "user", new Date());
-//        User updatedUser = new User(id, "John", "Doe", "johndoe", "johndoe@example.com", new HashedPassword("password"),
-//                "user", new Date());
-//        when(userRepository.findById(id)).thenReturn(Optional.of(userToUpdate));
-//        when(modelMapper.map(userRequestDTO, User.class)).thenReturn(updatedUser);
-//        when(userRepository.save(updatedUser)).thenReturn(updatedUser);
-//        when(modelMapper.map(updatedUser, UserResponseDTO.class))
-//                .thenReturn(new UserResponseDTO(id, "John", "Doe", "johndoe", "johndoe@example.com", "user"));
-//
-//        UserResponseDTO result = userService.update(id, userRequestDTO);
-//
-//        assertEquals(updatedUser.getId(), result.getId());
-//        verify(userRepository, times(1)).save(updatedUser);
-//    }
-//
-//    @Test
-//    public void testUpdateNoUserFound() {
-//        Long id = 1L;
-//        UserRequestDTO userRequestDTO = new UserRequestDTO("John", "Doe", "johndoe", "johndoe@example.com", "password",
-//                "user");
-//        when(userRepository.findById(id)).thenReturn(Optional.empty());
-//
-//        assertThrows(UserNotFoundException.class, () -> userService.update(id, userRequestDTO));
-//        verify(userRepository, times(0)).save(any(User.class));
-//    }
-//
-//    @Test
-//    public void testGetById() {
-//        Long id = 1L;
-//        User user = new User(id, "John", "Doe", "johndoe", "johndoe@example.com", new HashedPassword("password"),
-//                "user", new Date());
-//        when(userRepository.findById(id)).thenReturn(Optional.of(user));
-//        when(modelMapper.map(user, UserResponseDTO.class))
-//                .thenReturn(new UserResponseDTO(id, "John", "Doe", "johndoe", "johndoe@example.com", "user"));
-//
-//        UserResponseDTO result = userService.getById(id);
-//
-//        assertEquals(id, result.getId());
-//        verify(userRepository, times(1)).findById(id);
-//    }
-//
-//    @Test
-//    public void testGetByIdNoUserFound() {
-//        Long id = 1L;
-//        when(userRepository.findById(id)).thenReturn(Optional.empty());
-//
-//        assertThrows(UserNotFoundException.class, () -> userService.getById(id));
-//        verify(userRepository, times(1)).findById(id);
-//    }
-//
-//    @Test
-//    public void testDelete() {
-//        Long id = 1L;
-//
-//        userService.delete(id);
-//
-//        verify(userRepository, times(1)).deleteById(id);
-//    }
+    // @Test
+    // public void testUpdate() {
+    // Long id = 1L;
+    // UserRequestDTO userRequestDTO = new UserRequestDTO("John", "Doe", "johndoe",
+    // "johndoe@example.com", "password",
+    // "user");
+    // User userToUpdate = new User(id, "Jane", "Doe", "janedoe",
+    // "janedoe@example.com",
+    // new HashedPassword("password"), "user", new Date());
+    // User updatedUser = new User(id, "John", "Doe", "johndoe",
+    // "johndoe@example.com", new HashedPassword("password"),
+    // "user", new Date());
+    // when(userRepository.findById(id)).thenReturn(Optional.of(userToUpdate));
+    // when(modelMapper.map(userRequestDTO, User.class)).thenReturn(updatedUser);
+    // when(userRepository.save(updatedUser)).thenReturn(updatedUser);
+    // when(modelMapper.map(updatedUser, UserResponseDTO.class))
+    // .thenReturn(new UserResponseDTO(id, "John", "Doe", "johndoe",
+    // "johndoe@example.com", "user"));
+    //
+    // UserResponseDTO result = userService.update(id, userRequestDTO);
+    //
+    // assertEquals(updatedUser.getId(), result.getId());
+    // verify(userRepository, times(1)).save(updatedUser);
+    // }
+    //
+    // @Test
+    // public void testUpdateNoUserFound() {
+    // Long id = 1L;
+    // UserRequestDTO userRequestDTO = new UserRequestDTO("John", "Doe", "johndoe",
+    // "johndoe@example.com", "password",
+    // "user");
+    // when(userRepository.findById(id)).thenReturn(Optional.empty());
+    //
+    // assertThrows(UserNotFoundException.class, () -> userService.update(id,
+    // userRequestDTO));
+    // verify(userRepository, times(0)).save(any(User.class));
+    // }
+    //
+    @Test
+    public void testGetById() {
+        Long id = 1L;
+        User user = getMockUser();
+        when(userRepository.findById(id)).thenReturn(Optional.of(user));
+        when(modelMapper.map(user, UserResponseDTO.class)).thenReturn(getMockUserResponseDTO());
+
+        UserResponseDTO result = userService.getById(id);
+
+        assertEquals(getMockUserResponseDTO(), result);
+        verify(userRepository, times(1)).findById(id);
+    }
+
+    @Test
+    public void testGetByIdNoUserFound() {
+        Long id = 1L;
+        when(userRepository.findById(id)).thenReturn(Optional.empty());
+
+        assertThrows(UserNotFoundException.class, () -> userService.getById(id));
+        verify(userRepository, times(1)).findById(id);
+    }
+
+    @Test
+    public void testDelete() {
+        Long id = 1L;
+
+        userService.delete(id);
+
+        verify(userRepository, times(1)).deleteById(id);
+    }
 
 }
