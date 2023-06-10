@@ -57,7 +57,7 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ApiResponse<>(false, e.getMessage()));
         }
     }
-    
+
     @PutMapping("/{id}")
     public ResponseEntity<ApiResponse<UserResponseDTO>> update(@PathVariable Long id, @RequestBody UserRequestDTO user) {
         try {

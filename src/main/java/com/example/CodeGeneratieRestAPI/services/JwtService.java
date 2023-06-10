@@ -17,30 +17,20 @@ public class JwtService {
     @Autowired
     JwtKeyProvider keyProvider;
 
-    // Returns the JWT token from the Authorization header or null if the token is invalid
-    public String getJwtToken(String bearerToken) {
-        if (CheckTokenValidity(bearerToken)) {
-            return bearerToken.substring(7);
-        }
-        return null;
-    }
-
     // Returns the userId from the JWT token or -1 if the token is invalid
-    public long getUserIdFromJwtToken(String bearerToken) {
+    public Long getUserIdFromJwtToken(String bearerToken) {
         String token = getJwtToken(bearerToken);
         if (token != null) {
-            return Jwts.parserBuilder().setSigningKey(keyProvider.getPrivateKey()).build().parseClaimsJws(token)
-                    .getBody().get("userId", Long.class);
+            return Jwts.parserBuilder().setSigningKey(keyProvider.getPrivateKey()).build().parseClaimsJws(token).getBody().get("userId", Double.class).longValue();
         }
-        return -1;
+        return -1L;
     }
 
     // Returns the username from the JWT token or null if the token is invalid
     public String getUsernameFromJwtToken(String bearerToken) {
         String token = getJwtToken(bearerToken);
         if (token != null) {
-            return Jwts.parserBuilder().setSigningKey(keyProvider.getPrivateKey()).build().parseClaimsJws(token)
-                    .getBody().getSubject();
+            return Jwts.parserBuilder().setSigningKey(keyProvider.getPrivateKey()).build().parseClaimsJws(token).getBody().getSubject();
         }
         return null;
     }
@@ -49,25 +39,31 @@ public class JwtService {
     public Enum<UserType> getUserTypeFromJwtToken(String bearerToken) {
         String token = getJwtToken(bearerToken);
         if (token != null) {
-            return Jwts.parserBuilder().setSigningKey(keyProvider.getPrivateKey()).build().parseClaimsJws(token)
-                    .getBody().get("userType", UserType.class);
+            return Jwts.parserBuilder().setSigningKey(keyProvider.getPrivateKey()).build().parseClaimsJws(token).getBody().get("userType", UserType.class);
         }
         return null;
     }
 
     // Returns true if the JWT token is valid
-    public boolean validateJwtToken(String authbearerToken) {
-        String token = getJwtToken(authbearerToken);
+    public boolean validateJwtToken(String bearerToken) {
+        String token = getJwtToken(bearerToken);
         if (token != null) {
             try {
-                Jws<Claims> claims = Jwts.parserBuilder().setSigningKey(keyProvider.getPrivateKey()).build()
-                        .parseClaimsJws(token);
+                Jws<Claims> claims = Jwts.parserBuilder().setSigningKey(keyProvider.getPrivateKey()).build().parseClaimsJws(token);
                 return !claims.getBody().getExpiration().before(new Date());
             } catch (JwtException | IllegalArgumentException e) {
                 throw new JwtException("Expired or invalid JWT token");
             }
         }
         return false;
+    }
+
+    // Returns the JWT token from the Authorization header or null if the token is invalid
+    private String getJwtToken(String bearerToken) {
+        if (CheckTokenValidity(bearerToken)) {
+            return bearerToken.substring(7);
+        }
+        return null;
     }
 
     // Returns true if the Authorization header is valid

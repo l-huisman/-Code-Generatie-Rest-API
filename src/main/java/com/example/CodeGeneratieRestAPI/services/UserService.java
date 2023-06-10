@@ -52,11 +52,13 @@ public class UserService {
 
     public UserResponseDTO getMe(String bearerToken) {
         Long id = jwtService.getUserIdFromJwtToken(bearerToken);
-        User user = userRepository.findById(id).get();
-        if (user == null) {
-            throw new UserNotFoundException("No user found");
+        Optional<User> optionalUser = userRepository.findById(id);
+        if (optionalUser.isPresent()) {
+            User user = optionalUser.get();
+            return modelMapper.map(user, UserResponseDTO.class);
+        } else {
+            throw new UserNotFoundException("User not found with id: " + id);
         }
-        return modelMapper.map(user, UserResponseDTO.class);
     }
 
     public UserResponseDTO add(UserRequestDTO user) {
