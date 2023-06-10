@@ -1,8 +1,9 @@
 package com.example.CodeGeneratieRestAPI.controllers;
 
 import com.example.CodeGeneratieRestAPI.controllers.TransactionController;
+import com.example.CodeGeneratieRestAPI.dtos.TransactionRequestDTO;
+import com.example.CodeGeneratieRestAPI.exceptions.TransactionAmountNotValidException;
 import com.example.CodeGeneratieRestAPI.exceptions.TransactionNotOwnedException;
-import com.example.CodeGeneratieRestAPI.helpers.LoggedInUserHelper;
 import com.example.CodeGeneratieRestAPI.helpers.ServiceHelper;
 import com.example.CodeGeneratieRestAPI.jwt.JwTokenFilter;
 import com.example.CodeGeneratieRestAPI.jwt.JwTokenProvider;
@@ -11,6 +12,8 @@ import com.example.CodeGeneratieRestAPI.repositories.AccountRepository;
 import com.example.CodeGeneratieRestAPI.repositories.TransactionRepository;
 import com.example.CodeGeneratieRestAPI.repositories.UserRepository;
 import com.example.CodeGeneratieRestAPI.services.AccountService;
+import com.example.CodeGeneratieRestAPI.services.UserService;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.FilterChain;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -75,6 +78,8 @@ class TransactionControllerTest {
     // Note that we have to Mock all dependencies our controller code uses if we use @WebMvcTest
     @MockBean
     private TransactionService transactionService;
+    @MockBean
+    private UserService userService;
 
     @MockBean
     private UserRepository userRepository;
@@ -86,8 +91,6 @@ class TransactionControllerTest {
     @MockBean
     private JwTokenProvider jwTokenProvider;
 
-    @MockBean
-    private LoggedInUserHelper loggedInUserHelper;
 
     // We could also add ObjectMapper to convert objects to JSON for us
 
@@ -122,6 +125,8 @@ class TransactionControllerTest {
         transaction.setFromAccount(fromAccount);
         transaction.setToAccount(toAccount);
         transaction.setTransactionType(transactionType);
+        transaction.setLabel("");
+        transaction.setDescription("");
         return transaction;
     }
 
@@ -130,7 +135,7 @@ class TransactionControllerTest {
     void getAll() throws Exception {
         User user = getMockUser(1L, UserType.USER, "john");
         Account fromAccount = getMockAccount("123456", 1000F, user, false);
-        
+
         LocalDate today = LocalDate.now();
         Date startDate = Date.from(today.atStartOfDay(ZoneId.systemDefault()).toInstant());
         Date endDate = Date.from(today.atStartOfDay(ZoneId.systemDefault()).toInstant());
@@ -140,7 +145,7 @@ class TransactionControllerTest {
         transactions.add(getMockTransaction(2L, user, 60F, TransactionType.WITHDRAW, fromAccount, null));
 
         when(transactionService.getAll(user, startDate, endDate, search)).thenReturn(transactions);
-        when(userRepository.findUserByUsername(anyString())).thenReturn(Optional.of(user));
+        when(userService.getLoggedInUser()).thenReturn(user);
 
         SimpleDateFormat DateFormat = new SimpleDateFormat("yyyy-MM-dd");
 
@@ -163,7 +168,7 @@ class TransactionControllerTest {
         transactions.add(getMockTransaction(2L, user, 60F, TransactionType.WITHDRAW, fromAccount, null));
 
         when(transactionService.getAllByUser(user)).thenReturn(transactions);
-        when(userRepository.findUserByUsername(anyString())).thenReturn(Optional.of(user));
+        when(userService.getLoggedInUser()).thenReturn(user);
 
         // Check if we get a 200 OK
         // And if the JSON content matches our expectations
@@ -182,7 +187,7 @@ class TransactionControllerTest {
         Transaction transaction = getMockTransaction(1L, user, 60F, TransactionType.WITHDRAW, fromAccount, null);
 
         when(transactionService.getById(user, transaction.getId())).thenReturn(transaction);
-        when(userRepository.findUserByUsername(anyString())).thenReturn(Optional.of(user));
+        when(userService.getLoggedInUser()).thenReturn(user);
 
         // Check if we get a 200 OK
         // And if the JSON content matches our expectations
@@ -206,7 +211,7 @@ class TransactionControllerTest {
         transactions.add(getMockTransaction(2L, user, 60F, TransactionType.WITHDRAW, fromAccount, null));
 
         when(transactionService.getAllByAccountIban(user, fromAccount.getIban(), startDate, endDate, search)).thenReturn(transactions);
-        when(userRepository.findUserByUsername(anyString())).thenReturn(Optional.of(user));
+        when(userService.getLoggedInUser()).thenReturn(user);
 
         SimpleDateFormat DateFormat = new SimpleDateFormat("yyyy-MM-dd");
 
@@ -227,7 +232,7 @@ class TransactionControllerTest {
         Transaction transaction = getMockTransaction(1L, user, 60F, TransactionType.WITHDRAW, fromAccount, null);
 
         when(transactionService.transactionIsOwnedByUser(user, transaction.getId())).thenReturn(transaction);
-        when(userRepository.findUserByUsername(anyString())).thenReturn(Optional.of(user));
+        when(userService.getLoggedInUser()).thenReturn(user);
 
         // Check if we get a 200 OK
         // And if the JSON content matches our expectations
@@ -245,13 +250,55 @@ class TransactionControllerTest {
         Transaction transaction = getMockTransaction(1L, user1, 60F, TransactionType.WITHDRAW, fromAccount, null);
 
         when(transactionService.transactionIsOwnedByUser(user, transaction.getId())).thenThrow(new TransactionNotOwnedException("This user does not own the specified transaction"));
-        when(userRepository.findUserByUsername(anyString())).thenReturn(Optional.of(user));
+        when(userService.getLoggedInUser()).thenReturn(user);
 
         // Check if we get a 200 OK
         // And if the JSON content matches our expectations
         this.mockMvc.perform(get("/transactions/owns/" + transaction.getId()).header("Authorization", "test")).andDo(print())
-                .andExpect(status().isOk())
+                .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message").value("This user does not own the specified transaction"));
+    }
+
+    @Test
+    @WithMockUser(username = "Devon", password = "pwd", roles = "USER")
+    void addTransaction() throws Exception {
+        User user = getMockUser(1L, UserType.USER, "john");
+        Account fromAccount = getMockAccount("123456", 1000F, user, false);
+
+        Transaction transaction = getMockTransaction(1L, user, 60F, TransactionType.WITHDRAW, fromAccount, null);
+        TransactionRequestDTO transactionRequestDTO = new TransactionRequestDTO(fromAccount.getIban(), null, "WITHDRAW", transaction.getAmount() , transaction.getLabel(), transaction.getDescription());
+
+        when(transactionService.add(any(User.class), any(TransactionRequestDTO.class))).thenReturn(transaction);
+        when(userService.getLoggedInUser()).thenReturn(user);
+
+        String json = new ObjectMapper().writeValueAsString(transactionRequestDTO).replace("null", "\"\"");
+
+        // Check if we get a 200 OK
+        // And if the JSON content matches our expectations
+        this.mockMvc.perform(post("/transactions").header("Authorization", "test").with(org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf()).contentType(MediaType.APPLICATION_JSON).content(json).accept(MediaType.APPLICATION_JSON)).andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.amount").value("60.0"));
+    }
+
+    @Test
+    @WithMockUser(username = "Devon", password = "pwd", roles = "USER")
+    void addInvalidTransaction() throws Exception {
+        User user = getMockUser(1L, UserType.USER, "john");
+        Account fromAccount = getMockAccount("123456", 1000F, user, false);
+
+        Transaction transaction = getMockTransaction(1L, user, 0F, TransactionType.WITHDRAW, fromAccount, null);
+        TransactionRequestDTO transactionRequestDTO = new TransactionRequestDTO(fromAccount.getIban(), null, "WITHDRAW", transaction.getAmount() , transaction.getLabel(), transaction.getDescription());
+
+        when(transactionService.add(any(User.class), any(TransactionRequestDTO.class))).thenThrow(new TransactionAmountNotValidException("The transaction amount can't be zero."));
+        when(userService.getLoggedInUser()).thenReturn(user);
+
+        String json = new ObjectMapper().writeValueAsString(transactionRequestDTO).replace("null", "\"\"");
+
+        // Check if we get a 200 OK
+        // And if the JSON content matches our expectations
+        this.mockMvc.perform(post("/transactions").header("Authorization", "test").with(org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf()).contentType(MediaType.APPLICATION_JSON).content(json).accept(MediaType.APPLICATION_JSON)).andDo(print())
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("The transaction amount can't be zero."));
     }
 
     // @Test

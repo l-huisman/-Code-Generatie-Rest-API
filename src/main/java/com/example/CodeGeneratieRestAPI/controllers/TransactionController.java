@@ -7,6 +7,7 @@ import com.example.CodeGeneratieRestAPI.helpers.LoggedInUserHelper;
 import com.example.CodeGeneratieRestAPI.helpers.ServiceHelper;
 import com.example.CodeGeneratieRestAPI.models.*;
 import com.example.CodeGeneratieRestAPI.services.TransactionService;
+import jakarta.validation.Valid;
 import com.example.CodeGeneratieRestAPI.services.UserService;
 import org.hibernate.service.spi.InjectService;
 import org.modelmapper.ModelMapper;
@@ -30,7 +31,6 @@ public class TransactionController {
 
     ModelMapper modelMapper;
     @Autowired
-
     private TransactionService transactionService;
     @Autowired
     private LoggedInUserHelper loggedInUserHelper;
@@ -43,7 +43,9 @@ public class TransactionController {
     @GetMapping
     public ResponseEntity<ApiResponse> getAll(@RequestParam @DateTimeFormat(pattern="yyyy-MM-dd") Date start_date, @RequestParam @DateTimeFormat(pattern="yyyy-MM-dd") Date end_date, @RequestParam String search) {
         try {
+            System.out.println("kaas");
             User user = loggedInUserHelper.getLoggedInUser();
+            System.out.println(user.getUsername());
 
             List<Transaction> transactions = transactionService.getAll(user, start_date, end_date, search);
 
@@ -107,7 +109,7 @@ public class TransactionController {
     }
 
     @PostMapping
-    public ResponseEntity<ApiResponse> add(@RequestBody(required = true) TransactionRequestDTO transactionIn) {
+    public ResponseEntity<ApiResponse> add(@Valid @RequestBody(required = true) TransactionRequestDTO transactionIn) {
         try {
             User user = loggedInUserHelper.getLoggedInUser();
 
