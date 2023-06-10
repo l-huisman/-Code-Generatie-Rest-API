@@ -39,7 +39,7 @@ public class TransactionController {
     @GetMapping
     public ResponseEntity<ApiResponse> getAll(@RequestParam @DateTimeFormat(pattern="yyyy-MM-dd") Date start_date, @RequestParam @DateTimeFormat(pattern="yyyy-MM-dd") Date end_date, @RequestParam String search) {
         try {
-            User user = ServiceHelper.getLoggedInUser();
+            User user = serviceHelper.getLoggedInUser();
 
             List<Transaction> transactions = transactionService.getAll(user, start_date, end_date, search);
 

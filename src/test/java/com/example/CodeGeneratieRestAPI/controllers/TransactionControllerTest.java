@@ -84,8 +84,6 @@ class TransactionControllerTest {
 
     @BeforeEach
     void setUp() {
-        ServiceHelper serviceHelper = new ServiceHelper();
-        serviceHelper.setUserRepository(userRepository);
     }
 
     private User getMockUser(Long id, UserType userType, String username) {
