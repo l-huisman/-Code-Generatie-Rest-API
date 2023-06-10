@@ -21,6 +21,8 @@ public class UserService {
     @Autowired
     JwTokenProvider tokenProvider;
     @Autowired
+    JwtService jwtService;
+    @Autowired
     private UserRepository userRepository;
     @Autowired
     private LoginRepository loginRepository;
@@ -30,8 +32,7 @@ public class UserService {
     }
 
     public User getMe(String bearerToken) {
-        String token = bearerToken.substring(7);
-        long id = tokenProvider.getUserIdFromJWT(token);
+        Long id = jwtService.getUserIdFromJwtToken(bearerToken);
         return userRepository.findById(id).get();
     }
 
@@ -63,24 +64,14 @@ public class UserService {
             throw new NotYetImplementedException("User not found");
         }
         String token = tokenProvider.createToken(user.getId(), user.getUsername(), user.getUserType());
-
-        UserResponseDTO userResponseDTO = new UserResponseDTO();
-        userResponseDTO.setFirstName(user.getFirstName());
-        userResponseDTO.setLastName(user.getLastName());
-        userResponseDTO.setUsername(user.getUsername());
-        userResponseDTO.setEmail(user.getEmail());
-        userResponseDTO.setUserType(user.getUserType());
-        userResponseDTO.setCreatedAt(user.getCreatedAt());
-
-
+        UserResponseDTO userResponseDTO = new UserResponseDTO(user.getFirstName(), user.getLastName(),
+                user.getUsername(), user.getEmail(), user.getUserType(), user.getCreatedAt());
         return new LoginResponseDTO(token, userResponseDTO);
     }
 
     public Enum<UserType> validate(String bearerToken) {
-        String token = bearerToken.substring(7);
-        if (tokenProvider.validateToken(token)) {
-            String userType = tokenProvider.getUserTypeFromJWT(token);
-            return UserType.valueOf(userType);
+        if (jwtService.validateJwtToken(bearerToken)) {
+            return jwtService.getUserTypeFromJwtToken(bearerToken);
         } else {
             return null;
         }

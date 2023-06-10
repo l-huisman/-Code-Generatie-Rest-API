@@ -24,7 +24,7 @@ public class JwTokenFilter extends OncePerRequestFilter {
         if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
             return bearerToken.substring(7);
         }
-        return null;
+        return null;    
     }
 
     @Override

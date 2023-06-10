@@ -31,6 +31,9 @@ public class UserServiceTest {
     private JwTokenProvider tokenProvider;
 
     @Mock
+    private JwtService jwtService;
+
+    @Mock
     private UserRepository userRepository;
 
     @Mock
@@ -88,7 +91,7 @@ public class UserServiceTest {
         user.setCreatedAt("2021-10-01");
 
         String token = "token123";
-        when(tokenProvider.getUserIdFromJWT(token)).thenReturn(1L);
+        when(jwtService.getUserIdFromJwtToken(token)).thenReturn(1L);
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
 
         User result = userService.getMe("Bearer " + token);
@@ -172,13 +175,8 @@ public class UserServiceTest {
         when(loginRepository.findByUsername("user1")).thenReturn(Optional.of(user));
         when(tokenProvider.createToken(1L, "user1", UserType.USER)).thenReturn("token123");
 
-        UserResponseDTO userResponseDTO = new UserResponseDTO();
-        userResponseDTO.setFirstName(user.getFirstName());
-        userResponseDTO.setLastName(user.getLastName());
-        userResponseDTO.setUsername(user.getUsername());
-        userResponseDTO.setEmail(user.getEmail());
-        userResponseDTO.setUserType(user.getUserType());
-        userResponseDTO.setCreatedAt(user.getCreatedAt());
+        UserResponseDTO userResponseDTO = new UserResponseDTO(user.getFirstName(), user.getLastName(),
+                user.getUsername(), user.getEmail(), user.getUserType(), user.getCreatedAt());
 
         LoginResponseDTO expected = new LoginResponseDTO("token123", userResponseDTO);
 
@@ -190,8 +188,8 @@ public class UserServiceTest {
     @Test
     public void testValidate() {
         String token = "token123";
-        when(tokenProvider.validateToken(token)).thenReturn(true);
-        when(tokenProvider.getUserTypeFromJWT(token)).thenReturn(UserType.USER.name());
+        when(jwtService.validateJwtToken(token)).thenReturn(true);
+        when(jwtService.getUserTypeFromJwtToken(token)).thenReturn(UserType.USER);
 
         Enum<UserType> result = userService.validate("Bearer " + token);
 

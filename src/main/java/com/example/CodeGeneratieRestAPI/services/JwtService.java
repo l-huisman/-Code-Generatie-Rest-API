@@ -1,33 +1,79 @@
 package com.example.CodeGeneratieRestAPI.services;
 
+import com.example.CodeGeneratieRestAPI.jwt.JwtKeyProvider;
 import com.example.CodeGeneratieRestAPI.models.UserType;
+
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jws;
+import io.jsonwebtoken.JwtException;
+import io.jsonwebtoken.Jwts;
+
+import java.util.Date;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
 public class JwtService {
 
-    // TODO: Implement this method
-    public String getJwtToken() {
-        throw new UnsupportedOperationException("Not implemented yet.");
+    @Autowired
+    JwtKeyProvider keyProvider;
+
+    // Returns the JWT token from the Authorization header or null if the token is invalid
+    public String getJwtToken(String bearerToken) {
+        if (CheckTokenValidity(bearerToken)) {
+            return bearerToken.substring(7);
+        }
+        return null;
     }
 
-    // TODO: Implement this method
-    public long getUserIdFromJwtToken(String token) {
-        throw new UnsupportedOperationException("Not implemented yet.");
+    // Returns the userId from the JWT token or -1 if the token is invalid
+    public long getUserIdFromJwtToken(String bearerToken) {
+        String token = getJwtToken(bearerToken);
+        if (token != null) {
+            return Jwts.parserBuilder().setSigningKey(keyProvider.getPrivateKey()).build().parseClaimsJws(token)
+                .getBody().get("userId", Long.class);
+        }
+        return -1;
     }
 
-    // TODO: Implement this method
-    public String getUsernameFromJwtToken(String token) {
-        throw new UnsupportedOperationException("Not implemented yet.");
+    // Returns the username from the JWT token or null if the token is invalid
+    public String getUsernameFromJwtToken(String bearerToken) {
+        String token = getJwtToken(bearerToken);
+        if (token != null) {
+            return Jwts.parserBuilder().setSigningKey(keyProvider.getPrivateKey()).build().parseClaimsJws(token)
+                .getBody().getSubject();
+        }
+        return null;
     }
 
-    // TODO: Implement this method
-    public Enum<UserType> getUserTypeFromJwtToken(String token) {
-        throw new UnsupportedOperationException("Not implemented yet.");
+    // Returns the user type from the JWT token or null if the token is invalid
+    public Enum<UserType> getUserTypeFromJwtToken(String bearerToken) {
+        String token = getJwtToken(bearerToken);
+        if (token != null) {
+            return Jwts.parserBuilder().setSigningKey(keyProvider.getPrivateKey()).build().parseClaimsJws(token)
+                .getBody().get("userType", UserType.class);
+        }
+        return null;
     }
 
-    // TODO: Implement this method
-    public boolean validateJwtToken(String authToken) {
-        throw new UnsupportedOperationException("Not implemented yet.");
+    // Returns true if the JWT token is valid
+    public boolean validateJwtToken(String authbearerToken) {
+        String token = getJwtToken(authbearerToken);
+        if (token != null) {
+            try {
+                Jws<Claims> claims = Jwts.parserBuilder().setSigningKey(keyProvider.getPrivateKey()).build()
+                    .parseClaimsJws(token);
+                return !claims.getBody().getExpiration().before(new Date());
+            } catch (JwtException | IllegalArgumentException e) {
+                throw new JwtException("Expired or invalid JWT token");
+            }
+        }
+        return false;
+    }
+
+    // Returns true if the Authorization header is valid
+    private boolean CheckTokenValidity(String bearerToken) {
+        return bearerToken != null && bearerToken.startsWith("Bearer ");
     }
 }
