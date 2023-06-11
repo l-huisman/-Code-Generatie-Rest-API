@@ -149,7 +149,7 @@ public class AccountService {
 
         return accountRepository.getAccountByIban(iban).orElseThrow(() -> new AccountNotFoundException("Account with IBAN: " + iban + " does not exist"));
     }
-    public List<Account> getAllAccounts(String search, boolean active, User loggedInUser) {
+    public List<Account> getAllAccounts(String search, Boolean active, User loggedInUser) {
         // Check if the user is an employee
         if (loggedInUser.getUserType().getAuthority().equals("EMPLOYEE")) {
             //  Get all accounts
@@ -273,6 +273,6 @@ public class AccountService {
     public void addSeededAccount(String iban, Account account) {
         account.setIban(iban);
         accountRepository.save(account);
-        System.out.println("Account with IBAN: " + iban + " has been added");
+        //System.out.println("Account with IBAN: " + iban + " has been added");
     }
 }
