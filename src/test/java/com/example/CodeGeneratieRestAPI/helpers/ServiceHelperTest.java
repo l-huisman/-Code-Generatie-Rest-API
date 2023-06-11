@@ -1,6 +1,5 @@
 package com.example.CodeGeneratieRestAPI.helpers;
 
-import com.example.CodeGeneratieRestAPI.exceptions.UserNotFoundException;
 import com.example.CodeGeneratieRestAPI.models.Account;
 import com.example.CodeGeneratieRestAPI.models.Transaction;
 import com.example.CodeGeneratieRestAPI.models.User;
@@ -12,13 +11,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
-
-import java.util.Collections;
-import java.util.Optional;
 
 import static org.mockito.Mockito.when;
 

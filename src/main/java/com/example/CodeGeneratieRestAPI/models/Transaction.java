@@ -1,6 +1,5 @@
 package com.example.CodeGeneratieRestAPI.models;
 
-import com.example.CodeGeneratieRestAPI.dtos.TransactionRequestDTO;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;

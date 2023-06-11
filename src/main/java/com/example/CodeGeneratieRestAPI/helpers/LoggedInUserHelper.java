@@ -13,6 +13,7 @@ public class LoggedInUserHelper {
     public LoggedInUserHelper() {
         this.userService = new UserService();
     }
+
     //  Get the current logged-in user
     public User getLoggedInUser() {
         return userService.getLoggedInUser();

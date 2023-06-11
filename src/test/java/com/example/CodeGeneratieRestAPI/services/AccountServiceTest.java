@@ -2,11 +2,7 @@ package com.example.CodeGeneratieRestAPI.services;
 
 import com.example.CodeGeneratieRestAPI.dtos.AccountRequestDTO;
 import com.example.CodeGeneratieRestAPI.exceptions.AccountCreationException;
-import com.example.CodeGeneratieRestAPI.exceptions.AccountNoDataChangedException;
 import com.example.CodeGeneratieRestAPI.exceptions.AccountNotAccessibleException;
-import com.example.CodeGeneratieRestAPI.exceptions.AccountNotFoundException;
-import com.example.CodeGeneratieRestAPI.exceptions.AccountUpdateException;
-import com.example.CodeGeneratieRestAPI.exceptions.UserNotFoundException;
 import com.example.CodeGeneratieRestAPI.helpers.ServiceHelper;
 import com.example.CodeGeneratieRestAPI.models.Account;
 import com.example.CodeGeneratieRestAPI.models.User;
@@ -19,18 +15,12 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.WeakHashMap;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 public class AccountServiceTest {
@@ -44,11 +34,11 @@ public class AccountServiceTest {
     @InjectMocks
     private AccountService accountService;
 
-
     @BeforeEach
     public void init() {
         MockitoAnnotations.openMocks(this);
     }
+
     private Account getMockAccount(User user) {
         Account account = new Account();
         account.setIban("NL24-INHO-0288-9098-04");
@@ -62,6 +52,7 @@ public class AccountServiceTest {
         account.setIsActive(true);
         return account;
     }
+
     private AccountRequestDTO getMockAccountRequestDTO() {
         AccountRequestDTO accountRequestDTO = new AccountRequestDTO();
         accountRequestDTO.setBalance(1000.0F);
@@ -72,6 +63,7 @@ public class AccountServiceTest {
         accountRequestDTO.setIsActive(true);
         return accountRequestDTO;
     }
+
     private User getMockUser(UserType userType) {
         User user = new User();
         user.setId(1L);
@@ -79,6 +71,7 @@ public class AccountServiceTest {
         user.setUsername("john");
         return user;
     }
+
     @Test
     public void testGetAllAccounts() {
         // Setup
@@ -88,11 +81,13 @@ public class AccountServiceTest {
         Account account2 = getMockAccount(user);
         accountList.add(account1);
         accountList.add(account2);
-        when(accountRepository.findAllBySearchTermAndUserId(anyString(), anyBoolean(), anyLong())).thenReturn(accountList);
+        when(accountRepository.findAllBySearchTermAndUserId(anyString(), anyBoolean(), anyLong()))
+                .thenReturn(accountList);
 
         // Run the test
         final List<Account> result = accountService.getAllAccounts("Test", true, user);
-        //final List<Account> result = accountRepository.findAllBySearchTermAndUserId("Test", true, user.getId());
+        // final List<Account> result =
+        // accountRepository.findAllBySearchTermAndUserId("Test", true, user.getId());
 
         // Verify the results
         assertEquals(2, result.size());
@@ -111,14 +106,16 @@ public class AccountServiceTest {
         AccountRequestDTO accountRequestDTO_3 = getMockAccountRequestDTO();
         accountRequestDTO_3.setUserId(user_USER.getId());
 
-
-
         // Run the test and verify the exception
-        AccountCreationException exception_1 = Assertions.assertThrows(AccountCreationException.class, () -> accountService.add(accountRequestDTO_1, user_USER));
+        AccountCreationException exception_1 = Assertions.assertThrows(AccountCreationException.class,
+                () -> accountService.add(accountRequestDTO_1, user_USER));
         assertEquals("You cannot set the IBAN of a new account", exception_1.getMessage());
 
-        AccountCreationException exception_2 = Assertions.assertThrows(AccountCreationException.class, () -> accountService.add(accountRequestDTO_2, user_EMPLOYEE));
-        assertEquals("You cannot add an account as an employee without selecting a user (if you are adding an account for yourself, select yourself as the user)", exception_2.getMessage());
+        AccountCreationException exception_2 = Assertions.assertThrows(AccountCreationException.class,
+                () -> accountService.add(accountRequestDTO_2, user_EMPLOYEE));
+        assertEquals(
+                "You cannot add an account as an employee without selecting a user (if you are adding an account for yourself, select yourself as the user)",
+                exception_2.getMessage());
 
         assertDoesNotThrow(() -> accountService.add(accountRequestDTO_3, user_USER));
     }
@@ -138,6 +135,7 @@ public class AccountServiceTest {
 
         assertEquals(expectedAccountOptional.orElse(null), actualAccount);
     }
+
     @Test
     void testGetAccountByIbanThrowsAccountNotAccessibleException() {
         User user1 = getMockUser(UserType.USER);
@@ -153,8 +151,6 @@ public class AccountServiceTest {
         AccountNotAccessibleException exception = Assertions.assertThrows(AccountNotAccessibleException.class, () -> accountService.getAccountByIban(account.getIban(), user2));
         assertEquals("Account with IBAN: " + accountToCheck.getIban() + " does not belong to the logged in user", exception.getMessage());
     }
-
-
 
 
 }

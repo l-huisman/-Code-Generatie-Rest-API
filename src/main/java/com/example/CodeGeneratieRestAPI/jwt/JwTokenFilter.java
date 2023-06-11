@@ -1,6 +1,5 @@
 package com.example.CodeGeneratieRestAPI.jwt;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;

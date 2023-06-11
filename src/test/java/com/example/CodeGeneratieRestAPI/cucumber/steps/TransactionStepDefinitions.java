@@ -1,7 +1,10 @@
 package com.example.CodeGeneratieRestAPI.cucumber.steps;
 
 import com.example.CodeGeneratieRestAPI.dtos.TransactionRequestDTO;
-import com.example.CodeGeneratieRestAPI.models.*;
+import com.example.CodeGeneratieRestAPI.models.Account;
+import com.example.CodeGeneratieRestAPI.models.Transaction;
+import com.example.CodeGeneratieRestAPI.models.User;
+import com.example.CodeGeneratieRestAPI.models.UserType;
 import com.example.CodeGeneratieRestAPI.repositories.AccountRepository;
 import com.example.CodeGeneratieRestAPI.repositories.TransactionRepository;
 import com.example.CodeGeneratieRestAPI.repositories.UserRepository;
@@ -353,6 +356,7 @@ public class TransactionStepDefinitions extends BaseStepDefinitions {
         assertNotNull(exception);
         assertEquals(message, exception.getMessage());
     }
+
     @Then("a other RuntimeException is thrown with message {string}")
     public void aOtherRuntimeExceptionIsThrownWithMessage(String message) {
         Transaction savedTransaction = anotherTransaction.getId() != null ? transactionRepository.findById(anotherTransaction.getId()).orElse(null) : null;

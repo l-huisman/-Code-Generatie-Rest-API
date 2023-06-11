@@ -1,5 +1,16 @@
 package com.example.CodeGeneratieRestAPI.services;
-import static org.mockito.Mockito.when;
+
+import com.example.CodeGeneratieRestAPI.dtos.TransactionRequestDTO;
+import com.example.CodeGeneratieRestAPI.exceptions.*;
+import com.example.CodeGeneratieRestAPI.models.*;
+import com.example.CodeGeneratieRestAPI.repositories.AccountRepository;
+import com.example.CodeGeneratieRestAPI.repositories.TransactionRepository;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -12,20 +23,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
-import com.example.CodeGeneratieRestAPI.dtos.TransactionRequestDTO;
-import com.example.CodeGeneratieRestAPI.exceptions.*;
-import com.example.CodeGeneratieRestAPI.helpers.IBANGenerator;
-import com.example.CodeGeneratieRestAPI.models.*;
-import com.example.CodeGeneratieRestAPI.repositories.AccountRepository;
-import com.example.CodeGeneratieRestAPI.services.TransactionService;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-
-import com.example.CodeGeneratieRestAPI.repositories.TransactionRepository;
+import static org.mockito.Mockito.when;
 
 public class TransactionServiceTest {
 
@@ -77,7 +75,7 @@ public class TransactionServiceTest {
         User user = getMockUser(1L, UserType.USER, "john");
         Account toAccount = getMockAccount("123456", 1000F, user, false);
         Transaction transaction = getMockTransaction(user, 60F, null, null, toAccount);
-        TransactionRequestDTO transactionRequestDTO = new TransactionRequestDTO(null, toAccount.getIban(), "", transaction.getAmount() , transaction.getLabel(), transaction.getDescription());
+        TransactionRequestDTO transactionRequestDTO = new TransactionRequestDTO(null, toAccount.getIban(), "", transaction.getAmount(), transaction.getLabel(), transaction.getDescription());
 
         when(accountRepository.findByIban(toAccount.getIban())).thenReturn(toAccount);
         when(transactionRepository.save(transaction)).thenReturn(transaction);
@@ -90,7 +88,7 @@ public class TransactionServiceTest {
         User user = getMockUser(1L, UserType.USER, "john");
         Account toAccount = getMockAccount("123456", 1000F, user, false);
         Transaction transaction = getMockTransaction(user, 60F, TransactionType.DEPOSIT, null, toAccount);
-        TransactionRequestDTO transactionRequestDTO = new TransactionRequestDTO(null, toAccount.getIban(), "DEPOSIT", transaction.getAmount() , transaction.getLabel(), transaction.getDescription());
+        TransactionRequestDTO transactionRequestDTO = new TransactionRequestDTO(null, toAccount.getIban(), "DEPOSIT", transaction.getAmount(), transaction.getLabel(), transaction.getDescription());
 
         when(accountRepository.findByIban(toAccount.getIban())).thenReturn(toAccount);
         when(transactionRepository.save(transaction)).thenReturn(transaction);
@@ -103,7 +101,7 @@ public class TransactionServiceTest {
         User user = getMockUser(1L, UserType.USER, "john");
         Account toAccount = getMockAccount("123456", 1000F, user, false);
         Transaction transaction = getMockTransaction(user, 0F, TransactionType.DEPOSIT, null, toAccount);
-        TransactionRequestDTO transactionRequestDTO = new TransactionRequestDTO(null, toAccount.getIban(), "DEPOSIT", transaction.getAmount() , transaction.getLabel(), transaction.getDescription());
+        TransactionRequestDTO transactionRequestDTO = new TransactionRequestDTO(null, toAccount.getIban(), "DEPOSIT", transaction.getAmount(), transaction.getLabel(), transaction.getDescription());
 
         when(accountRepository.findByIban(toAccount.getIban())).thenReturn(toAccount);
         when(transactionRepository.save(transaction)).thenReturn(transaction);
@@ -116,7 +114,7 @@ public class TransactionServiceTest {
         User user = getMockUser(1L, UserType.USER, "john");
         Account toAccount = getMockAccount("123456", 1000F, user, false);
         Transaction transaction = getMockTransaction(user, -10F, TransactionType.DEPOSIT, null, toAccount);
-        TransactionRequestDTO transactionRequestDTO = new TransactionRequestDTO(null, toAccount.getIban(), "DEPOSIT", transaction.getAmount() , transaction.getLabel(), transaction.getDescription());
+        TransactionRequestDTO transactionRequestDTO = new TransactionRequestDTO(null, toAccount.getIban(), "DEPOSIT", transaction.getAmount(), transaction.getLabel(), transaction.getDescription());
 
         when(accountRepository.findByIban(toAccount.getIban())).thenReturn(toAccount);
         when(transactionRepository.save(transaction)).thenReturn(transaction);
@@ -129,7 +127,7 @@ public class TransactionServiceTest {
         User user = getMockUser(1L, UserType.USER, "john");
         Account toAccount = getMockAccount("123456", 1000F, user, false);
         Transaction transaction = getMockTransaction(user, 60F, TransactionType.DEPOSIT, null, null);
-        TransactionRequestDTO transactionRequestDTO = new TransactionRequestDTO(null, null, "DEPOSIT", transaction.getAmount() , transaction.getLabel(), transaction.getDescription());
+        TransactionRequestDTO transactionRequestDTO = new TransactionRequestDTO(null, null, "DEPOSIT", transaction.getAmount(), transaction.getLabel(), transaction.getDescription());
 
         when(accountRepository.findByIban(toAccount.getIban())).thenReturn(toAccount);
         when(transactionRepository.save(transaction)).thenReturn(transaction);
@@ -143,7 +141,7 @@ public class TransactionServiceTest {
         User user1 = getMockUser(2L, UserType.USER, "doe");
         Account toAccount = getMockAccount("123456", 1000F, user1, false);
         Transaction transaction = getMockTransaction(user1, 60F, TransactionType.DEPOSIT, null, toAccount);
-        TransactionRequestDTO transactionRequestDTO = new TransactionRequestDTO(null, toAccount.getIban(), "DEPOSIT", transaction.getAmount() , transaction.getLabel(), transaction.getDescription());
+        TransactionRequestDTO transactionRequestDTO = new TransactionRequestDTO(null, toAccount.getIban(), "DEPOSIT", transaction.getAmount(), transaction.getLabel(), transaction.getDescription());
 
         when(accountRepository.findByIban(toAccount.getIban())).thenReturn(toAccount);
         when(transactionRepository.save(transaction)).thenReturn(transaction);
@@ -156,7 +154,7 @@ public class TransactionServiceTest {
         User user = getMockUser(1L, UserType.USER, "john");
         Account fromAccount = getMockAccount("123456", 1000F, user, false);
         Transaction transaction = getMockTransaction(user, 60F, TransactionType.WITHDRAW, fromAccount, null);
-        TransactionRequestDTO transactionRequestDTO = new TransactionRequestDTO(fromAccount.getIban(), null, "WITHDRAW", transaction.getAmount() , transaction.getLabel(), transaction.getDescription());
+        TransactionRequestDTO transactionRequestDTO = new TransactionRequestDTO(fromAccount.getIban(), null, "WITHDRAW", transaction.getAmount(), transaction.getLabel(), transaction.getDescription());
 
         when(accountRepository.findByIban(fromAccount.getIban())).thenReturn(fromAccount);
         when(transactionRepository.save(transaction)).thenReturn(transaction);
@@ -169,7 +167,7 @@ public class TransactionServiceTest {
         User user = getMockUser(1L, UserType.USER, "john");
         Account fromAccount = getMockAccount("123456", 1000F, user, false);
         Transaction transaction = getMockTransaction(user, 60F, TransactionType.WITHDRAW, null, null);
-        TransactionRequestDTO transactionRequestDTO = new TransactionRequestDTO(null, null, "WITHDRAW", transaction.getAmount() , transaction.getLabel(), transaction.getDescription());
+        TransactionRequestDTO transactionRequestDTO = new TransactionRequestDTO(null, null, "WITHDRAW", transaction.getAmount(), transaction.getLabel(), transaction.getDescription());
 
         when(accountRepository.findByIban(fromAccount.getIban())).thenReturn(fromAccount);
         when(transactionRepository.save(transaction)).thenReturn(transaction);
@@ -182,7 +180,7 @@ public class TransactionServiceTest {
         User user = getMockUser(1L, UserType.USER, "john");
         Account fromAccount = getMockAccount("123456", 1000F, user, false);
         Transaction transaction = getMockTransaction(user, 200F, TransactionType.WITHDRAW, fromAccount, null);
-        TransactionRequestDTO transactionRequestDTO = new TransactionRequestDTO(fromAccount.getIban(), null, "WITHDRAW", transaction.getAmount() , transaction.getLabel(), transaction.getDescription());
+        TransactionRequestDTO transactionRequestDTO = new TransactionRequestDTO(fromAccount.getIban(), null, "WITHDRAW", transaction.getAmount(), transaction.getLabel(), transaction.getDescription());
 
         when(accountRepository.findByIban(fromAccount.getIban())).thenReturn(fromAccount);
         when(transactionRepository.save(transaction)).thenReturn(transaction);
@@ -195,7 +193,7 @@ public class TransactionServiceTest {
         User user = getMockUser(1L, UserType.USER, "john");
         Account fromAccount = getMockAccount("123456", 100F, user, false);
         Transaction transaction = getMockTransaction(user, 950F, TransactionType.WITHDRAW, fromAccount, null);
-        TransactionRequestDTO transactionRequestDTO = new TransactionRequestDTO(fromAccount.getIban(), null, "WITHDRAW", transaction.getAmount() , transaction.getLabel(), transaction.getDescription());
+        TransactionRequestDTO transactionRequestDTO = new TransactionRequestDTO(fromAccount.getIban(), null, "WITHDRAW", transaction.getAmount(), transaction.getLabel(), transaction.getDescription());
 
         when(accountRepository.findByIban(fromAccount.getIban())).thenReturn(fromAccount);
         when(transactionRepository.save(transaction)).thenReturn(transaction);
@@ -208,7 +206,7 @@ public class TransactionServiceTest {
         User user = getMockUser(1L, UserType.USER, "john");
         Account fromAccount = getMockAccount("123456", 1000F, user, false);
         Transaction transaction = getMockTransaction(user, 90F, TransactionType.WITHDRAW, fromAccount, null);
-        TransactionRequestDTO transactionRequestDTO = new TransactionRequestDTO(fromAccount.getIban(), null, "WITHDRAW", transaction.getAmount() , transaction.getLabel(), transaction.getDescription());
+        TransactionRequestDTO transactionRequestDTO = new TransactionRequestDTO(fromAccount.getIban(), null, "WITHDRAW", transaction.getAmount(), transaction.getLabel(), transaction.getDescription());
 
         List<Transaction> transactions = new ArrayList<>();
         transactions.add(transaction);
@@ -235,7 +233,7 @@ public class TransactionServiceTest {
         Account toAccount = getMockAccount("123457", 1000F, user, false);
 
         Transaction transaction = getMockTransaction(user, 60F, TransactionType.TRANSFER, fromAccount, toAccount);
-        TransactionRequestDTO transactionRequestDTO = new TransactionRequestDTO(fromAccount.getIban(), toAccount.getIban(), "TRANSFER", transaction.getAmount() , transaction.getLabel(), transaction.getDescription());
+        TransactionRequestDTO transactionRequestDTO = new TransactionRequestDTO(fromAccount.getIban(), toAccount.getIban(), "TRANSFER", transaction.getAmount(), transaction.getLabel(), transaction.getDescription());
 
         when(accountRepository.findByIban(fromAccount.getIban())).thenReturn(fromAccount);
         when(accountRepository.findByIban(toAccount.getIban())).thenReturn(toAccount);
@@ -251,7 +249,7 @@ public class TransactionServiceTest {
         Account toAccount = getMockAccount("123457", 1000F, user, false);
 
         Transaction transaction = getMockTransaction(user, 60F, TransactionType.TRANSFER, fromAccount, toAccount);
-        TransactionRequestDTO transactionRequestDTO = new TransactionRequestDTO(fromAccount.getIban(), toAccount.getIban(), "TRANSFER", transaction.getAmount() , transaction.getLabel(), transaction.getDescription());
+        TransactionRequestDTO transactionRequestDTO = new TransactionRequestDTO(fromAccount.getIban(), toAccount.getIban(), "TRANSFER", transaction.getAmount(), transaction.getLabel(), transaction.getDescription());
 
         when(accountRepository.findByIban(fromAccount.getIban())).thenReturn(fromAccount);
         when(accountRepository.findByIban(toAccount.getIban())).thenReturn(toAccount);
@@ -267,7 +265,7 @@ public class TransactionServiceTest {
         Account toAccount = getMockAccount("123457", 1000F, user, true);
 
         Transaction transaction = getMockTransaction(user, 60F, TransactionType.TRANSFER, fromAccount, toAccount);
-        TransactionRequestDTO transactionRequestDTO = new TransactionRequestDTO(fromAccount.getIban(), toAccount.getIban(), "TRANSFER", transaction.getAmount() , transaction.getLabel(), transaction.getDescription());
+        TransactionRequestDTO transactionRequestDTO = new TransactionRequestDTO(fromAccount.getIban(), toAccount.getIban(), "TRANSFER", transaction.getAmount(), transaction.getLabel(), transaction.getDescription());
 
         when(accountRepository.findByIban(fromAccount.getIban())).thenReturn(fromAccount);
         when(accountRepository.findByIban(toAccount.getIban())).thenReturn(toAccount);
@@ -285,7 +283,7 @@ public class TransactionServiceTest {
         Account toAccount = getMockAccount("123457", 1000F, user1, true);
 
         Transaction transaction = getMockTransaction(user, 60F, TransactionType.TRANSFER, fromAccount, toAccount);
-        TransactionRequestDTO transactionRequestDTO = new TransactionRequestDTO(fromAccount.getIban(), toAccount.getIban(), "TRANSFER", transaction.getAmount() , transaction.getLabel(), transaction.getDescription());
+        TransactionRequestDTO transactionRequestDTO = new TransactionRequestDTO(fromAccount.getIban(), toAccount.getIban(), "TRANSFER", transaction.getAmount(), transaction.getLabel(), transaction.getDescription());
 
         when(accountRepository.findByIban(fromAccount.getIban())).thenReturn(fromAccount);
         when(accountRepository.findByIban(toAccount.getIban())).thenReturn(toAccount);
@@ -303,7 +301,7 @@ public class TransactionServiceTest {
         Account toAccount = getMockAccount("123457", 1000F, user1, false);
 
         Transaction transaction = getMockTransaction(user, 60F, TransactionType.TRANSFER, fromAccount, toAccount);
-        TransactionRequestDTO transactionRequestDTO = new TransactionRequestDTO(fromAccount.getIban(), toAccount.getIban(), "TRANSFER", transaction.getAmount() , transaction.getLabel(), transaction.getDescription());
+        TransactionRequestDTO transactionRequestDTO = new TransactionRequestDTO(fromAccount.getIban(), toAccount.getIban(), "TRANSFER", transaction.getAmount(), transaction.getLabel(), transaction.getDescription());
 
         when(accountRepository.findByIban(fromAccount.getIban())).thenReturn(fromAccount);
         when(accountRepository.findByIban(toAccount.getIban())).thenReturn(toAccount);
@@ -319,7 +317,7 @@ public class TransactionServiceTest {
         Account toAccount = getMockAccount("123457", 1000F, user, false);
 
         Transaction transaction = getMockTransaction(user, 110F, TransactionType.TRANSFER, fromAccount, toAccount);
-        TransactionRequestDTO transactionRequestDTO = new TransactionRequestDTO(fromAccount.getIban(), toAccount.getIban(), "TRANSFER", transaction.getAmount() , transaction.getLabel(), transaction.getDescription());
+        TransactionRequestDTO transactionRequestDTO = new TransactionRequestDTO(fromAccount.getIban(), toAccount.getIban(), "TRANSFER", transaction.getAmount(), transaction.getLabel(), transaction.getDescription());
 
         when(accountRepository.findByIban(fromAccount.getIban())).thenReturn(fromAccount);
         when(accountRepository.findByIban(toAccount.getIban())).thenReturn(toAccount);
@@ -335,7 +333,7 @@ public class TransactionServiceTest {
         Account toAccount = getMockAccount("123457", 60F, user, false);
 
         Transaction transaction = getMockTransaction(user, 90F, TransactionType.TRANSFER, fromAccount, toAccount);
-        TransactionRequestDTO transactionRequestDTO = new TransactionRequestDTO(fromAccount.getIban(), toAccount.getIban(), "TRANSFER", transaction.getAmount() , transaction.getLabel(), transaction.getDescription());
+        TransactionRequestDTO transactionRequestDTO = new TransactionRequestDTO(fromAccount.getIban(), toAccount.getIban(), "TRANSFER", transaction.getAmount(), transaction.getLabel(), transaction.getDescription());
 
         when(accountRepository.findByIban(fromAccount.getIban())).thenReturn(fromAccount);
         when(accountRepository.findByIban(toAccount.getIban())).thenReturn(toAccount);
@@ -351,7 +349,7 @@ public class TransactionServiceTest {
         Account toAccount = getMockAccount("123457", 1000F, user, false);
 
         Transaction transaction = getMockTransaction(user, 90F, TransactionType.TRANSFER, fromAccount, toAccount);
-        TransactionRequestDTO transactionRequestDTO = new TransactionRequestDTO(fromAccount.getIban(), toAccount.getIban(), "TRANSFER", transaction.getAmount() , transaction.getLabel(), transaction.getDescription());
+        TransactionRequestDTO transactionRequestDTO = new TransactionRequestDTO(fromAccount.getIban(), toAccount.getIban(), "TRANSFER", transaction.getAmount(), transaction.getLabel(), transaction.getDescription());
 
         List<Transaction> transactions = new ArrayList<>();
         transactions.add(getMockTransaction(user, 90F, TransactionType.WITHDRAW, fromAccount, toAccount));
@@ -526,7 +524,8 @@ public class TransactionServiceTest {
 
         List<Transaction> transactions = new ArrayList<>();
 
-        Transaction transaction = getMockTransaction(user, 100F, TransactionType.DEPOSIT, null, account);;
+        Transaction transaction = getMockTransaction(user, 100F, TransactionType.DEPOSIT, null, account);
+        ;
         transaction.setLabel("test");
         transactions.add(transaction);
         transactions.add(getMockTransaction(user, 100F, TransactionType.DEPOSIT, null, account));
@@ -556,7 +555,8 @@ public class TransactionServiceTest {
 
         List<Transaction> transactions = new ArrayList<>();
 
-        Transaction transaction = getMockTransaction(user1, 100F, TransactionType.DEPOSIT, null, account);;
+        Transaction transaction = getMockTransaction(user1, 100F, TransactionType.DEPOSIT, null, account);
+        ;
         transaction.setLabel("test");
         transactions.add(transaction);
         transactions.add(getMockTransaction(user1, 100F, TransactionType.DEPOSIT, null, account));

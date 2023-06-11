@@ -34,19 +34,6 @@ public class JwTokenProvider {
                 .compact();
     }
 
-    public boolean validateToken(String token) {
-        try {
-            Jws<Claims> claims = Jwts.parserBuilder().setSigningKey(keyProvider.getPrivateKey()).build()
-                    .parseClaimsJws(token);
-            return !claims.getBody().getExpiration().before(new Date());
-        } catch (JwtException | IllegalArgumentException e) {
-
-            System.out.println(token);
-
-            throw new JwtException("Expired or invalid JWT token");
-        }
-    }
-
     public Authentication getAuthentication(String token) {
         try {
             Jws<Claims> claims = Jwts.parserBuilder().setSigningKey(keyProvider.getPrivateKey()).build()
@@ -57,17 +44,5 @@ public class JwTokenProvider {
         } catch (JwtException | IllegalArgumentException e) {
             throw new JwtException("Bearer token not valid");
         }
-    }
-
-    public Long getUserIdFromJWT(String token) {
-        double userID = Jwts.parserBuilder().setSigningKey(keyProvider.getPrivateKey()).build().parseClaimsJws(token)
-                .getBody().get("userId", Double.class);
-        return (long) userID;
-    }
-
-    public String getUserTypeFromJWT(String token) {
-        String userType = Jwts.parserBuilder().setSigningKey(keyProvider.getPrivateKey()).build().parseClaimsJws(token)
-                .getBody().get("role", String.class);
-        return userType;
     }
 }

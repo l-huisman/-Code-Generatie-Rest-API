@@ -14,7 +14,7 @@ import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 
-public class AccountStepDefinitions extends BaseStepDefinitions{
+public class AccountStepDefinitions extends BaseStepDefinitions {
     private final HttpHeaders httpHeaders = new HttpHeaders();
 
     @Autowired

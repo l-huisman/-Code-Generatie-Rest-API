@@ -1,7 +1,10 @@
 package com.example.CodeGeneratieRestAPI.configuration;
 
 import com.example.CodeGeneratieRestAPI.dtos.TransactionRequestDTO;
-import com.example.CodeGeneratieRestAPI.models.*;
+import com.example.CodeGeneratieRestAPI.dtos.UserRequestDTO;
+import com.example.CodeGeneratieRestAPI.models.Account;
+import com.example.CodeGeneratieRestAPI.models.UserType;
+import com.example.CodeGeneratieRestAPI.repositories.UserRepository;
 import com.example.CodeGeneratieRestAPI.services.AccountService;
 import com.example.CodeGeneratieRestAPI.services.TransactionService;
 import com.example.CodeGeneratieRestAPI.services.UserService;
@@ -21,6 +24,8 @@ public class DataSeeder implements ApplicationRunner {
     TransactionService transactionService;
     @Autowired
     UserService userService;
+    @Autowired
+    UserRepository userRepository;
 
     @Autowired
     AccountService accountService;
@@ -28,47 +33,28 @@ public class DataSeeder implements ApplicationRunner {
     @Override
     public void run(ApplicationArguments args) throws Exception {
         // Create a default user
-        User defaultUser = new User();
-        defaultUser.setFirstName("Luke");
-        defaultUser.setLastName("Huisman");
-        defaultUser.setEmail("684651@student.inholland.nl");
-        defaultUser.setUsername("admin");
-        defaultUser.setPassword(new HashedPassword("admin"));
-        defaultUser.setUserType(UserType.EMPLOYEE);
-        userService.add(defaultUser);
+        UserRequestDTO defaultEmployee = new UserRequestDTO("Luke", "Huisman", "admin", "admin",
+                "684651@student.inholland.nl", UserType.EMPLOYEE);
+        userService.add(defaultEmployee);
 
         // Create a default customer user
-        User defaultCustomer = new User();
-        defaultCustomer.setFirstName("Dewi");
-        defaultCustomer.setLastName("Cabret");
-        defaultCustomer.setEmail("647824@student.inholland.nl");
-        defaultCustomer.setUsername("Dewi");
-        defaultCustomer.setPassword(new HashedPassword("Dewi"));
-        defaultCustomer.setUserType(UserType.USER);
+        UserRequestDTO defaultCustomer = new UserRequestDTO("Dewi", "Cabret", "Dewi", "Dewi",
+                "647824@student.inholland.nl", UserType.USER);
         userService.add(defaultCustomer);
 
         // Create another default customer user
-        User defaultCustomer2 = new User();
-        defaultCustomer2.setFirstName("Devon");
-        defaultCustomer2.setLastName("van Wichen");
-        defaultCustomer2.setEmail("650122@student.inholland.nl");
-        defaultCustomer2.setUsername("Devon");
-        defaultCustomer2.setPassword(new HashedPassword("Devon"));
-        defaultCustomer2.setUserType(UserType.USER);
+        UserRequestDTO defaultCustomer2 = new UserRequestDTO("Devon", "van Wichen", "Devon", "Devon",
+                "650122@student.inholland.nl", UserType.USER);
         userService.add(defaultCustomer2);
 
         // Create another default customer user
-        User defaultCustomer3 = new User();
-        defaultCustomer3.setFirstName("Mark");
-        defaultCustomer3.setLastName("de Haan");
-        defaultCustomer3.setEmail("Mark.deHaan@inholland.nl");
-        defaultCustomer3.setUsername("Mark");
-        defaultCustomer3.setPassword(new HashedPassword("Mark"));
-        defaultCustomer3.setUserType(UserType.USER);
+        UserRequestDTO defaultCustomer3 = new UserRequestDTO("Mark", "de Haan", "Mark", "Mark",
+                "Mark.deHaan@inholland.nl", UserType.USER);
         userService.add(defaultCustomer3);
 
-        userService.getAll().forEach(user -> {
-            if (user.getUserType() == UserType.EMPLOYEE) return;
+        userRepository.findAll().forEach(user -> {
+            if (user.getUserType() == UserType.EMPLOYEE)
+                return;
             Random random = new Random();
             // Create default accounts
             Account account = new Account();
