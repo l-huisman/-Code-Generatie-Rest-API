@@ -31,8 +31,6 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 
 public class TransactionStepDefinitions extends BaseStepDefinitions {
     private final HttpHeaders httpHeaders = new HttpHeaders();
@@ -113,6 +111,7 @@ public class TransactionStepDefinitions extends BaseStepDefinitions {
 
         response = restTemplate.exchange(restTemplate.getRootUri() + "/transactions", HttpMethod.POST, new HttpEntity<>(transactionDTO, httpHeaders), String.class);
     }
+
     @When("I add a transfer transaction of {float} from {string} to {string}")
     public void iAddATransferTransaction(Float amount, String fromIban, String toIban) {
         transactionDTO = new TransactionRequestDTO();
@@ -123,6 +122,7 @@ public class TransactionStepDefinitions extends BaseStepDefinitions {
 
         response = restTemplate.exchange(restTemplate.getRootUri() + "/transactions", HttpMethod.POST, new HttpEntity<>(transactionDTO, httpHeaders), String.class);
     }
+
     @When("I add a deposit transaction of {float} without a toAccountIban")
     public void iAddADepositTransaction(Float amount) {
         transactionDTO = new TransactionRequestDTO();
@@ -150,6 +150,7 @@ public class TransactionStepDefinitions extends BaseStepDefinitions {
 
         response = restTemplate.exchange(restTemplate.getRootUri() + "/transactions", HttpMethod.POST, new HttpEntity<>(transactionDTO, httpHeaders), String.class);
     }
+
     @When("I add a transfer transaction of {float} from no iban to {string}")
     public void iAddATransferTransactionWithoutFromIban(Float amount, String toIban) {
         transactionDTO = new TransactionRequestDTO();
@@ -159,6 +160,7 @@ public class TransactionStepDefinitions extends BaseStepDefinitions {
 
         response = restTemplate.exchange(restTemplate.getRootUri() + "/transactions", HttpMethod.POST, new HttpEntity<>(transactionDTO, httpHeaders), String.class);
     }
+
     @Then("The amount of the saved transaction is {double}")
     public void theAmountOfTheSavedTransactionIs(Double amount) {
         Double actual = JsonPath.read(response.getBody(), "$.data.amount");
