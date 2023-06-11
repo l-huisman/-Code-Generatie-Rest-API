@@ -1,8 +1,11 @@
 package com.example.CodeGeneratieRestAPI.services;
 
 import com.example.CodeGeneratieRestAPI.dtos.AccountRequestDTO;
+import com.example.CodeGeneratieRestAPI.exceptions.AccountCannotBeDeletedException;
 import com.example.CodeGeneratieRestAPI.exceptions.AccountCreationException;
 import com.example.CodeGeneratieRestAPI.exceptions.AccountNotAccessibleException;
+import com.example.CodeGeneratieRestAPI.exceptions.AccountNotFoundException;
+import com.example.CodeGeneratieRestAPI.exceptions.AccountUpdateException;
 import com.example.CodeGeneratieRestAPI.helpers.ServiceHelper;
 import com.example.CodeGeneratieRestAPI.models.Account;
 import com.example.CodeGeneratieRestAPI.models.User;
@@ -310,7 +313,48 @@ public class AccountServiceTest {
         when(serviceHelper.checkIfObjectExistsByIdentifier(any(), any())).thenReturn(true);
         when(accountRepository.getAccountByIban(account.getIban())).thenReturn(Optional.of(accountToCheck));
 
-        accountService.delete(account.getIban(), user1);
-        verify(accountRepository, times(1)).delete(accountToCheck);
+        assertEquals("Account with IBAN: " + accountToCheck.getIban() + " has been set to inactive", accountService.delete(account.getIban(), user1));
+    }
+    @Test
+    void testDeleteThrowsAccountCannotBeDeletedException(){
+        User user1 = getMockUser(UserType.USER);
+        AccountRequestDTO account = getMockAccountRequestDTO();
+        Account accountToCheck = accountService.add(account, user1);
+        accountToCheck.setIsActive(false);
+
+        when(accountRepository.checkIfAccountBelongsToUser(accountToCheck.getIban(), user1.getId())).thenReturn(true);
+        when(serviceHelper.checkIfObjectExistsByIdentifier(any(), any())).thenReturn(true);
+        when(accountRepository.getAccountByIban(account.getIban())).thenReturn(Optional.of(accountToCheck));
+
+        AccountCannotBeDeletedException exception = Assertions.assertThrows(AccountCannotBeDeletedException.class, () -> accountService.delete(account.getIban(), user1));
+        assertEquals("Account with IBAN: " + accountToCheck.getIban() + " is already inactive", exception.getMessage());
+    }
+    @Test
+    void testDeleteThrowsAccountNotFoundException(){
+        User user1 = getMockUser(UserType.USER);
+        AccountRequestDTO account = getMockAccountRequestDTO();
+        Account accountToCheck = accountService.add(account, user1);
+
+        when(accountRepository.checkIfAccountBelongsToUser(accountToCheck.getIban(), user1.getId())).thenReturn(true);
+        when(serviceHelper.checkIfObjectExistsByIdentifier(any(), any())).thenReturn(true);
+        when(accountRepository.getAccountByIban(account.getIban())).thenReturn(Optional.empty());
+
+        AccountNotFoundException exception = Assertions.assertThrows(AccountNotFoundException.class, () -> accountService.delete(account.getIban(), user1));
+        assertEquals("Account with IBAN: " + account.getIban() + " does not exist", exception.getMessage());
+    }
+    @Test
+    void testDeleteThrowsAccountNotAccessibleException(){
+        User user1 = getMockUser(UserType.USER);
+        User user2 = getMockUser(UserType.USER);
+        user2.setId(2L);
+        AccountRequestDTO account = getMockAccountRequestDTO();
+        Account accountToCheck = accountService.add(account, user1);
+
+        when(accountRepository.checkIfAccountBelongsToUser(accountToCheck.getIban(), user1.getId())).thenReturn(false);
+        when(serviceHelper.checkIfObjectExistsByIdentifier(any(), any())).thenReturn(true);
+        when(accountRepository.getAccountByIban(account.getIban())).thenReturn(Optional.of(accountToCheck));
+
+        AccountNotAccessibleException exception = Assertions.assertThrows(AccountNotAccessibleException.class, () -> accountService.delete(account.getIban(), user2));
+        assertEquals("Account with IBAN: "+ account.getIban() +" does not belong to the logged in user", exception.getMessage());
     }
 }

@@ -242,7 +242,7 @@ public class AccountService {
 
         // Check if the account is active
         if (!account.getIsActive()) {
-            throw new IllegalArgumentException("Account with IBAN: " + iban + " is already inactive");
+            throw new AccountCannotBeDeletedException("Account with IBAN: " + iban + " is already inactive");
         }
 
         // Delete the account
