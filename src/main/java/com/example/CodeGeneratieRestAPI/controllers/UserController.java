@@ -54,17 +54,20 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.CREATED)
                     .body(new ApiResponse<>(true, "User created!", userService.add(user)));
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ApiResponse<>(false, e.getMessage()));
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ApiResponse<>(false, e.getMessage()));
         }
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ApiResponse<UserResponseDTO>> update(@PathVariable Long id, @RequestBody UserRequestDTO user) {
+    public ResponseEntity<ApiResponse<UserResponseDTO>> update(@PathVariable Long id,
+                                                               @RequestBody UserRequestDTO user) {
         try {
             return ResponseEntity.status(HttpStatus.OK)
                     .body(new ApiResponse<>(true, "User updated!", userService.update(id, user)));
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ApiResponse<>(false, e.getMessage()));
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ApiResponse<>(false, e.getMessage()));
         }
     }
 
@@ -74,7 +77,8 @@ public class UserController {
             userService.delete(id);
             return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse<>(true, "User deleted!"));
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ApiResponse<>(false, e.getMessage()));
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ApiResponse<>(false, e.getMessage()));
         }
     }
 }
