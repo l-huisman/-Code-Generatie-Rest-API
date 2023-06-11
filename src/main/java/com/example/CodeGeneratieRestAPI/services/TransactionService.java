@@ -2,7 +2,6 @@ package com.example.CodeGeneratieRestAPI.services;
 
 import com.example.CodeGeneratieRestAPI.dtos.TransactionRequestDTO;
 import com.example.CodeGeneratieRestAPI.exceptions.*;
-import com.example.CodeGeneratieRestAPI.helpers.ServiceHelper;
 import com.example.CodeGeneratieRestAPI.models.*;
 import com.example.CodeGeneratieRestAPI.repositories.AccountRepository;
 import com.example.CodeGeneratieRestAPI.repositories.TransactionRepository;
@@ -178,12 +177,14 @@ public class TransactionService {
             throw new TransactionExceededTransactionLimitException("The transaction limit for this account has been exceeded.");
         }
     }
+
     private void validateUserOwnsAccount(User user, Account account) {
         //Check if the user owns this account or is an admin
         if (!user.getUserType().equals(UserType.EMPLOYEE) && !account.getUser().getUsername().equals(user.getUsername())) {
             throw new AccountNotOwnedException("This account does not belong to this user.");
         }
     }
+
     private void validateDailyLimit(Account account, Transaction transaction) {
         //Check if the transaction amount didn't exceed the total limit
         if (account.getDailyLimit() < getTodaysAccumulatedTransactionAmount(account.getIban()) + transaction.getAmount()) {
@@ -203,6 +204,7 @@ public class TransactionService {
                 .atZone(ZoneId.systemDefault())
                 .toLocalDate().atStartOfDay(ZoneId.systemDefault()).toInstant());
     }
+
     private Date getEndOfDay(Date date) {
         return Date.from(date.toInstant()
                 .atZone(ZoneId.systemDefault())

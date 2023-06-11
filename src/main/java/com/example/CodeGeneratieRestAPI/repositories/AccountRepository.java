@@ -15,6 +15,7 @@ public interface AccountRepository extends CrudRepository<Account, Long> {
 
     @Query("SELECT a FROM Account a WHERE a.iban = :iban")
     Optional<Account> getAccountByIban(String iban);
+
     List<Account> findAll();
 
     Boolean existsByIban(String iban);
@@ -43,7 +44,7 @@ public interface AccountRepository extends CrudRepository<Account, Long> {
             "OR a.name ILIKE %:search% " +
             "OR a.iban ILIKE %:search%)")
 //    @Query("SELECT a FROM Account a")
-List<Account> findAllBySearchTerm(String search, Boolean isActive);
+    List<Account> findAllBySearchTerm(String search, Boolean isActive);
 
     @Query("SELECT a FROM Account a WHERE a.user.id = :userId AND (:isActive IS NULL OR a.isActive = :isActive) AND (a.user.username ILIKE %:search% " +
             "OR a.user.firstName ILIKE %:search% " +

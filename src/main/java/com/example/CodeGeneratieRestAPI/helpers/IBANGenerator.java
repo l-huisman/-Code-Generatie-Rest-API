@@ -2,7 +2,6 @@ package com.example.CodeGeneratieRestAPI.helpers;
 
 import com.example.CodeGeneratieRestAPI.exceptions.IBANGenerationException;
 import com.example.CodeGeneratieRestAPI.models.Account;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.math.BigInteger;
@@ -19,6 +18,14 @@ public class IBANGenerator {
 
     public IBANGenerator(ServiceHelper serviceHelper) {
         this.serviceHelper = serviceHelper;
+    }
+
+    // Calculate the two-digit checksum using modulo-97 (this is the ISO 7064 mod 97-10 algorithm)
+    private static int calculateChecksum(String ibanDigits) {
+        ibanDigits += "00"; // Append the country code and checksum (initially 00)
+        BigInteger number = new BigInteger(ibanDigits);
+        BigInteger mod97 = number.mod(new BigInteger(MODULUS.toByteArray()));
+        return 98 - mod97.intValue(); // Subtract the remainder from 98
     }
 
     public String getUniqueIban() {
@@ -63,13 +70,5 @@ public class IBANGenerator {
             throw new IBANGenerationException(exception.getMessage(), exception);
         }
 
-    }
-
-    // Calculate the two-digit checksum using modulo-97 (this is the ISO 7064 mod 97-10 algorithm)
-    private static int calculateChecksum(String ibanDigits) {
-        ibanDigits += "00"; // Append the country code and checksum (initially 00)
-        BigInteger number = new BigInteger(ibanDigits);
-        BigInteger mod97 = number.mod(new BigInteger(MODULUS.toByteArray()));
-        return 98 - mod97.intValue(); // Subtract the remainder from 98
     }
 }

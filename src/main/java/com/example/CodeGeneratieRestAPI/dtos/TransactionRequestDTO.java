@@ -1,6 +1,5 @@
 package com.example.CodeGeneratieRestAPI.dtos;
 
-import com.example.CodeGeneratieRestAPI.models.TransactionType;
 import lombok.Data;
 
 @Data
