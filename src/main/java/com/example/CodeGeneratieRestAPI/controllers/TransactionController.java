@@ -7,10 +7,13 @@ import com.example.CodeGeneratieRestAPI.models.ApiResponse;
 import com.example.CodeGeneratieRestAPI.models.Transaction;
 import com.example.CodeGeneratieRestAPI.models.User;
 import com.example.CodeGeneratieRestAPI.services.TransactionService;
+import jakarta.annotation.Nullable;
 import jakarta.validation.Valid;
+import org.modelmapper.Converter;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.config.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -37,15 +40,13 @@ public class TransactionController {
     }
 
     @GetMapping
-    public ResponseEntity<ApiResponse> getAll(@RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") Date start_date, @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") Date end_date, @RequestParam String search) {
+    public ResponseEntity<ApiResponse> getAll(@RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") Date start_date, @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") Date end_date, @RequestParam String iban, @RequestParam String amount_relation, @Nullable @RequestParam(defaultValue = "0") Float amount, @RequestParam int page_number, @RequestParam int page_size) {
         try {
-            System.out.println("kaas");
             User user = loggedInUserHelper.getLoggedInUser();
-            System.out.println(user.getUsername());
 
-            List<Transaction> transactions = transactionService.getAll(user, start_date, end_date, search);
+            Page<Transaction> transactions = transactionService.getAll(user, start_date, end_date, iban, amount_relation, amount, page_number, page_size);
 
-            return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse<>(true, "All transactions retrieved", Arrays.asList(modelMapper.map(transactions, TransactionResponseDTO[].class))));
+            return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse<>(true, "" + transactions.getTotalElements(), Arrays.asList(modelMapper.map(transactions.getContent(), TransactionResponseDTO[].class))));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ApiResponse<>(false, e.getMessage()));
         }
