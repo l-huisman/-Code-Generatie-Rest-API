@@ -161,7 +161,7 @@ public class TransactionService {
         return transactionRepository.findAllByIban(endOfDay, startOfDay, iban, search);
     }
 
-    private Double getTodaysAccumulatedTransactionAmount(String iban) {
+    public Double getTodaysAccumulatedTransactionAmount(String iban) {
         LocalDate today = LocalDate.now();
         Date startOfDay = Date.from(today.atStartOfDay(ZoneId.systemDefault()).toInstant());
         Date endOfDay = Date.from(today.atTime(LocalTime.MAX).atZone(ZoneId.systemDefault()).toInstant());
