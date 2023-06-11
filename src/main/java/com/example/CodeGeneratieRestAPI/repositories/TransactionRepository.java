@@ -17,10 +17,6 @@ public interface TransactionRepository extends CrudRepository<Transaction, Long>
     @Query("SELECT t FROM Transaction t LEFT JOIN t.toAccount LEFT JOIN t.fromAccount LEFT JOIN t.toAccount.user LEFT JOIN t.fromAccount.user WHERE t.fromAccount.user.id = :id OR t.toAccount.user.id = :id")
     List<Transaction> findAllByUserId(Long id);
 
-//    @Query("SELECT t FROM Transaction t LEFT JOIN t.toAccount LEFT JOIN t.fromAccount WHERE t.createdAt <= :endDate AND t.createdAt >= :startDate OR ((t.fromAccount IS NOT null AND t.fromAccount.iban = :iban ) OR (t.toAccount IS NOT null and t.toAccount.iban = :iban)) AND (:amountRelation is null\n" +
-//            "or (:amountRelation = '<' and t.amount < :amount)\n" +
-//            "or (:amountRelation = '>' and t.amount > :amount)\n" +
-//            "or (:amountRelation = '=' and t.amount = :amount))")
     @Query("SELECT t FROM Transaction t LEFT JOIN t.toAccount LEFT JOIN t.fromAccount WHERE t.createdAt <= :endDate AND t.createdAt >= :startDate AND (:amountRelation is null OR :amountRelation = '' OR (:amountRelation = '<' AND t.amount < :amount) OR (:amountRelation = '>' AND t.amount > :amount) OR (:amountRelation = '=' AND t.amount = :amount)) AND (:iban = '' OR :iban is null OR (t.fromAccount IS NOT null AND t.fromAccount.iban = :iban ) OR (t.toAccount IS NOT null and t.toAccount.iban = :iban))")
     Page<Transaction> findAll(Date endDate, Date startDate, String iban, String amountRelation, Float amount, Pageable pageable);
 
