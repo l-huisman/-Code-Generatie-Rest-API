@@ -42,6 +42,9 @@ public class AccountService {
 
     public Account add(AccountRequestDTO accountRequestDTO, User loggedInUser) {
         try {
+            //  To add the bank's own account, this is a special case
+            if (accountRequestDTO.getIban().equals("NL01-INHO-0000-0000-01"))
+                return addBankAccount(accountRequestDTO);
 
             //  Check if the accountRequestDTO is valid
             //this.checkIfAccountRequestDTOIsValid(accountRequestDTO, currentLoggedInUser);
@@ -85,7 +88,13 @@ public class AccountService {
         }
 
     }
-
+    private Account addBankAccount(AccountRequestDTO accountRequestDTO){
+        //  Check if the account with this IBAN already exists
+        if (serviceHelper.checkIfObjectExistsByIdentifier(accountRequestDTO.getIban(), new Account())) {
+            throw new AccountAlreadyExistsException("The bank's account already exists");
+        }
+        return accountRepository.save(new Account(accountRequestDTO, null));
+    }
     private Date getCurrentDate() {
         //TODO: Make the ZoneId configurable
         ZoneId zone = ZoneId.of("Europe/Amsterdam");
@@ -127,6 +136,10 @@ public class AccountService {
     }
 
     private Account checkAndGetAccount(String iban, User loggedInUser) {
+        if (iban.equals("NL01-INHO-0000-0000-01")){
+            throw new AccountNotAccessibleException("This is the bank's account, you cannot access this account");
+        }
+
         // Check if the iban is valid
         if (!serviceHelper.checkIfObjectExistsByIdentifier(iban, new Account())) {
             throw new AccountNotFoundException("Account with IBAN: " + iban + " does not exist");
@@ -139,18 +152,6 @@ public class AccountService {
 
         return accountRepository.getAccountByIban(iban).orElseThrow(() -> new AccountNotFoundException("Account with IBAN: " + iban + " does not exist"));
     }
-
-//    public List<Account> getAllActiveAccountsForLoggedInUser(String accountName) {
-//        // Get the current logged in user
-//        User currentLoggedInUser = serviceHelper.getLoggedInUser();
-//
-//        // Get the balance of all accounts of the user and return it
-//        List<Account> allActiveAccountsBalance = accountRepository.findAllByNameContainingAndUser_Id(accountName, currentLoggedInUser.getId());
-//
-//        //  Return the accounts
-//        return allActiveAccountsBalance;
-//    }
-
     public List<Account> getAllAccounts(String search, boolean active, User loggedInUser) {
         // Check if the user is an employee
         if (loggedInUser.getUserType().getAuthority().equals("EMPLOYEE")) {
@@ -162,7 +163,6 @@ public class AccountService {
             return accountRepository.findAllBySearchTermAndUserId(search, active, loggedInUser.getId());
         }
     }
-
     public Account getAccountByIban(String iban, User loggedInUser) {
         //  Check account and get the account
         Account account = this.checkAndGetAccount(iban, loggedInUser);
