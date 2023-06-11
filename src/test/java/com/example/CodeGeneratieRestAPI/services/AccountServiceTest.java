@@ -134,6 +134,8 @@ public class AccountServiceTest {
         User user1 = getMockUser(UserType.USER);
         AccountRequestDTO account = getMockAccountRequestDTO();
 
+        when(ibanGenerator.getUniqueIban()).thenReturn("NL01-INHO-0000-0000-05");
+
         Account accountToCheck = accountService.add(account, user1);
 
         Optional<Account> expectedAccountOptional = Optional.of(accountToCheck);
@@ -141,11 +143,11 @@ public class AccountServiceTest {
         when(serviceHelper.checkIfObjectExistsByIdentifier(any(), any())).thenReturn(true);
         when(accountRepository.checkIfAccountBelongsToUser(accountToCheck.getIban(), user1.getId())).thenReturn(true);
 
-        Account actualAccount = accountService.getAccountByIban(account.getIban(), user1);
-        //AccountData actualAccount = accountService.getAccountByIban(account.getIban(), user1);
+        //Account actualAccount = accountService.getAccountByIban(account.getIban(), user1);
+        AccountData actualAccount = accountService.getAccountByIban(account.getIban(), user1);
 
-        assertEquals(expectedAccountOptional.orElse(null), actualAccount);
-        //assertEquals(expectedAccountOptional.orElse(null), actualAccount.getAccount());
+        //assertEquals(expectedAccountOptional.orElse(null), actualAccount);
+        assertEquals(expectedAccountOptional.orElse(null), actualAccount.getAccount());
     }
 
     @Test
@@ -153,6 +155,8 @@ public class AccountServiceTest {
         User user1 = getMockUser(UserType.USER);
         User user2 = getMockUser(UserType.USER);
         AccountRequestDTO account = getMockAccountRequestDTO();
+
+        when(ibanGenerator.getUniqueIban()).thenReturn("NL01-INHO-0000-0000-05");
 
         Account accountToCheck = accountService.add(account, user1);
 
@@ -246,6 +250,9 @@ public class AccountServiceTest {
     void testUpdate(){
         User user1 = getMockUser(UserType.USER);
         AccountRequestDTO account = getMockAccountRequestDTO();
+
+        when(ibanGenerator.getUniqueIban()).thenReturn("NL01-INHO-0000-0000-05");
+
         Account accountToCheck = accountService.add(account, user1);
         AccountRequestDTO accountRequestDTO = getMockAccountRequestDTO();
         accountRequestDTO.setIban(accountToCheck.getIban());
@@ -263,6 +270,9 @@ public class AccountServiceTest {
     void testUpdateAccountUpdateException(){
         User user1 = getMockUser(UserType.USER);
         AccountRequestDTO account = getMockAccountRequestDTO();
+
+        when(ibanGenerator.getUniqueIban()).thenReturn("NL01-INHO-0000-0000-05");
+
         Account accountToCheck = accountService.add(account, user1);
         AccountRequestDTO accountRequestDTO = getMockAccountRequestDTO();
         accountRequestDTO.setIban(accountToCheck.getIban());
@@ -279,6 +289,9 @@ public class AccountServiceTest {
     void testUpdateAccountNotFoundException(){
         User user1 = getMockUser(UserType.USER);
         AccountRequestDTO account = getMockAccountRequestDTO();
+
+        when(ibanGenerator.getUniqueIban()).thenReturn("NL01-INHO-0000-0000-05");
+
         Account accountToCheck = accountService.add(account, user1);
         AccountRequestDTO accountRequestDTO = getMockAccountRequestDTO();
         accountRequestDTO.setIban(accountToCheck.getIban());
@@ -289,6 +302,7 @@ public class AccountServiceTest {
         when(serviceHelper.checkIfObjectExistsByIdentifier(any(), any())).thenReturn(true);
         when(accountRepository.getAccountByIban(account.getIban())).thenReturn(Optional.empty());
 
+
         AccountNotFoundException exception = Assertions.assertThrows(AccountNotFoundException.class, () -> accountService.update(accountRequestDTO, user1));
         assertEquals("Account with IBAN: " + accountToCheck.getIban() + " does not exist", exception.getMessage());
     }
@@ -298,6 +312,9 @@ public class AccountServiceTest {
         User user2 = getMockUser(UserType.USER);
         user2.setId(2L);
         AccountRequestDTO account = getMockAccountRequestDTO();
+
+        when(ibanGenerator.getUniqueIban()).thenReturn("NL01-INHO-0000-0000-05");
+
         Account accountToCheck = accountService.add(account, user1);
         AccountRequestDTO accountRequestDTO = getMockAccountRequestDTO();
         accountRequestDTO.setIban(accountToCheck.getIban());
@@ -315,6 +332,9 @@ public class AccountServiceTest {
     void testDelete(){
         User user1 = getMockUser(UserType.USER);
         AccountRequestDTO account = getMockAccountRequestDTO();
+
+        when(ibanGenerator.getUniqueIban()).thenReturn("NL01-INHO-0000-0000-05");
+
         Account accountToCheck = accountService.add(account, user1);
 
         when(accountRepository.checkIfAccountBelongsToUser(accountToCheck.getIban(), user1.getId())).thenReturn(true);
@@ -327,6 +347,9 @@ public class AccountServiceTest {
     void testDeleteThrowsAccountCannotBeDeletedException(){
         User user1 = getMockUser(UserType.USER);
         AccountRequestDTO account = getMockAccountRequestDTO();
+
+        when(ibanGenerator.getUniqueIban()).thenReturn("NL01-INHO-0000-0000-05");
+
         Account accountToCheck = accountService.add(account, user1);
         accountToCheck.setIsActive(false);
 
@@ -341,6 +364,9 @@ public class AccountServiceTest {
     void testDeleteThrowsAccountNotFoundException(){
         User user1 = getMockUser(UserType.USER);
         AccountRequestDTO account = getMockAccountRequestDTO();
+
+        when(ibanGenerator.getUniqueIban()).thenReturn("NL01-INHO-0000-0000-05");
+
         Account accountToCheck = accountService.add(account, user1);
 
         when(accountRepository.checkIfAccountBelongsToUser(accountToCheck.getIban(), user1.getId())).thenReturn(true);
@@ -356,6 +382,9 @@ public class AccountServiceTest {
         User user2 = getMockUser(UserType.USER);
         user2.setId(2L);
         AccountRequestDTO account = getMockAccountRequestDTO();
+
+        when(ibanGenerator.getUniqueIban()).thenReturn("NL01-INHO-0000-0000-05");
+
         Account accountToCheck = accountService.add(account, user1);
 
         when(accountRepository.checkIfAccountBelongsToUser(accountToCheck.getIban(), user1.getId())).thenReturn(false);

@@ -24,24 +24,19 @@ import java.util.List;
 
 @Service
 public class AccountService {
-
-    private final AccountRepository accountRepository;
-    private final UserRepository userRepository;
     @Autowired
-    private final ServiceHelper serviceHelper;
-    private final IBANGenerator ibanGenerator;
+    private AccountRepository accountRepository;
+    @Autowired
+    private UserRepository userRepository;
+    @Autowired
+    private ServiceHelper serviceHelper;
+    @Autowired
+    private IBANGenerator ibanGenerator;
+    @Autowired
+    private TransactionService transactionService;
 
     @Autowired
-    private final LoggedInUserHelper loggedInUserHelper;
-
-    public AccountService(AccountRepository accountRepository, UserRepository userRepository, ServiceHelper serviceHelper) {
-        this.accountRepository = accountRepository;
-        this.userRepository = userRepository;
-        this.serviceHelper = serviceHelper;
-        ibanGenerator = new IBANGenerator(serviceHelper);
-        loggedInUserHelper = new LoggedInUserHelper();
-
-    }
+    private LoggedInUserHelper loggedInUserHelper;
 
     public Account add(AccountRequestDTO accountRequestDTO, User loggedInUser) {
         try {
@@ -165,33 +160,33 @@ public class AccountService {
             return accountRepository.findAllBySearchTermAndUserId(search, active, loggedInUser.getId());
         }
     }
-//    public AccountData getAccountByIban(String iban, User loggedInUser) {
-//        //  Check account and get the account
-//        Account account = this.checkAndGetAccount(iban, loggedInUser);
-//
-//        //  Get the account limits left
-//        AccountLimitsLeft accountLimitsLeft = new AccountLimitsLeft();
-//        Double doubleValue = transactionService.getTodaysAccumulatedTransactionAmount(account.getIban());
-//        Float floatValue = doubleValue != null ? doubleValue.floatValue() : 0F;
-//
-//        accountLimitsLeft.setDailyLimitLeft(floatValue);
-//        accountLimitsLeft.setTransactionLimit(account.getTransactionLimit());
-//        accountLimitsLeft.setTotalLimitLeft(Math.min(accountLimitsLeft.getDailyLimitLeft(), accountLimitsLeft.getTransactionLimit()));
-//
-//        //  Return an AccountData object which contains the account and the account limits left
-//        return new AccountData(account, accountLimitsLeft);
-//    }
-public Account getAccountByIban(String iban, User loggedInUser) {
-    //  Check account and get the account
-    Account account = this.checkAndGetAccount(iban, loggedInUser);
+    public AccountData getAccountByIban(String iban, User loggedInUser) {
+        //  Check account and get the account
+        Account account = this.checkAndGetAccount(iban, loggedInUser);
 
-    //  Get the account limits left
-    //AccountLimitsLeft accountLimitsLeft = new AccountLimitsLeft();
-    //accountLimitsLeft.setDailyLimitLeft(transactionService.getDailyLimitLeft(account));
+        //  Get the account limits left
+        AccountLimitsLeft accountLimitsLeft = new AccountLimitsLeft();
+        Double doubleValue = transactionService.getTodaysAccumulatedTransactionAmount(account.getIban());
+        Float floatValue = doubleValue != null ? doubleValue.floatValue() : 0F;
 
-    //  Return the account
-    return account;
-}
+        accountLimitsLeft.setDailyLimitLeft(floatValue);
+        accountLimitsLeft.setTransactionLimit(account.getTransactionLimit());
+        accountLimitsLeft.setTotalLimitLeft(Math.min(accountLimitsLeft.getDailyLimitLeft(), accountLimitsLeft.getTransactionLimit()));
+
+        //  Return an AccountData object which contains the account and the account limits left
+        return new AccountData(account, accountLimitsLeft);
+    }
+//public Account getAccountByIban(String iban, User loggedInUser) {
+//    //  Check account and get the account
+//    Account account = this.checkAndGetAccount(iban, loggedInUser);
+//
+//    //  Get the account limits left
+//    //AccountLimitsLeft accountLimitsLeft = new AccountLimitsLeft();
+//    //accountLimitsLeft.setDailyLimitLeft(transactionService.getDailyLimitLeft(account));
+//
+//    //  Return the account
+//    return account;
+//}
 
     public List<Account> getAllAccountsByUserId(Long userId, User loggedInUser) {
         //  Check if the userId matches the id of the logged in user and throw an exception if it doesn't unless the user is an employee
