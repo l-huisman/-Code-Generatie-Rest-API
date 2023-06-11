@@ -1,11 +1,7 @@
 package com.example.CodeGeneratieRestAPI.services;
 
 import com.example.CodeGeneratieRestAPI.dtos.AccountRequestDTO;
-import com.example.CodeGeneratieRestAPI.exceptions.AccountCannotBeDeletedException;
-import com.example.CodeGeneratieRestAPI.exceptions.AccountCreationException;
-import com.example.CodeGeneratieRestAPI.exceptions.AccountNotAccessibleException;
-import com.example.CodeGeneratieRestAPI.exceptions.AccountNotFoundException;
-import com.example.CodeGeneratieRestAPI.exceptions.AccountUpdateException;
+import com.example.CodeGeneratieRestAPI.exceptions.*;
 import com.example.CodeGeneratieRestAPI.helpers.ServiceHelper;
 import com.example.CodeGeneratieRestAPI.models.Account;
 import com.example.CodeGeneratieRestAPI.models.User;
@@ -168,6 +164,7 @@ public class AccountServiceTest {
         AccountNotFoundException exception = Assertions.assertThrows(AccountNotFoundException.class, () -> accountService.getAccountByIban("NL02-INHO-1254-1234-56", user1));
         assertEquals("Account with IBAN: NL02-INHO-1254-1234-56 does not exist", exception.getMessage());
     }
+
     @Test
     void testGetAllAccountsByUserIdThrowsAccountNotAccessibleException() {
         User user1 = getMockUser(UserType.USER);
@@ -184,6 +181,7 @@ public class AccountServiceTest {
         AccountNotAccessibleException exception = Assertions.assertThrows(AccountNotAccessibleException.class, () -> accountService.getAllAccountsByUserId(user1.getId(), user2));
         assertEquals("You cannot access the accounts of another user", exception.getMessage());
     }
+
     @Test
     void testGetAllAccountsByUserId() {
         User user1 = getMockUser(UserType.USER);
@@ -200,6 +198,7 @@ public class AccountServiceTest {
         assertTrue(result.contains(account1));
         assertTrue(result.contains(account2));
     }
+
     @Test
     void testGetAllAccountsByUserIdWithEmployee() {
         User user1 = getMockUser(UserType.USER);
@@ -218,8 +217,9 @@ public class AccountServiceTest {
         assertTrue(result.contains(account1));
         assertTrue(result.contains(account2));
     }
+
     @Test
-    void testGetAllAccountsByUserIdAsUserFromEmployee(){
+    void testGetAllAccountsByUserIdAsUserFromEmployee() {
         User user1 = getMockUser(UserType.USER);
         User user2 = getMockUser(UserType.EMPLOYEE);
         user2.setId(2L);
@@ -234,8 +234,9 @@ public class AccountServiceTest {
         AccountNotAccessibleException exception = Assertions.assertThrows(AccountNotAccessibleException.class, () -> accountService.getAllAccountsByUserId(user2.getId(), user1));
         assertEquals("You cannot access the accounts of another user", exception.getMessage());
     }
+
     @Test
-    void testUpdate(){
+    void testUpdate() {
         User user1 = getMockUser(UserType.USER);
         AccountRequestDTO account = getMockAccountRequestDTO();
         Account accountToCheck = accountService.add(account, user1);
@@ -251,8 +252,9 @@ public class AccountServiceTest {
         Account accountToUpdate = accountService.update(accountRequestDTO, user1);
         assertEquals(accountToCheck.getBalance(), accountToUpdate.getBalance());
     }
+
     @Test
-    void testUpdateAccountUpdateException(){
+    void testUpdateAccountUpdateException() {
         User user1 = getMockUser(UserType.USER);
         AccountRequestDTO account = getMockAccountRequestDTO();
         Account accountToCheck = accountService.add(account, user1);
@@ -267,8 +269,9 @@ public class AccountServiceTest {
         AccountUpdateException exception = Assertions.assertThrows(AccountUpdateException.class, () -> accountService.update(accountRequestDTO, user1));
         assertEquals("You cannot update the balance of an account", exception.getMessage());
     }
+
     @Test
-    void testUpdateAccountNotFoundException(){
+    void testUpdateAccountNotFoundException() {
         User user1 = getMockUser(UserType.USER);
         AccountRequestDTO account = getMockAccountRequestDTO();
         Account accountToCheck = accountService.add(account, user1);
@@ -284,8 +287,9 @@ public class AccountServiceTest {
         AccountNotFoundException exception = Assertions.assertThrows(AccountNotFoundException.class, () -> accountService.update(accountRequestDTO, user1));
         assertEquals("Account with IBAN: " + accountToCheck.getIban() + " does not exist", exception.getMessage());
     }
+
     @Test
-    void testUpdateAccountNotAccessibleException(){
+    void testUpdateAccountNotAccessibleException() {
         User user1 = getMockUser(UserType.USER);
         User user2 = getMockUser(UserType.USER);
         user2.setId(2L);
@@ -301,10 +305,11 @@ public class AccountServiceTest {
         when(accountRepository.getAccountByIban(account.getIban())).thenReturn(Optional.of(accountToCheck));
 
         AccountNotAccessibleException exception = Assertions.assertThrows(AccountNotAccessibleException.class, () -> accountService.update(accountRequestDTO, user2));
-        assertEquals("Account with IBAN: "+ accountRequestDTO.getIban() +" does not belong to the logged in user", exception.getMessage());
+        assertEquals("Account with IBAN: " + accountRequestDTO.getIban() + " does not belong to the logged in user", exception.getMessage());
     }
+
     @Test
-    void testDelete(){
+    void testDelete() {
         User user1 = getMockUser(UserType.USER);
         AccountRequestDTO account = getMockAccountRequestDTO();
         Account accountToCheck = accountService.add(account, user1);
@@ -315,8 +320,9 @@ public class AccountServiceTest {
 
         assertEquals("Account with IBAN: " + accountToCheck.getIban() + " has been set to inactive", accountService.delete(account.getIban(), user1));
     }
+
     @Test
-    void testDeleteThrowsAccountCannotBeDeletedException(){
+    void testDeleteThrowsAccountCannotBeDeletedException() {
         User user1 = getMockUser(UserType.USER);
         AccountRequestDTO account = getMockAccountRequestDTO();
         Account accountToCheck = accountService.add(account, user1);
@@ -329,8 +335,9 @@ public class AccountServiceTest {
         AccountCannotBeDeletedException exception = Assertions.assertThrows(AccountCannotBeDeletedException.class, () -> accountService.delete(account.getIban(), user1));
         assertEquals("Account with IBAN: " + accountToCheck.getIban() + " is already inactive", exception.getMessage());
     }
+
     @Test
-    void testDeleteThrowsAccountNotFoundException(){
+    void testDeleteThrowsAccountNotFoundException() {
         User user1 = getMockUser(UserType.USER);
         AccountRequestDTO account = getMockAccountRequestDTO();
         Account accountToCheck = accountService.add(account, user1);
@@ -342,8 +349,9 @@ public class AccountServiceTest {
         AccountNotFoundException exception = Assertions.assertThrows(AccountNotFoundException.class, () -> accountService.delete(account.getIban(), user1));
         assertEquals("Account with IBAN: " + account.getIban() + " does not exist", exception.getMessage());
     }
+
     @Test
-    void testDeleteThrowsAccountNotAccessibleException(){
+    void testDeleteThrowsAccountNotAccessibleException() {
         User user1 = getMockUser(UserType.USER);
         User user2 = getMockUser(UserType.USER);
         user2.setId(2L);
@@ -355,6 +363,6 @@ public class AccountServiceTest {
         when(accountRepository.getAccountByIban(account.getIban())).thenReturn(Optional.of(accountToCheck));
 
         AccountNotAccessibleException exception = Assertions.assertThrows(AccountNotAccessibleException.class, () -> accountService.delete(account.getIban(), user2));
-        assertEquals("Account with IBAN: "+ account.getIban() +" does not belong to the logged in user", exception.getMessage());
+        assertEquals("Account with IBAN: " + account.getIban() + " does not belong to the logged in user", exception.getMessage());
     }
 }
