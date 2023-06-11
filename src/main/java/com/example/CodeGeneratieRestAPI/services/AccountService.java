@@ -1,5 +1,7 @@
 package com.example.CodeGeneratieRestAPI.services;
 
+import com.example.CodeGeneratieRestAPI.dtos.AccountData;
+import com.example.CodeGeneratieRestAPI.dtos.AccountLimitsLeft;
 import com.example.CodeGeneratieRestAPI.dtos.AccountRequestDTO;
 import com.example.CodeGeneratieRestAPI.exceptions.*;
 import com.example.CodeGeneratieRestAPI.helpers.IBANGenerator;
@@ -22,32 +24,30 @@ import java.util.List;
 
 @Service
 public class AccountService {
-
-    private final AccountRepository accountRepository;
-    private final UserRepository userRepository;
     @Autowired
-    private final ServiceHelper serviceHelper;
-    private final IBANGenerator ibanGenerator;
+    private AccountRepository accountRepository;
+    @Autowired
+    private UserRepository userRepository;
+    @Autowired
+    private ServiceHelper serviceHelper;
+    @Autowired
+    private IBANGenerator ibanGenerator;
+    @Autowired
+    private TransactionService transactionService;
 
     @Autowired
-    private final LoggedInUserHelper loggedInUserHelper;
-
-    public AccountService(AccountRepository accountRepository, UserRepository userRepository, ServiceHelper serviceHelper) {
-        this.accountRepository = accountRepository;
-        this.userRepository = userRepository;
-        this.serviceHelper = serviceHelper;
-        ibanGenerator = new IBANGenerator(serviceHelper);
-        loggedInUserHelper = new LoggedInUserHelper();
-    }
+    private LoggedInUserHelper loggedInUserHelper;
 
     public Account add(AccountRequestDTO accountRequestDTO, User loggedInUser) {
         try {
-
             //  Check if the accountRequestDTO is valid
             //this.checkIfAccountRequestDTOIsValid(accountRequestDTO, currentLoggedInUser);
 
             //  Check if the IBAN has not been set yet
             if (accountRequestDTO.getIban() != null) {
+                //  To add the bank's own account, this is a special case
+                if (accountRequestDTO.getIban().equals("NL01-INHO-0000-0000-01"))
+                    return addBankAccount(accountRequestDTO);
                 throw new AccountCreationException("You cannot set the IBAN of a new account");
             }
 
@@ -85,7 +85,13 @@ public class AccountService {
         }
 
     }
-
+    private Account addBankAccount(AccountRequestDTO accountRequestDTO){
+        //  Check if the account with this IBAN already exists
+        if (serviceHelper.checkIfObjectExistsByIdentifier(accountRequestDTO.getIban(), new Account())) {
+            throw new AccountAlreadyExistsException("The bank's account already exists");
+        }
+        return accountRepository.save(new Account(accountRequestDTO, null));
+    }
     private Date getCurrentDate() {
         //TODO: Make the ZoneId configurable
         ZoneId zone = ZoneId.of("Europe/Amsterdam");
@@ -127,6 +133,10 @@ public class AccountService {
     }
 
     private Account checkAndGetAccount(String iban, User loggedInUser) {
+        if (iban.equals("NL01-INHO-0000-0000-01")){
+            throw new AccountNotAccessibleException("This is the bank's account, you cannot access this account");
+        }
+
         // Check if the iban is valid
         if (!serviceHelper.checkIfObjectExistsByIdentifier(iban, new Account())) {
             throw new AccountNotFoundException("Account with IBAN: " + iban + " does not exist");
@@ -139,18 +149,6 @@ public class AccountService {
 
         return accountRepository.getAccountByIban(iban).orElseThrow(() -> new AccountNotFoundException("Account with IBAN: " + iban + " does not exist"));
     }
-
-//    public List<Account> getAllActiveAccountsForLoggedInUser(String accountName) {
-//        // Get the current logged in user
-//        User currentLoggedInUser = serviceHelper.getLoggedInUser();
-//
-//        // Get the balance of all accounts of the user and return it
-//        List<Account> allActiveAccountsBalance = accountRepository.findAllByNameContainingAndUser_Id(accountName, currentLoggedInUser.getId());
-//
-//        //  Return the accounts
-//        return allActiveAccountsBalance;
-//    }
-
     public List<Account> getAllAccounts(String search, boolean active, User loggedInUser) {
         // Check if the user is an employee
         if (loggedInUser.getUserType().getAuthority().equals("EMPLOYEE")) {
@@ -162,14 +160,34 @@ public class AccountService {
             return accountRepository.findAllBySearchTermAndUserId(search, active, loggedInUser.getId());
         }
     }
-
-    public Account getAccountByIban(String iban, User loggedInUser) {
+    public AccountData getAccountByIban(String iban, User loggedInUser) {
         //  Check account and get the account
         Account account = this.checkAndGetAccount(iban, loggedInUser);
 
-        //  Return the account
-        return account;
+        //  Get the account limits left
+        AccountLimitsLeft accountLimitsLeft = new AccountLimitsLeft();
+        Double doubleValue = transactionService.getTodaysAccumulatedTransactionAmount(account.getIban());
+        Float floatValue = doubleValue != null ? doubleValue.floatValue() : 0F;
+
+        accountLimitsLeft.setDailyLimitLeft(floatValue);
+        accountLimitsLeft.setTransactionLimit(account.getTransactionLimit());
+        accountLimitsLeft.setAmountSpendableOnNextTransaction(Math.min(accountLimitsLeft.getDailyLimitLeft(), accountLimitsLeft.getTransactionLimit()));
+        accountLimitsLeft.setDifferenceBalanceAndAbsoluteLimit(account.getBalance() - account.getAbsoluteLimit());
+
+        //  Return an AccountData object which contains the account and the account limits left
+        return new AccountData(account, accountLimitsLeft);
     }
+//public Account getAccountByIban(String iban, User loggedInUser) {
+//    //  Check account and get the account
+//    Account account = this.checkAndGetAccount(iban, loggedInUser);
+//
+//    //  Get the account limits left
+//    //AccountLimitsLeft accountLimitsLeft = new AccountLimitsLeft();
+//    //accountLimitsLeft.setDailyLimitLeft(transactionService.getDailyLimitLeft(account));
+//
+//    //  Return the account
+//    return account;
+//}
 
     public List<Account> getAllAccountsByUserId(Long userId, User loggedInUser) {
         //  Check if the userId matches the id of the logged in user and throw an exception if it doesn't unless the user is an employee
@@ -255,5 +273,6 @@ public class AccountService {
     public void addSeededAccount(String iban, Account account) {
         account.setIban(iban);
         accountRepository.save(account);
+        System.out.println("Account with IBAN: " + iban + " has been added");
     }
 }

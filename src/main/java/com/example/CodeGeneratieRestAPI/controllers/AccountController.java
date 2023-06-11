@@ -1,5 +1,6 @@
 package com.example.CodeGeneratieRestAPI.controllers;
 
+import com.example.CodeGeneratieRestAPI.dtos.AccountData;
 import com.example.CodeGeneratieRestAPI.dtos.AccountRequestDTO;
 import com.example.CodeGeneratieRestAPI.dtos.AccountResponseDTO;
 import com.example.CodeGeneratieRestAPI.helpers.LoggedInUserHelper;
@@ -111,10 +112,10 @@ public class AccountController {
             User user = loggedInUserHelper.getLoggedInUser();
 
             //  Retrieve the data
-            AccountResponseDTO account = modelMapper.map(accountService.getAccountByIban(iban, user), AccountResponseDTO.class);
+            AccountData accountData = accountService.getAccountByIban(iban, user);
 
             //  Return the data
-            return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse<>(true, "Account retrieved successfully", account));
+            return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse<>(true, "Account retrieved successfully", accountData));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ApiResponse<>(false, e.getMessage()));
         }

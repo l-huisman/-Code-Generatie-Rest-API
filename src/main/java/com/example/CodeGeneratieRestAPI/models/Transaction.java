@@ -1,5 +1,6 @@
 package com.example.CodeGeneratieRestAPI.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -26,10 +27,12 @@ public class Transaction {
 
     @ManyToOne(fetch = FetchType.EAGER, optional = true)
     @JoinColumn(name = "from_iban", nullable = true)
+    @JsonIgnore
     private Account fromAccount;
 
     @ManyToOne(fetch = FetchType.EAGER, optional = true)
     @JoinColumn(name = "to_iban", nullable = true)
+    @JsonIgnore
     private Account toAccount;
 
     @Enumerated(EnumType.STRING)
