@@ -10,10 +10,15 @@ public class AccountLimitsLeft {
     @JsonProperty("Daily limit left")
     private float dailyLimitLeft;
 
-    @JsonProperty("Total limit left")
-    private float totalLimitLeft;
-
     @JsonProperty("Transaction Limit")
     private float transactionLimit;
+
+    @JsonProperty("Amount spendable on next transaction")
+    private float amountSpendableOnNextTransaction;
+
+    @JsonProperty("Difference balance and absolute limit")
+    private float differenceBalanceAndAbsoluteLimit;
+
+
 
 }

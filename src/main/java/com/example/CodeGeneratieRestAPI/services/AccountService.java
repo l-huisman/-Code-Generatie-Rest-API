@@ -171,7 +171,8 @@ public class AccountService {
 
         accountLimitsLeft.setDailyLimitLeft(floatValue);
         accountLimitsLeft.setTransactionLimit(account.getTransactionLimit());
-        accountLimitsLeft.setTotalLimitLeft(Math.min(accountLimitsLeft.getDailyLimitLeft(), accountLimitsLeft.getTransactionLimit()));
+        accountLimitsLeft.setAmountSpendableOnNextTransaction(Math.min(accountLimitsLeft.getDailyLimitLeft(), accountLimitsLeft.getTransactionLimit()));
+        accountLimitsLeft.setDifferenceBalanceAndAbsoluteLimit(account.getBalance() - account.getAbsoluteLimit());
 
         //  Return an AccountData object which contains the account and the account limits left
         return new AccountData(account, accountLimitsLeft);
