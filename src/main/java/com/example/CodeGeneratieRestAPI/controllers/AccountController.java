@@ -3,12 +3,14 @@ package com.example.CodeGeneratieRestAPI.controllers;
 import com.example.CodeGeneratieRestAPI.dtos.AccountData;
 import com.example.CodeGeneratieRestAPI.dtos.AccountRequestDTO;
 import com.example.CodeGeneratieRestAPI.dtos.AccountResponseDTO;
+import com.example.CodeGeneratieRestAPI.exceptions.*;
 import com.example.CodeGeneratieRestAPI.helpers.LoggedInUserHelper;
 import com.example.CodeGeneratieRestAPI.models.Account;
 import com.example.CodeGeneratieRestAPI.models.ApiResponse;
 import com.example.CodeGeneratieRestAPI.models.User;
 import com.example.CodeGeneratieRestAPI.services.AccountService;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.annotation.Nullable;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.PropertyMap;
 import org.modelmapper.config.Configuration;
@@ -28,7 +30,6 @@ public class AccountController {
     // POJO stands for Plain Old Java Object. It has no restrictions and can be used in any Java project.
     // It is a Java object that is not bound by any restriction other than those forced by the Java Language Specification.
     // In short, a POJO is an object that encapsulates data.
-    private final ObjectMapper objectMapper;
     @Autowired
     private final LoggedInUserHelper loggedInUserHelper;
     @Autowired
@@ -47,7 +48,6 @@ public class AccountController {
         };
         modelMapper.addMappings(accountMap);
 
-        objectMapper = new ObjectMapper();
     }
 
     //  POST mappings
@@ -62,7 +62,10 @@ public class AccountController {
 
             //  Return the data
             return ResponseEntity.status(HttpStatus.CREATED).body(new ApiResponse<>(true, "Account created successfully", new AccountResponseDTO(account)));
-        } catch (Exception e) {
+        } catch(UserNotFoundException | AccountCreationException | IBANGenerationException e) {
+            return ResponseEntity.status(e.getStatusCode()).body(new ApiResponse<>(false, e.getMessage()));
+        }
+        catch (Exception e) {
             //TODO: handle exception
             //System.out.println(e);
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ApiResponse<>(false, e.getMessage()));
@@ -71,7 +74,7 @@ public class AccountController {
 
     //  GET mappings
     @GetMapping()
-    public ResponseEntity<ApiResponse> getAllAccounts(@RequestParam(required = false) String search, @RequestParam(required = false) boolean active) {
+    public ResponseEntity<ApiResponse> getAllAccounts(@RequestParam(required = false) String search, @Nullable @RequestParam(required = false, defaultValue = "") Boolean active) {
         try {
             //  Get the logged-in user
             User user = loggedInUserHelper.getLoggedInUser();
@@ -81,9 +84,10 @@ public class AccountController {
 
             //  Return the data
             return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse(true, accounts.stream().count() + " Accounts retrieved", Arrays.asList(modelMapper.map(accounts, AccountResponseDTO[].class))));
-        } catch (Exception e) {
-            //TODO: handle exception
-            //System.out.println(e);
+        } catch(UserNotFoundException e) {
+            return ResponseEntity.status(e.getStatusCode()).body(new ApiResponse<>(false, e.getMessage()));
+        }
+        catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ApiResponse<>(false, e.getMessage()));
         }
     }
@@ -99,7 +103,10 @@ public class AccountController {
 
             //  Return the data
             return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse(true, accounts.stream().count() + " Accounts retrieved", Arrays.asList(modelMapper.map(accounts, AccountResponseDTO[].class))));
-        } catch (Exception e) {
+        }catch (AccountNotFoundException | UserNotFoundException | AccountNotAccessibleException e) {
+            return ResponseEntity.status(e.getStatusCode()).body(new ApiResponse<>(false, e.getMessage()));
+        }
+        catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ApiResponse<>(false, e.getMessage()));
         }
     }
@@ -116,7 +123,10 @@ public class AccountController {
 
             //  Return the data
             return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse<>(true, "Account retrieved successfully", accountData));
-        } catch (Exception e) {
+        } catch (AccountNotFoundException | UserNotFoundException | AccountNotAccessibleException e) {
+            return ResponseEntity.status(e.getStatusCode()).body(new ApiResponse<>(false, e.getMessage()));
+        }
+        catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ApiResponse<>(false, e.getMessage()));
         }
     }
@@ -133,9 +143,10 @@ public class AccountController {
 
             //  Return the data
             return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse<>(true, "Account updated successfully", new AccountResponseDTO(account)));
-        } catch (Exception e) {
-            //TODO: handle exception
-            //System.out.println(e);
+        } catch (AccountNoDataChangedException | UserNotFoundException | AccountUpdateException | AccountNotAccessibleException | AccountNotFoundException e) {
+            return ResponseEntity.status(e.getStatusCode()).body(new ApiResponse<>(false, e.getMessage()));
+        }
+        catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ApiResponse<>(false, e.getMessage()));
         }
     }
@@ -154,7 +165,10 @@ public class AccountController {
             // Return a response entity with the response body and the status code
             return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse<>(true, responseBody));
 
-        } catch (Exception e) {
+        } catch (AccountNotFoundException | UserNotFoundException | AccountNotAccessibleException | AccountCannotBeDeletedException e) {
+            return ResponseEntity.status(e.getStatusCode()).body(new ApiResponse<>(false, e.getMessage()));
+        }
+        catch (Exception e) {
             //TODO: handle exception
             //System.out.println(e);
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ApiResponse<>(false, e.getMessage()));
