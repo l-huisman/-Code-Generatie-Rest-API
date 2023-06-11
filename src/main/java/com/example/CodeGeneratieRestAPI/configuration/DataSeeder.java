@@ -30,6 +30,8 @@ public class DataSeeder implements ApplicationRunner {
     @Autowired
     AccountService accountService;
 
+    private int accountIndex = 0;
+
     @Override
     public void run(ApplicationArguments args) throws Exception {
         // Create a default user
@@ -62,14 +64,44 @@ public class DataSeeder implements ApplicationRunner {
             account.setUser(user);
             account.setUserId(user.getId());
             account.setName(user.getFirstName() + " " + user.getLastName() + " $avings account");
-            account.setDailyLimit(100f);
+            account.setDailyLimit(500f);
             account.setTransactionLimit(100f);
             account.setAbsoluteLimit(-50f);
-            account.setBalance(1000f);
-            account.setIsSavings(random.nextBoolean());
+            account.setBalance(400f);
+            account.setIsSavings(true);
             account.setCreatedAt(new Date());
             account.setIsActive(true);
-            accountService.addSeededAccount(account);
+            accountService.addSeededAccount("NL61-INHO-0897-9124-9" + accountIndex, account);
+            accountIndex++;
+
+            Account account1 = new Account();
+            account1.setIban(null);
+            account1.setUser(user);
+            account1.setUserId(user.getId());
+            account1.setName(user.getFirstName() + " " + user.getLastName() + " payment account");
+            account1.setDailyLimit(500f);
+            account1.setTransactionLimit(100f);
+            account1.setAbsoluteLimit(-50f);
+            account1.setBalance(1000f);
+            account1.setIsSavings(false);
+            account1.setCreatedAt(new Date());
+            account1.setIsActive(true);
+            accountService.addSeededAccount("NL61-INHO-0897-9124-9" + accountIndex, account1);
+            accountIndex++;
+
+            Account account2 = new Account();
+            account2.setIban(null);
+            account2.setUser(user);
+            account2.setUserId(user.getId());
+            account2.setName(user.getFirstName() + " " + user.getLastName() + " payment account 2");
+            account2.setDailyLimit(200f);
+            account2.setTransactionLimit(100f);
+            account2.setAbsoluteLimit(-50f);
+            account2.setBalance(400f);
+            account2.setIsSavings(false);
+            account2.setCreatedAt(new Date());
+            account2.setIsActive(true);
+            accountService.addSeededAccount("NL61-INHO-0897-9124-9" + accountIndex, account2);
 
             TransactionRequestDTO transaction = new TransactionRequestDTO();
             transaction.setTransactionType("DEPOSIT");
@@ -87,6 +119,7 @@ public class DataSeeder implements ApplicationRunner {
 
             transactionService.add(user, transaction);
             transactionService.add(user, transaction2);
+            accountIndex++;
         });
     }
 }

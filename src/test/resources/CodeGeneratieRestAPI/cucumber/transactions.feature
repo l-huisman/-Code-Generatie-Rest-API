@@ -1,146 +1,165 @@
 Feature: Transactions CRUD operations
 
   Scenario: Getting all transactions
-    Given The endpoint for "transactions" is available for method "GET"
+    Given I am logged in as "Devon" with password "devon"
+    And The endpoint for "transactions" is available for method "GET"
     When I retrieve all transactions
     Then I should receive all transactions
 
   Scenario: Add withdraw transaction with valid data from payment account
-    Given a user with username "john" and type "USER"
-    And "john" has a "payment" account with IBAN "1234567890" and balance 1000 and transaction limit 500 and daily limit 500 and absolute limit 100
-    When a withdraw transaction of 500 is added to the account
-    Then the transaction is saved successfully
+    Given I am logged in as "Devon" with password "devon"
+    And The endpoint for "transactions" is available for method "POST"
+    When I add a withdraw transaction of 80 from "NL61-INHO-0897-9124-94"
+    Then The response status code is 200
+    And The amount of the saved transaction is 80
 
   Scenario: Add withdraw transaction with valid data from savings account
-    Given a user with username "john" and type "USER"
-    And "john" has a "savings" account with IBAN "1234567890" and balance 1000 and transaction limit 500 and daily limit 500 and absolute limit 100
-    When a withdraw transaction of 500 is added to the account
-    Then the transaction is saved successfully
+    Given I am logged in as "Devon" with password "devon"
+    And The endpoint for "transactions" is available for method "POST"
+    When I add a withdraw transaction of 80 from "NL61-INHO-0897-9124-93"
+    Then The response status code is 200
+    And The amount of the saved transaction is 80
 
-  Scenario: Add deposit transaction with valid data from payment account
-    Given a user with username "john" and type "USER"
-    And "john" has a "payment" account with IBAN "1234567890" and balance 1000 and transaction limit 500 and daily limit 500 and absolute limit 100
-    When a deposit transaction of 500 is added to the account
-    Then the transaction is saved successfully
+  Scenario: Add deposit transaction with valid data to savings account
+    Given I am logged in as "Devon" with password "devon"
+    And The endpoint for "transactions" is available for method "POST"
+    When I add a deposit transaction of 80 to "NL61-INHO-0897-9124-93"
+    Then The response status code is 200
+    And The amount of the saved transaction is 80
 
-  Scenario: Add deposit transaction with valid data from savings account
-    Given a user with username "john" and type "USER"
-    And "john" has a "savings" account with IBAN "1234567890" and balance 1000 and transaction limit 500 and daily limit 500 and absolute limit 100
-    When a deposit transaction of 500 is added to the account
-    Then the transaction is saved successfully
+  Scenario: Add deposit transaction with valid data to payment account
+    Given I am logged in as "Devon" with password "devon"
+    And The endpoint for "transactions" is available for method "POST"
+    When I add a deposit transaction of 80 to "NL61-INHO-0897-9124-94"
+    Then The response status code is 200
+    And The amount of the saved transaction is 80
+
+  Scenario: Add transfer transaction with valid data from savings to other account
+    Given I am logged in as "Devon" with password "devon"
+    And The endpoint for "transactions" is available for method "POST"
+    When I add a transfer transaction of 80 from "NL61-INHO-0897-9124-93" to "NL61-INHO-0897-9124-94"
+    Then The response status code is 200
+    And The amount of the saved transaction is 80
+
+  Scenario: Add transfer transaction with valid data from other to savings account
+    Given I am logged in as "Devon" with password "devon"
+    And The endpoint for "transactions" is available for method "POST"
+    When I add a transfer transaction of 80 from "NL61-INHO-0897-9124-94" to "NL61-INHO-0897-9124-93"
+    Then The response status code is 200
+    And The amount of the saved transaction is 80
 
   Scenario: Add deposit transaction without toAccountIban
-    Given a user with username "john" and type "USER"
-    And "john" has a "savings" account with IBAN "1234567890" and balance 1000 and transaction limit 500 and daily limit 500 and absolute limit 100
-    When a deposit transaction of 500 is added to the account without a toAccountIban
-    Then a RuntimeException is thrown with message "The to account can't be empty."
+    Given I am logged in as "Devon" with password "devon"
+    And The endpoint for "transactions" is available for method "POST"
+    When I add a deposit transaction of 80 without a toAccountIban
+    Then The response status code is 400
+    And The message returned is "The to account can't be empty."
 
-  Scenario: Add transfer transaction with valid data from payment account to payment account
-    Given a user with username "john" and type "USER"
-    And "john" has a "payment" account with IBAN "1234567890" and balance 1000 and transaction limit 500 and daily limit 500 and absolute limit 100
-    And a "payment" account with IBAN "1234567891" and balance 1000 and transaction limit 500 and daily limit 500 and absolute limit 100
-    When a transfer transaction of 500 to IBAN "1234567891" is added to the account
-    Then the transaction is saved successfully
+  Scenario: Add withdraw transaction without fromAccountIban
+    Given I am logged in as "Devon" with password "devon"
+    And The endpoint for "transactions" is available for method "POST"
+    When I add a withdraw transaction of 80 without a fromAccountIban
+    Then The response status code is 400
+    And The message returned is "The from account can't be empty."
 
-  Scenario: Add transfer transaction with valid data from savings account to payment account
-    Given a user with username "john" and type "USER"
-    And "john" has a "savings" account with IBAN "1234567890" and balance 1000 and transaction limit 500 and daily limit 500 and absolute limit 100
-    And a "payment" account with IBAN "1234567891" and balance 1000 and transaction limit 500 and daily limit 500 and absolute limit 100
-    When a transfer transaction of 500 to IBAN "1234567891" is added to the account
-    Then the transaction is saved successfully
+  Scenario: Add transfer transaction from own savings to other not own account
+    Given I am logged in as "Devon" with password "devon"
+    And The endpoint for "transactions" is available for method "POST"
+    When I add a transfer transaction of 80 from "NL61-INHO-0897-9124-93" to "NL61-INHO-0897-9124-92"
+    Then The response status code is 400
+    And The message returned is "It is not possible to transfer from a savings account to an account that is not your account."
 
-  Scenario: Add transfer transaction with valid data from savings account to savings account
-    Given a user with username "john" and type "USER"
-    And "john" has a "savings" account with IBAN "1234567890" and balance 1000 and transaction limit 500 and daily limit 500 and absolute limit 100
-    And a "savings" account with IBAN "1234567891" and balance 1000 and transaction limit 500 and daily limit 500 and absolute limit 100
-    When a transfer transaction of 500 to IBAN "1234567891" is added to the account
-    Then the transaction is saved successfully
-
-  Scenario: Add transfer transaction with valid data from payment account to savings account
-    Given a user with username "john" and type "USER"
-    And "john" has a "payment" account with IBAN "1234567890" and balance 1000 and transaction limit 500 and daily limit 500 and absolute limit 100
-    And a "savings" account with IBAN "1234567891" and balance 1000 and transaction limit 500 and daily limit 500 and absolute limit 100
-    When a transfer transaction of 500 to IBAN "1234567891" is added to the account
-    Then the transaction is saved successfully
+  Scenario: Add transfer transaction from own payment to other not own savings
+    Given I am logged in as "Devon" with password "devon"
+    And The endpoint for "transactions" is available for method "POST"
+    When I add a transfer transaction of 80 from "NL61-INHO-0897-9124-94" to "NL61-INHO-0897-9124-90"
+    Then The response status code is 400
+    And The message returned is "It is not possible to transfer to a savings account from an account that is not your account."
 
   Scenario: Add withdraw transaction with negative amount
-    Given a user with username "john" and type "USER"
-    And "john" has a "payment" account with IBAN "1234567890" and balance 1000 and transaction limit 500 and daily limit 500 and absolute limit 100
-    When a withdraw transaction of -500 is added to the account
-    Then a RuntimeException is thrown with message "The transaction amount can not be negative."
+    Given I am logged in as "Devon" with password "devon"
+    And The endpoint for "transactions" is available for method "POST"
+    When I add a withdraw transaction of -10 from "NL61-INHO-0897-9124-93"
+    Then The response status code is 400
+    And The message returned is "The transaction amount can't be negative."
 
-  Scenario: Add withdraw transaction with zero amount
-    Given a user with username "john" and type "USER"
-    And "john" has a "payment" account with IBAN "1234567890" and balance 1000 and transaction limit 500 and daily limit 500 and absolute limit 100
-    When a withdraw transaction of 0 is added to the account
-    Then a RuntimeException is thrown with message "The transaction amount can not be zero."
-
-  Scenario: Add withdraw transaction with insufficient balance
-    Given a user with username "john" and type "USER"
-    And "john" has a "payment" account with IBAN "1234567890" and balance 1000 and transaction limit 500 and daily limit 500 and absolute limit 100
-    When a withdraw transaction of 1500 is added to the account
-    Then a RuntimeException is thrown with message "This transaction exceeds the absolute limit of this account."
+  Scenario: Add withdraw transaction with negative amount
+    Given I am logged in as "Devon" with password "devon"
+    And The endpoint for "transactions" is available for method "POST"
+    When I add a withdraw transaction of 0 from "NL61-INHO-0897-9124-93"
+    Then The response status code is 400
+    And The message returned is "The transaction amount can't be zero."
 
   Scenario: Add transfer transaction without toAccountIban
-    Given a user with username "john" and type "USER"
-    And "john" has a "payment" account with IBAN "1234567890" and balance 1000 and transaction limit 500 and daily limit 500 and absolute limit 100
-    When a transfer transaction of 500 is added to the account without a toAccountIban
-    Then a RuntimeException is thrown with message "The to or from account can't be empty."
+    Given I am logged in as "Devon" with password "devon"
+    And The endpoint for "transactions" is available for method "POST"
+    When I add a transfer transaction of 80 from "NL61-INHO-0897-9124-94" to no iban
+    Then The response status code is 400
+    And The message returned is "The to or from account can't be empty."
 
-  Scenario: Add transfer transaction without toAccountIban
-    Given a user with username "john" and type "USER"
-    And "john" has a "payment" account with IBAN "1234567890" and balance 1000 and transaction limit 500 and daily limit 500 and absolute limit 100
-    When a transfer transaction of 500 is added to the account without a fromAccountIban
-    Then a RuntimeException is thrown with message "The to or from account can't be empty."
+  Scenario: Add transfer transaction without fromAccountIban
+    Given I am logged in as "Devon" with password "devon"
+    And The endpoint for "transactions" is available for method "POST"
+    When I add a transfer transaction of 80 from no iban to "NL61-INHO-0897-9124-93"
+    Then The response status code is 400
+    And The message returned is "The to or from account can't be empty."
 
   Scenario: Add withdraw transaction with exceeded transaction limit
-    Given a user with username "john" and type "USER"
-    And "john" has a "payment" account with IBAN "1234567890" and balance 2000 and transaction limit 500 and daily limit 500 and absolute limit 100
-    When a withdraw transaction of 1000 is added to the account
-    Then a RuntimeException is thrown with message "The transaction limit for this account has been exceeded."
+    Given I am logged in as "Devon" with password "devon"
+    And The endpoint for "transactions" is available for method "POST"
+    When I add a withdraw transaction of 120 from "NL61-INHO-0897-9124-93"
+    Then The response status code is 400
+    And The message returned is "The transaction limit for this account has been exceeded."
 
-  Scenario: Add transfer transaction with with exceeded transaction limit
-    Given a user with username "john" and type "USER"
-    And "john" has a "payment" account with IBAN "1234567890" and balance 1000 and transaction limit 500 and daily limit 500 and absolute limit 100
-    And a "savings" account with IBAN "1234567891" and balance 1000 and transaction limit 400 and daily limit 500 and absolute limit 100
-    When a transfer transaction of 500 to IBAN "1234567891" is added to the account
-    Then a RuntimeException is thrown with message "The transaction limit for this account has been exceeded."
+  Scenario: Add withdraw transaction with exceeded daily limit
+    Given I am logged in as "Devon" with password "devon"
+    And The endpoint for "transactions" is available for method "POST"
+    When I add a withdraw transaction of 90 from "NL61-INHO-0897-9124-95"
+    And I add a withdraw transaction of 90 from "NL61-INHO-0897-9124-95"
+    And I add a withdraw transaction of 90 from "NL61-INHO-0897-9124-95"
+    Then The response status code is 400
+    And The message returned is "This account exceeded the daily limit."
 
-  Scenario: Add transaction with exceeded daily limit
-    Given a user with username "john" and type "USER"
-    And "john" has a "payment" account with IBAN "1234567890" and balance 1000 and transaction limit 500 and daily limit 500 and absolute limit 100
-    And a withdraw transaction of 400 is added to the account
-    When another withdraw transaction of 200 is added to the account
-    Then a other RuntimeException is thrown with message "This account exceeded the daily limit."
+  Scenario: Add transfer transaction exceeded transaction limit
+    Given I am logged in as "Devon" with password "devon"
+    And The endpoint for "transactions" is available for method "POST"
+    When I add a withdraw transaction of 120 from "NL61-INHO-0897-9124-95"
+    Then The response status code is 400
+    And The message returned is "The transaction limit for this account has been exceeded."
 
-  Scenario: Add transaction with exceeded daily limit
-    Given a user with username "john" and type "USER"
-    And "john" has a "payment" account with IBAN "1234567890" and balance 1000 and transaction limit 500 and daily limit 500 and absolute limit 100
-    And a "savings" account with IBAN "1234567891" and balance 1000 and transaction limit 500 and daily limit 500 and absolute limit 100
-    And a transfer transaction of 500 to IBAN "1234567891" is added to the account
-    When another transfer transaction of 200 to IBAN "1234567891" is added to the account
-    Then a other RuntimeException is thrown with message "This account exceeded the daily limit."
+  Scenario: Add transfer transaction exceeded daily limit
+    Given I am logged in as "Devon" with password "devon"
+    And The endpoint for "transactions" is available for method "POST"
+    When I add a transfer transaction of 90 from "NL61-INHO-0897-9124-95" to "NL61-INHO-0897-9124-93"
+    And I add a transfer transaction of 90 from "NL61-INHO-0897-9124-95" to "NL61-INHO-0897-9124-93"
+    And I add a transfer transaction of 90 from "NL61-INHO-0897-9124-95" to "NL61-INHO-0897-9124-93"
+    Then The response status code is 400
+    And The message returned is "This account exceeded the daily limit."
 
-  Scenario: Add transfer transaction with wrong iban
-    Given a user with username "john" and type "USER"
-    And another user with username "bert" and type "USER"
-    And "john" has a "payment" account with IBAN "1234567890" and balance 1000 and transaction limit 500 and daily limit 500 and absolute limit 100
-    And another user "bert" has a "payment" account with IBAN "1234567891" and balance 1000 and transaction limit 500 and daily limit 500 and absolute limit 100
-    When a transfer transaction of 200 from IBAN "1234567891" to IBAN "1234567891" is added to the account
-    Then a RuntimeException is thrown with message "This account does not belong to this user."
+  Scenario: Add transfer transaction not owning the from account
+    Given I am logged in as "Devon" with password "devon"
+    And The endpoint for "transactions" is available for method "POST"
+    When I add a transfer transaction of 90 from "NL61-INHO-0897-9124-91" to "NL61-INHO-0897-9124-93"
+    Then The response status code is 400
+    And The message returned is "This account does not belong to this user."
 
-  Scenario: Add deposit transaction with wrong iban
-    Given a user with username "john" and type "USER"
-    And another user with username "bert" and type "USER"
-    And "john" has a "payment" account with IBAN "1234567890" and balance 1000 and transaction limit 500 and daily limit 500 and absolute limit 100
-    And another user "bert" has a "payment" account with IBAN "1234567891" and balance 1000 and transaction limit 500 and daily limit 500 and absolute limit 100
-    When a deposit transaction of 200 to IBAN "1234567891" is added to the account
-    Then a RuntimeException is thrown with message "This account does not belong to this user."
+  Scenario: Add transfer transaction not owning the from account
+    Given I am logged in as "Devon" with password "devon"
+    And The endpoint for "transactions" is available for method "POST"
+    When I add a transfer transaction of 90 from "NL61-INHO-0897-9124-91" to "NL61-INHO-0897-9124-93"
+    Then The response status code is 400
+    And The message returned is "This account does not belong to this user."
 
-  Scenario: Add withdraw transaction with wrong iban
-    Given a user with username "john" and type "USER"
-    And another user with username "bert" and type "USER"
-    And "john" has a "payment" account with IBAN "1234567890" and balance 1000 and transaction limit 500 and daily limit 500 and absolute limit 100
-    And another user "bert" has a "payment" account with IBAN "1234567891" and balance 1000 and transaction limit 500 and daily limit 500 and absolute limit 100
-    When a withdraw transaction of 200 from IBAN "1234567891" is added to the account
-    Then a RuntimeException is thrown with message "This account does not belong to this user."
+  Scenario: Add withdraw transaction not owning the from account
+    Given I am logged in as "Devon" with password "devon"
+    And The endpoint for "transactions" is available for method "POST"
+    When I add a withdraw transaction of 90 from "NL61-INHO-0897-9124-91"
+    Then The response status code is 400
+    And The message returned is "This account does not belong to this user."
+
+  Scenario: Add deposit transaction not owning the from account
+    Given I am logged in as "Devon" with password "devon"
+    And The endpoint for "transactions" is available for method "POST"
+    When I add a deposit transaction of 90 to "NL61-INHO-0897-9124-91"
+    Then The response status code is 400
+    And The message returned is "This account does not belong to this user."
