@@ -22,7 +22,11 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -55,7 +59,22 @@ public class TransactionStepDefinitions extends BaseStepDefinitions {
     private TransactionRequestDTO transactionDTO, anotherTransactionDTO;
     private Transaction transaction, anotherTransaction;
 
+    private String token;
+
     private RuntimeException exception;
+
+    @Given("I am logged in as {string} with password {string}")
+    public void iAmLoggedIn(String username, String password) throws Throwable {
+        httpHeaders.add("Content-Type", "application/json");
+        response = restTemplate
+                .exchange("/" + "login",
+                        HttpMethod.POST,
+                        new HttpEntity<>("{\"username\":\"" + username + "\", \"password\":\"" + password + "\"}", httpHeaders), // null because OPTIONS does not have a body
+                        String.class);
+
+        token = JsonPath.read(response.getBody(), "$.token");
+        httpHeaders.add("Authorization", "Bearer " + token);
+    }
 
     @Given("The endpoint for {string} is available for method {string}")
     public void theEndpointForIsAvailableForMethod(String endpoint, String method) throws Throwable {
@@ -73,15 +92,96 @@ public class TransactionStepDefinitions extends BaseStepDefinitions {
         Assertions.assertTrue(options.contains(method.toUpperCase()));
     }
 
-    @When("^I retrieve all transactions$")
-    public void iRetrieveAllTransactions() {
-        response = restTemplate.exchange(restTemplate.getRootUri() + "/transactions", HttpMethod.GET, new HttpEntity<>(null, new HttpHeaders()), String.class);
+    @When("I add a withdraw transaction of {float} from {string}")
+    public void iAddAWithdrawTransaction(Float amount, String fromIban) {
+        transactionDTO = new TransactionRequestDTO();
+        transactionDTO.setAmount(amount);
+        transactionDTO.setFromAccountIban(fromIban);
+        transactionDTO.setTransactionType("WITHDRAW");
+
+        response = restTemplate.exchange(restTemplate.getRootUri() + "/transactions", HttpMethod.POST, new HttpEntity<>(transactionDTO, httpHeaders), String.class);
     }
 
-    @Then("^I should receive all transactions$")
+    @When("I add a deposit transaction of {float} to {string}")
+    public void iAddADepositTransaction(Float amount, String toIban) {
+        transactionDTO = new TransactionRequestDTO();
+        transactionDTO.setAmount(amount);
+        transactionDTO.setToAccountIban(toIban);
+        transactionDTO.setTransactionType("DEPOSIT");
+
+        response = restTemplate.exchange(restTemplate.getRootUri() + "/transactions", HttpMethod.POST, new HttpEntity<>(transactionDTO, httpHeaders), String.class);
+    }
+
+    @When("I add a transfer transaction of {float} from {string} to {string}")
+    public void iAddATransferTransaction(Float amount, String fromIban, String toIban) {
+        transactionDTO = new TransactionRequestDTO();
+        transactionDTO.setAmount(amount);
+        transactionDTO.setToAccountIban(toIban);
+        transactionDTO.setFromAccountIban(fromIban);
+        transactionDTO.setTransactionType("TRANSFER");
+
+        response = restTemplate.exchange(restTemplate.getRootUri() + "/transactions", HttpMethod.POST, new HttpEntity<>(transactionDTO, httpHeaders), String.class);
+    }
+
+    @When("I add a deposit transaction of {float} without a toAccountIban")
+    public void iAddADepositTransaction(Float amount) {
+        transactionDTO = new TransactionRequestDTO();
+        transactionDTO.setAmount(amount);
+        transactionDTO.setTransactionType("DEPOSIT");
+
+        response = restTemplate.exchange(restTemplate.getRootUri() + "/transactions", HttpMethod.POST, new HttpEntity<>(transactionDTO, httpHeaders), String.class);
+    }
+
+    @When("I add a withdraw transaction of {float} without a fromAccountIban")
+    public void iAddAWithdrawTransaction(Float amount) {
+        transactionDTO = new TransactionRequestDTO();
+        transactionDTO.setAmount(amount);
+        transactionDTO.setTransactionType("WITHDRAW");
+
+        response = restTemplate.exchange(restTemplate.getRootUri() + "/transactions", HttpMethod.POST, new HttpEntity<>(transactionDTO, httpHeaders), String.class);
+    }
+
+    @When("I add a transfer transaction of {float} from {string} to no iban")
+    public void iAddATransferTransactionWithoutToIban(Float amount, String fromIban) {
+        transactionDTO = new TransactionRequestDTO();
+        transactionDTO.setAmount(amount);
+        transactionDTO.setFromAccountIban(fromIban);
+        transactionDTO.setTransactionType("TRANSFER");
+
+        response = restTemplate.exchange(restTemplate.getRootUri() + "/transactions", HttpMethod.POST, new HttpEntity<>(transactionDTO, httpHeaders), String.class);
+    }
+
+    @When("I add a transfer transaction of {float} from no iban to {string}")
+    public void iAddATransferTransactionWithoutFromIban(Float amount, String toIban) {
+        transactionDTO = new TransactionRequestDTO();
+        transactionDTO.setAmount(amount);
+        transactionDTO.setToAccountIban(toIban);
+        transactionDTO.setTransactionType("TRANSFER");
+
+        response = restTemplate.exchange(restTemplate.getRootUri() + "/transactions", HttpMethod.POST, new HttpEntity<>(transactionDTO, httpHeaders), String.class);
+    }
+
+    @Then("The amount of the saved transaction is {double}")
+    public void theAmountOfTheSavedTransactionIs(Double amount) {
+        Double actual = JsonPath.read(response.getBody(), "$.data.amount");
+        Assertions.assertEquals(amount, actual);
+    }
+
+    @When("^I retrieve all transactions")
+    public void iRetrieveAllTransactions() {
+        SimpleDateFormat DateFormat = new SimpleDateFormat("yyyy-MM-dd");
+
+        LocalDate today = LocalDate.now();
+        Date startDate = Date.from(today.atStartOfDay(ZoneId.systemDefault()).toInstant());
+        Date endDate = Date.from(today.atStartOfDay(ZoneId.systemDefault()).toInstant());
+
+        response = restTemplate.exchange(restTemplate.getRootUri() + "/transactions?start_date=" + DateFormat.format(startDate) + "&end_date=" + DateFormat.format(endDate) + "&search=", HttpMethod.GET, new HttpEntity<>(null, httpHeaders), String.class);
+    }
+
+    @Then("^I should receive all transactions")
     public void iShouldReceiveAllTransactions() {
-        int actual = JsonPath.read(response.getBody(), "$.size()");
-        Assertions.assertEquals(1, actual);
+        int actual = JsonPath.read(response.getBody(), "$.data.size()");
+        Assertions.assertEquals(6, actual);
     }
 
     @Given("a user with username {string} and type {string}")
@@ -363,5 +463,16 @@ public class TransactionStepDefinitions extends BaseStepDefinitions {
         assertNull(savedTransaction);
         assertNotNull(exception);
         assertEquals(message, exception.getMessage());
+    }
+
+    @Then("The response status code is {int}")
+    public void theResponseStatusIs(int status) {
+        Assertions.assertEquals(status, response.getStatusCode().value());
+    }
+
+    @Then("The message returned is {string}")
+    public void theMessageReturnedIs(String message) {
+        String returnedMessage = JsonPath.read(response.getBody(), "$.message");
+        Assertions.assertEquals(message, returnedMessage);
     }
 }
