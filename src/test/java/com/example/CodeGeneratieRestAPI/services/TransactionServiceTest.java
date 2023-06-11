@@ -11,6 +11,10 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -399,11 +403,15 @@ public class TransactionServiceTest {
         transactions.add(new Transaction());
         transactions.add(new Transaction());
 
-        when(transactionRepository.findAll(endDate, startDate, search)).thenReturn(transactions);
+        Pageable pageableRequest = PageRequest.of(0, 10);
 
-        List<Transaction> result = transactionService.getAll(user, startDate, endDate, search);
+        Page<Transaction> pageTransactions = new PageImpl<>(transactions, pageableRequest, transactions.size());
 
-        Assertions.assertEquals(transactions.size(), result.size());
+        when(transactionRepository.findAll(endDate, startDate, "", "", 0F, pageableRequest)).thenReturn(pageTransactions);
+
+        Page<Transaction> result = transactionService.getAll(user, startDate, endDate, "", "", 0F, 0, 10);
+
+        Assertions.assertEquals(transactions.size(), result.getContent().size());
     }
 
     @Test
@@ -419,7 +427,7 @@ public class TransactionServiceTest {
         String search = "test";
 
         Assertions.assertThrows(EmployeeOnlyException.class, () -> {
-            transactionService.getAll(user, startDate, endDate, search);
+            transactionService.getAll(user, startDate, endDate, "", "", 0F, 0, 10);
         });
     }
 
