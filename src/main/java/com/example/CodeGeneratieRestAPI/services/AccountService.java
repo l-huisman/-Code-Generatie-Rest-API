@@ -252,8 +252,8 @@ public class AccountService {
         return "Account with IBAN: " + iban + " has been set to inactive";
     }
 
-    public void addSeededAccount(Account account) {
-        account.setIban(ibanGenerator.generateIban());
+    public void addSeededAccount(String iban, Account account) {
+        account.setIban(iban);
         accountRepository.save(account);
     }
 }
