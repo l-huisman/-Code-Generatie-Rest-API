@@ -25,6 +25,7 @@ public class AccountService {
 
     private final AccountRepository accountRepository;
     private final UserRepository userRepository;
+    @Autowired
     private final ServiceHelper serviceHelper;
     private final IBANGenerator ibanGenerator;
 
@@ -127,9 +128,9 @@ public class AccountService {
 
     private Account checkAndGetAccount(String iban, User loggedInUser) {
         // Check if the iban is valid
-//        if (!serviceHelper.checkIfObjectExistsByIdentifier(iban, new Account())) {
-//            throw new AccountNotFoundException("Account with IBAN: " + iban + " does not exist");
-//        }
+        if (!serviceHelper.checkIfObjectExistsByIdentifier(iban, new Account())) {
+            throw new AccountNotFoundException("Account with IBAN: " + iban + " does not exist");
+        }
 
         //Check if the account belongs to the user, if not, check if the user is an employee and if so, allow the user to access the account
         if (!checkIfAccountBelongsToUser(iban, loggedInUser) && !loggedInUser.getUserType().equals(UserType.EMPLOYEE)) {
@@ -186,7 +187,7 @@ public class AccountService {
         Account accountToUpdate = checkAndGetAccount(account.getIban(), loggedInUser);
 
         // Update the account
-        Account updatedAccount = getUpdatedAccount(account, accountToUpdate);
+        Account updatedAccount = getUpdatedAccount(account, accountToUpdate, loggedInUser);
 
         // Save the account
         accountRepository.save(updatedAccount);
@@ -195,26 +196,31 @@ public class AccountService {
         return updatedAccount;
     }
 
-    private Account getUpdatedAccount(AccountRequestDTO accountWithNewValues, Account accountToUpdate) {
+    private Account getUpdatedAccount(AccountRequestDTO accountWithNewValues, Account accountToUpdate, User loggedInUser) {
         // Loop through all the fields of the accountWithNewValues object
         // If the field is not null and the value is different from the one in the accountToUpdate object
         // Set the new value to the accountToUpdate object
         try {
             for (Field field : accountWithNewValues.getClass().getDeclaredFields()) {
-                // Skip the iban and userId fields (they cannot be updated)
-                if (field.getName().equals("iban") || field.getName().equals("userId"))
-                    continue;
+                // Set the field to accessible
+                field.setAccessible(true);
 
-                //  Check if the balance is being changed, if so, check if the user is an employee, if not, throw an exception
-                if (field.getName().equals("balance") && !loggedInUserHelper.getLoggedInUser().getUserType().getAuthority().equals("EMPLOYEE")) {
+                // Skip the iban and userId fields (they cannot be updated)
+                if (field.getName().equals("iban") || field.getName().equals("userId") || field == null || field.get(accountWithNewValues) == null) {
+                    continue;
+                }
+
+                //  Check if the balance field is not null but is different from the one in the accountToUpdate object
+                //  and if so, throw an exception
+                if (field.getName().equals("balance") && field != null && !accountToUpdate.getBalance().equals(accountWithNewValues.getBalance()) && !loggedInUser.getUserType().getAuthority().equals("EMPLOYEE")) {
                     throw new AccountUpdateException("You cannot update the balance of an account");
                 }
 
                 // Check if the field exists in the Account class
                 Field accountField = accountToUpdate.getClass().getDeclaredField(field.getName());
-                // Set the field to accessible
-                field.setAccessible(true);
+                //  Set the field to accessible
                 accountField.setAccessible(true);
+
                 Object newValue = field.get(accountWithNewValues);
                 Object oldValue = accountField.get(accountToUpdate);
 
@@ -236,7 +242,7 @@ public class AccountService {
 
         // Check if the account is active
         if (!account.getIsActive()) {
-            throw new IllegalArgumentException("Account with IBAN: " + iban + " is already inactive");
+            throw new AccountCannotBeDeletedException("Account with IBAN: " + iban + " is already inactive");
         }
 
         // Delete the account
