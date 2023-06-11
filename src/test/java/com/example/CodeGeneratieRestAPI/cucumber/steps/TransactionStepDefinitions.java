@@ -175,7 +175,7 @@ public class TransactionStepDefinitions extends BaseStepDefinitions {
         Date startDate = Date.from(today.atStartOfDay(ZoneId.systemDefault()).toInstant());
         Date endDate = Date.from(today.atStartOfDay(ZoneId.systemDefault()).toInstant());
 
-        response = restTemplate.exchange(restTemplate.getRootUri() + "/transactions?start_date=" + DateFormat.format(startDate) + "&end_date=" + DateFormat.format(endDate) + "&search=", HttpMethod.GET, new HttpEntity<>(null, httpHeaders), String.class);
+        response = restTemplate.exchange(restTemplate.getRootUri() + "/transactions?start_date=" + DateFormat.format(startDate) + "&end_date=" + DateFormat.format(endDate) + "&search=&iban=&amount_relation=&amount=&page_number=0&page_size=10", HttpMethod.GET, new HttpEntity<>(null, httpHeaders), String.class);
     }
 
     @Then("^I should receive all transactions")

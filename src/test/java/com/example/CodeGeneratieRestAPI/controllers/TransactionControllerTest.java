@@ -137,14 +137,14 @@ class TransactionControllerTest {
 
         Page<Transaction> pageTransactions = new PageImpl<>(transactions, pageableRequest, transactions.size());
 
-        when(transactionService.getAll(user, startDate, endDate, null, null, 0F, pageNumber, pageSize)).thenReturn(pageTransactions);
+        when(transactionService.getAll(user, startDate, endDate, "", "", 0F, pageNumber, pageSize)).thenReturn(pageTransactions);
         when(userService.getLoggedInUser()).thenReturn(user);
 
         SimpleDateFormat DateFormat = new SimpleDateFormat("yyyy-MM-dd");
 
         // Check if we get a 200 OK
         // And if the JSON content matches our expectations
-        this.mockMvc.perform(get("/transactions?start_date=" + DateFormat.format(startDate) + "&end_date=" + DateFormat.format(endDate) + "&search=&page_number=" + pageNumber + "&page_size=" + pageSize).header("Authorization", "test")).andDo(print())
+        this.mockMvc.perform(get("/transactions?start_date=" + DateFormat.format(startDate) + "&end_date=" + DateFormat.format(endDate) + "&iban=&amount_relation=&amount=&page_number=" + pageNumber + "&page_size=" + pageSize).header("Authorization", "test")).andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data", hasSize(transactions.size())))
                 .andExpect(jsonPath("$.data[0].amount").value("60.0"));

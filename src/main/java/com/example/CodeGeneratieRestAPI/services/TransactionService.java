@@ -36,6 +36,12 @@ public class TransactionService {
         Date startOfDay = getStartOfDay(startDate);
         Date endOfDay = getEndOfDay(endDate);
 
+        if (!amountRelation.isEmpty() && !(amountRelation.equals(">") || amountRelation.equals("<") || amountRelation.equals("="))) {
+            throw new RuntimeException("The transaction amount relation is not valid.");
+        } else if (!amountRelation.isEmpty() && amount == 0) {
+            throw new RuntimeException("The transaction amount relation is not valid.");
+        }
+
         //Check if user is not an employee and if the doesn't user owns the account
         if (!user.getUserType().equals(UserType.EMPLOYEE)) {
             throw new EmployeeOnlyException("This user is not an employee.");

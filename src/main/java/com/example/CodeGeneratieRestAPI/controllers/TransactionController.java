@@ -7,6 +7,7 @@ import com.example.CodeGeneratieRestAPI.models.ApiResponse;
 import com.example.CodeGeneratieRestAPI.models.Transaction;
 import com.example.CodeGeneratieRestAPI.models.User;
 import com.example.CodeGeneratieRestAPI.services.TransactionService;
+import jakarta.annotation.Nullable;
 import jakarta.validation.Valid;
 import org.modelmapper.Converter;
 import org.modelmapper.ModelMapper;
@@ -39,12 +40,9 @@ public class TransactionController {
     }
 
     @GetMapping
-    public ResponseEntity<ApiResponse> getAll(@RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") Date start_date, @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") Date end_date, @RequestParam String iban, @RequestParam String amount_relation, @RequestParam Float amount, @RequestParam int page_number, @RequestParam int page_size) {
+    public ResponseEntity<ApiResponse> getAll(@RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") Date start_date, @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") Date end_date, @RequestParam String iban, @RequestParam String amount_relation, @Nullable @RequestParam(defaultValue = "0") Float amount, @RequestParam int page_number, @RequestParam int page_size) {
         try {
             User user = loggedInUserHelper.getLoggedInUser();
-
-            System.out.println(amount_relation);
-            System.out.println(amount);
 
             Page<Transaction> transactions = transactionService.getAll(user, start_date, end_date, iban, amount_relation, amount, page_number, page_size);
 
