@@ -27,6 +27,7 @@ public class ServiceHelper {
 
     //  This method checks if an object exists by its identifier (IBAN, user id, transaction id) and its data type (Account, User, Transaction)
     public <T> boolean checkIfObjectExistsByIdentifier(T identifier, Object objectDataType) {
+        System.out.println("identifier: " + identifier + " | objectDataType: " + objectDataType);
         switch (objectDataType.getClass().getSimpleName()) {
             case "Account":
                 return accountRepository.existsByIban((String) identifier);
