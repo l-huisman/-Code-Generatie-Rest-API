@@ -1,7 +1,7 @@
 Feature: Transactions CRUD operations
 
   Scenario: Getting all transactions
-    Given I am logged in as "Devon" with password "devon"
+    Given I am logged in as "admin" with password "admin"
     And The endpoint for "transactions" is available for method "GET"
     When I retrieve all transactions
     Then I should receive all transactions
