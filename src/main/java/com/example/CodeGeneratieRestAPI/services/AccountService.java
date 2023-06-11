@@ -22,7 +22,6 @@ import java.util.List;
 
 @Service
 public class AccountService {
-
     private final AccountRepository accountRepository;
     private final UserRepository userRepository;
     @Autowired

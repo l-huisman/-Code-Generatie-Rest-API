@@ -7,6 +7,9 @@ import com.example.CodeGeneratieRestAPI.repositories.AccountRepository;
 import com.example.CodeGeneratieRestAPI.repositories.TransactionRepository;
 import com.example.CodeGeneratieRestAPI.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -28,7 +31,7 @@ public class TransactionService {
     @Autowired
     private UserRepository userRepository;
 
-    public List<Transaction> getAll(User user, Date startDate, Date endDate, String search) {
+    public Page<Transaction> getAll(User user, Date startDate, Date endDate, String iban, String balanceRelation, Float amount, Integer pageNumber, Integer pageSize) {
 
         Date startOfDay = getStartOfDay(startDate);
         Date endOfDay = getEndOfDay(endDate);
@@ -37,8 +40,9 @@ public class TransactionService {
         if (!user.getUserType().equals(UserType.EMPLOYEE)) {
             throw new EmployeeOnlyException("This user is not an employee.");
         }
+        Pageable pageableRequest = PageRequest.of(pageNumber, pageSize);
 
-        return transactionRepository.findAll(endOfDay, startOfDay, search);
+        return transactionRepository.findAll(endOfDay, startOfDay, iban, balanceRelation, amount, pageableRequest);
     }
 
     public List<Transaction> getAllByUser(User user) {
