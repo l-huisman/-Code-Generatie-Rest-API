@@ -2,11 +2,7 @@ package com.example.CodeGeneratieRestAPI.services;
 
 import com.example.CodeGeneratieRestAPI.dtos.AccountRequestDTO;
 import com.example.CodeGeneratieRestAPI.exceptions.AccountCreationException;
-import com.example.CodeGeneratieRestAPI.exceptions.AccountNoDataChangedException;
 import com.example.CodeGeneratieRestAPI.exceptions.AccountNotAccessibleException;
-import com.example.CodeGeneratieRestAPI.exceptions.AccountNotFoundException;
-import com.example.CodeGeneratieRestAPI.exceptions.AccountUpdateException;
-import com.example.CodeGeneratieRestAPI.exceptions.UserNotFoundException;
 import com.example.CodeGeneratieRestAPI.helpers.ServiceHelper;
 import com.example.CodeGeneratieRestAPI.models.Account;
 import com.example.CodeGeneratieRestAPI.models.User;
@@ -19,18 +15,12 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.WeakHashMap;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 public class AccountServiceTest {
@@ -145,6 +135,7 @@ public class AccountServiceTest {
 
         assertEquals(expectedAccountOptional.orElse(null), actualAccount);
     }
+
     @Test
     void testGetAccountByIbanThrowsAccountNotAccessibleException() {
         User user1 = getMockUser(UserType.USER);
@@ -160,7 +151,6 @@ public class AccountServiceTest {
         AccountNotAccessibleException exception = Assertions.assertThrows(AccountNotAccessibleException.class, () -> accountService.getAccountByIban(account.getIban(), user2));
         assertEquals("Account with IBAN: " + accountToCheck.getIban() + " does not belong to the logged in user", exception.getMessage());
     }
-
 
 
 }

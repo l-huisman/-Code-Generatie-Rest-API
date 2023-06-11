@@ -1,55 +1,37 @@
 package com.example.CodeGeneratieRestAPI.controllers;
 
-import com.example.CodeGeneratieRestAPI.controllers.TransactionController;
 import com.example.CodeGeneratieRestAPI.dtos.TransactionRequestDTO;
 import com.example.CodeGeneratieRestAPI.exceptions.TransactionAmountNotValidException;
 import com.example.CodeGeneratieRestAPI.exceptions.TransactionNotOwnedException;
-import com.example.CodeGeneratieRestAPI.helpers.ServiceHelper;
-import com.example.CodeGeneratieRestAPI.jwt.JwTokenFilter;
 import com.example.CodeGeneratieRestAPI.jwt.JwTokenProvider;
 import com.example.CodeGeneratieRestAPI.models.*;
 import com.example.CodeGeneratieRestAPI.repositories.AccountRepository;
 import com.example.CodeGeneratieRestAPI.repositories.TransactionRepository;
 import com.example.CodeGeneratieRestAPI.repositories.UserRepository;
-import com.example.CodeGeneratieRestAPI.services.AccountService;
+import com.example.CodeGeneratieRestAPI.services.TransactionService;
 import com.example.CodeGeneratieRestAPI.services.UserService;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.servlet.FilterChain;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
-import org.springframework.mock.web.MockHttpServletRequest;
-import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.security.test.context.support.WithUserDetails;
-import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 
-import com.example.CodeGeneratieRestAPI.services.TransactionService;
-
-import javax.swing.text.html.Option;
-import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
-import java.time.LocalTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Optional;
 
-import static org.hamcrest.Matchers.anything;
 import static org.hamcrest.Matchers.hasSize;
-import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -97,6 +79,7 @@ class TransactionControllerTest {
     @BeforeEach
     void setUp() {
     }
+
     private User getMockUser(Long id, UserType userType, String username) {
         User user = new User();
         user.setId(id);
@@ -240,6 +223,7 @@ class TransactionControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.message").value("You own this transaction"));
     }
+
     @Test
     @WithMockUser(username = "Devon", password = "pwd", roles = "USER")
     void transactionIsNotOwnedByUser() throws Exception {
@@ -266,7 +250,7 @@ class TransactionControllerTest {
         Account fromAccount = getMockAccount("123456", 1000F, user, false);
 
         Transaction transaction = getMockTransaction(1L, user, 60F, TransactionType.WITHDRAW, fromAccount, null);
-        TransactionRequestDTO transactionRequestDTO = new TransactionRequestDTO(fromAccount.getIban(), null, "WITHDRAW", transaction.getAmount() , transaction.getLabel(), transaction.getDescription());
+        TransactionRequestDTO transactionRequestDTO = new TransactionRequestDTO(fromAccount.getIban(), null, "WITHDRAW", transaction.getAmount(), transaction.getLabel(), transaction.getDescription());
 
         when(transactionService.add(any(User.class), any(TransactionRequestDTO.class))).thenReturn(transaction);
         when(userService.getLoggedInUser()).thenReturn(user);
@@ -287,7 +271,7 @@ class TransactionControllerTest {
         Account fromAccount = getMockAccount("123456", 1000F, user, false);
 
         Transaction transaction = getMockTransaction(1L, user, 0F, TransactionType.WITHDRAW, fromAccount, null);
-        TransactionRequestDTO transactionRequestDTO = new TransactionRequestDTO(fromAccount.getIban(), null, "WITHDRAW", transaction.getAmount() , transaction.getLabel(), transaction.getDescription());
+        TransactionRequestDTO transactionRequestDTO = new TransactionRequestDTO(fromAccount.getIban(), null, "WITHDRAW", transaction.getAmount(), transaction.getLabel(), transaction.getDescription());
 
         when(transactionService.add(any(User.class), any(TransactionRequestDTO.class))).thenThrow(new TransactionAmountNotValidException("The transaction amount can't be zero."));
         when(userService.getLoggedInUser()).thenReturn(user);

@@ -3,12 +3,11 @@ package com.example.CodeGeneratieRestAPI.controllers;
 import com.example.CodeGeneratieRestAPI.dtos.TransactionRequestDTO;
 import com.example.CodeGeneratieRestAPI.dtos.TransactionResponseDTO;
 import com.example.CodeGeneratieRestAPI.helpers.LoggedInUserHelper;
-import com.example.CodeGeneratieRestAPI.helpers.ServiceHelper;
-import com.example.CodeGeneratieRestAPI.models.*;
+import com.example.CodeGeneratieRestAPI.models.ApiResponse;
+import com.example.CodeGeneratieRestAPI.models.Transaction;
+import com.example.CodeGeneratieRestAPI.models.User;
 import com.example.CodeGeneratieRestAPI.services.TransactionService;
 import jakarta.validation.Valid;
-import com.example.CodeGeneratieRestAPI.services.UserService;
-import org.hibernate.service.spi.InjectService;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.config.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,6 +29,7 @@ public class TransactionController {
     private TransactionService transactionService;
     @Autowired
     private LoggedInUserHelper loggedInUserHelper;
+
     public TransactionController() {
         loggedInUserHelper = new LoggedInUserHelper();
         modelMapper = new ModelMapper();
@@ -79,7 +79,7 @@ public class TransactionController {
     }
 
     @GetMapping("/accounts/{iban}")
-    public ResponseEntity<ApiResponse> getAllByAccountIban(@PathVariable String iban, @RequestParam @DateTimeFormat(pattern="yyyy-MM-dd") Date start_date, @RequestParam @DateTimeFormat(pattern="yyyy-MM-dd") Date end_date, @RequestParam String search) {
+    public ResponseEntity<ApiResponse> getAllByAccountIban(@PathVariable String iban, @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") Date start_date, @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") Date end_date, @RequestParam String search) {
         try {
             User user = loggedInUserHelper.getLoggedInUser();
 

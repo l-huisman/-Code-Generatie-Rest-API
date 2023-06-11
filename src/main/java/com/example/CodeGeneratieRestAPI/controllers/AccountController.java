@@ -7,7 +7,6 @@ import com.example.CodeGeneratieRestAPI.models.Account;
 import com.example.CodeGeneratieRestAPI.models.ApiResponse;
 import com.example.CodeGeneratieRestAPI.models.User;
 import com.example.CodeGeneratieRestAPI.services.AccountService;
-import com.example.CodeGeneratieRestAPI.services.UserService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.PropertyMap;
@@ -30,9 +29,9 @@ public class AccountController {
     // In short, a POJO is an object that encapsulates data.
     private final ObjectMapper objectMapper;
     @Autowired
-    private AccountService accountService;
-    @Autowired
     private final LoggedInUserHelper loggedInUserHelper;
+    @Autowired
+    private AccountService accountService;
 
     public AccountController() {
         this.loggedInUserHelper = new LoggedInUserHelper();
@@ -107,9 +106,9 @@ public class AccountController {
     @GetMapping("/{iban}")
     public ResponseEntity<ApiResponse> getAccountByIban(@PathVariable(required = true) String iban) {
 
-        try{
-        //  Get the logged-in user
-        User user = loggedInUserHelper.getLoggedInUser();
+        try {
+            //  Get the logged-in user
+            User user = loggedInUserHelper.getLoggedInUser();
 
             //  Retrieve the data
             AccountResponseDTO account = modelMapper.map(accountService.getAccountByIban(iban, user), AccountResponseDTO.class);

@@ -1,6 +1,5 @@
 package com.example.CodeGeneratieRestAPI.helpers;
 
-import io.cucumber.java.Before;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -10,16 +9,16 @@ import org.mockito.MockitoAnnotations;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
-import static org.mockito.Mockito.when;
-
 class IBANGeneratorTest {
     @Mock
     private IBANGenerator ibanGenerator;
+
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
         ibanGenerator = new IBANGenerator(null);
     }
+
     @Test
         //  This test tests the generateIban method from IBANGenerator helper class
         //  This test makes sure that whenever the generateIban method is invoked, it returns an IBAN with the correct format

@@ -1,11 +1,7 @@
 package com.example.CodeGeneratieRestAPI.services;
 
 import com.example.CodeGeneratieRestAPI.dtos.AccountRequestDTO;
-import com.example.CodeGeneratieRestAPI.exceptions.AccountCreationException;
-import com.example.CodeGeneratieRestAPI.exceptions.AccountNoDataChangedException;
-import com.example.CodeGeneratieRestAPI.exceptions.AccountNotAccessibleException;
-import com.example.CodeGeneratieRestAPI.exceptions.AccountNotFoundException;
-import com.example.CodeGeneratieRestAPI.exceptions.AccountUpdateException;
+import com.example.CodeGeneratieRestAPI.exceptions.*;
 import com.example.CodeGeneratieRestAPI.helpers.IBANGenerator;
 import com.example.CodeGeneratieRestAPI.helpers.LoggedInUserHelper;
 import com.example.CodeGeneratieRestAPI.helpers.ServiceHelper;
@@ -34,6 +30,7 @@ public class AccountService {
 
     @Autowired
     private final LoggedInUserHelper loggedInUserHelper;
+
     public AccountService(AccountRepository accountRepository, UserRepository userRepository, ServiceHelper serviceHelper) {
         this.accountRepository = accountRepository;
         this.userRepository = userRepository;
@@ -127,6 +124,7 @@ public class AccountService {
         }
         return accountRepository.checkIfAccountBelongsToUser(iban, loggedInUser.getId());
     }
+
     private Account checkAndGetAccount(String iban, User loggedInUser) {
         // Check if the iban is valid
 //        if (!serviceHelper.checkIfObjectExistsByIdentifier(iban, new Account())) {
