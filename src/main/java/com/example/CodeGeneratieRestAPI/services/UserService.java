@@ -5,6 +5,7 @@ import com.example.CodeGeneratieRestAPI.dtos.UserResponseDTO;
 import com.example.CodeGeneratieRestAPI.exceptions.UserNotFoundException;
 import com.example.CodeGeneratieRestAPI.models.HashedPassword;
 import com.example.CodeGeneratieRestAPI.models.User;
+import com.example.CodeGeneratieRestAPI.repositories.AccountRepository;
 import com.example.CodeGeneratieRestAPI.repositories.UserRepository;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeMap;
@@ -27,6 +28,8 @@ public class UserService {
     JwtService jwtService;
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private AccountRepository accountRepository;
 
     public UserService() {
         this.modelMapper = new ModelMapper();
@@ -44,19 +47,28 @@ public class UserService {
     public User getLoggedInUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-        return userRepository.findUserByUsername(userDetails.getUsername()).orElseThrow(() -> new UserNotFoundException("User with username: " + userDetails.getUsername() + " does not exist"));
+        return userRepository.findUserByUsername(userDetails.getUsername()).orElseThrow(() -> new UserNotFoundException(
+                "User with username: " + userDetails.getUsername() + " does not exist"));
     }
 
-    public List<UserResponseDTO> getAll() {
+    public List<UserResponseDTO> getAll(boolean hasNoAccounts) {
         Iterable<User> users = userRepository.findAll();
         if (users == null) {
             throw new UserNotFoundException("No users found");
         }
         List<UserResponseDTO> userResponseDTOs = new ArrayList<>();
         for (User user : users) {
+            if (hasNoAccounts && hasNoAccounts(user)) {
+                userResponseDTOs.add(modelMapper.map(user, UserResponseDTO.class));
+                continue;
+            }
             userResponseDTOs.add(modelMapper.map(user, UserResponseDTO.class));
         }
         return userResponseDTOs;
+    }
+
+    private Boolean hasNoAccounts(User user) {
+        return accountRepository.findAllActiveAccountsByUserId(user.getId()).isEmpty();
     }
 
     public UserResponseDTO getMe(String bearerToken) {

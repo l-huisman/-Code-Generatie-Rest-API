@@ -55,7 +55,6 @@ public class DataSeeder implements ApplicationRunner {
         userRepository.findAll().forEach(user -> {
             if (user.getUserType() == UserType.EMPLOYEE)
                 return;
-            Random random = new Random();
             // Create default accounts
             Account account = new Account();
             account.setIban(null);
@@ -88,5 +87,10 @@ public class DataSeeder implements ApplicationRunner {
             transactionService.add(user, transaction);
             transactionService.add(user, transaction2);
         });
+
+                // Create another default customer user
+        UserRequestDTO defaultCustomer4 = new UserRequestDTO("John", "Doe", "Johny", "hereIs!",
+                "John.Doe@inholland.nl", UserType.USER);
+        userService.add(defaultCustomer4);
     }
 }

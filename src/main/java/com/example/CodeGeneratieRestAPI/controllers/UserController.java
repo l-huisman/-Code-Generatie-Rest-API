@@ -19,10 +19,10 @@ public class UserController {
     private UserService userService;
 
     @GetMapping
-    public ResponseEntity<ApiResponse<List<UserResponseDTO>>> getAll() {
+    public ResponseEntity<ApiResponse<List<UserResponseDTO>>> getAll(@RequestParam(required = false) boolean hasNoAccounts) {
         try {
             return ResponseEntity.status(HttpStatus.FOUND)
-                    .body(new ApiResponse<>(true, "Users found!", userService.getAll()));
+                    .body(new ApiResponse<>(true, "Users found!", userService.getAll(hasNoAccounts)));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse<>(false, e.getMessage()));
         }
