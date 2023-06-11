@@ -7,6 +7,7 @@ import com.example.CodeGeneratieRestAPI.exceptions.AccountNotAccessibleException
 import com.example.CodeGeneratieRestAPI.exceptions.AccountNotFoundException;
 import com.example.CodeGeneratieRestAPI.exceptions.AccountUpdateException;
 import com.example.CodeGeneratieRestAPI.helpers.IBANGenerator;
+import com.example.CodeGeneratieRestAPI.helpers.LoggedInUserHelper;
 import com.example.CodeGeneratieRestAPI.helpers.ServiceHelper;
 import com.example.CodeGeneratieRestAPI.models.Account;
 import com.example.CodeGeneratieRestAPI.models.User;
@@ -31,11 +32,14 @@ public class AccountService {
     private final ServiceHelper serviceHelper;
     private final IBANGenerator ibanGenerator;
 
+    @Autowired
+    private final LoggedInUserHelper loggedInUserHelper;
     public AccountService(AccountRepository accountRepository, UserRepository userRepository, ServiceHelper serviceHelper) {
         this.accountRepository = accountRepository;
         this.userRepository = userRepository;
         this.serviceHelper = serviceHelper;
         ibanGenerator = new IBANGenerator(serviceHelper);
+        loggedInUserHelper = new LoggedInUserHelper();
     }
 
     public Account add(AccountRequestDTO accountRequestDTO, User loggedInUser) {
@@ -131,7 +135,7 @@ public class AccountService {
 
         //Check if the account belongs to the user, if not, check if the user is an employee and if so, allow the user to access the account
         if (!checkIfAccountBelongsToUser(iban, loggedInUser) && !loggedInUser.getUserType().equals(UserType.EMPLOYEE)) {
-            throw new AccountNotFoundException("Account with IBAN: " + iban + " does not exist");
+            throw new AccountNotAccessibleException("Account with IBAN: " + iban + " does not belong to the logged in user");
         }
 
         return accountRepository.getAccountByIban(iban).orElseThrow(() -> new AccountNotFoundException("Account with IBAN: " + iban + " does not exist"));
@@ -150,7 +154,7 @@ public class AccountService {
 
     public List<Account> getAllAccounts(String search, boolean active, User loggedInUser) {
         // Check if the user is an employee
-        if (loggedInUser.getUserType().getAuthority().equals(UserType.EMPLOYEE)) {
+        if (loggedInUser.getUserType().getAuthority().equals("EMPLOYEE")) {
             //  Get all accounts
             return accountRepository.findAllBySearchTerm(search, active);
         } else {
@@ -170,7 +174,7 @@ public class AccountService {
 
     public List<Account> getAllAccountsByUserId(Long userId, User loggedInUser) {
         //  Check if the userId matches the id of the logged in user and throw an exception if it doesn't unless the user is an employee
-        if (!loggedInUser.getUserType().getAuthority().equals(UserType.EMPLOYEE) && !userId.equals(loggedInUser.getId())) {
+        if (!loggedInUser.getUserType().getAuthority().equals("EMPLOYEE") && !userId.equals(loggedInUser.getId())) {
             throw new AccountNotAccessibleException("You cannot access the accounts of another user");
         }
         return accountRepository.findAllByUserId(userId);
@@ -204,7 +208,7 @@ public class AccountService {
                     continue;
 
                 //  Check if the balance is being changed, if so, check if the user is an employee, if not, throw an exception
-                if (field.getName().equals("balance") && !serviceHelper.getLoggedInUser().getUserType().getAuthority().equals("EMPLOYEE")) {
+                if (field.getName().equals("balance") && !loggedInUserHelper.getLoggedInUser().getUserType().getAuthority().equals("EMPLOYEE")) {
                     throw new AccountUpdateException("You cannot update the balance of an account");
                 }
 

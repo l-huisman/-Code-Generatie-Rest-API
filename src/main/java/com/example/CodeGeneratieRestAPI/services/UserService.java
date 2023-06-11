@@ -4,11 +4,15 @@ import com.example.CodeGeneratieRestAPI.dtos.UserRequestDTO;
 import com.example.CodeGeneratieRestAPI.dtos.UserResponseDTO;
 import com.example.CodeGeneratieRestAPI.exceptions.UserNotFoundException;
 import com.example.CodeGeneratieRestAPI.models.HashedPassword;
+import com.example.CodeGeneratieRestAPI.jwt.JwTokenProvider;
 import com.example.CodeGeneratieRestAPI.models.User;
 import com.example.CodeGeneratieRestAPI.repositories.UserRepository;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeMap;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -37,6 +41,11 @@ public class UserService {
             typeMap = modelMapper.createTypeMap(UserRequestDTO.class, User.class);
         }
         typeMap.addMappings(mapper -> mapper.skip(User::setPassword));
+    }
+    public User getLoggedInUser() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+        return userRepository.findUserByUsername(userDetails.getUsername()).orElseThrow(() -> new UserNotFoundException("User with username: " + userDetails.getUsername() + " does not exist"));
     }
 
     public List<UserResponseDTO> getAll() {

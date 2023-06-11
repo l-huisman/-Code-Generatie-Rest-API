@@ -2,9 +2,12 @@ package com.example.CodeGeneratieRestAPI.controllers;
 
 import com.example.CodeGeneratieRestAPI.dtos.TransactionRequestDTO;
 import com.example.CodeGeneratieRestAPI.dtos.TransactionResponseDTO;
+import com.example.CodeGeneratieRestAPI.helpers.LoggedInUserHelper;
 import com.example.CodeGeneratieRestAPI.helpers.ServiceHelper;
 import com.example.CodeGeneratieRestAPI.models.*;
 import com.example.CodeGeneratieRestAPI.services.TransactionService;
+import jakarta.validation.Valid;
+import com.example.CodeGeneratieRestAPI.services.UserService;
 import org.hibernate.service.spi.InjectService;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.config.Configuration;
@@ -23,13 +26,12 @@ import java.util.List;
 public class TransactionController {
 
     ModelMapper modelMapper;
-    private TransactionService transactionService;
-
     @Autowired
-    private final ServiceHelper serviceHelper;
-
-    public TransactionController(ServiceHelper serviceHelper) {
-        this.serviceHelper = serviceHelper;
+    private TransactionService transactionService;
+    @Autowired
+    private LoggedInUserHelper loggedInUserHelper;
+    public TransactionController() {
+        loggedInUserHelper = new LoggedInUserHelper();
         modelMapper = new ModelMapper();
         modelMapper.getConfiguration().setFieldMatchingEnabled(true).setFieldAccessLevel(Configuration.AccessLevel.PRIVATE);
     }
@@ -37,7 +39,9 @@ public class TransactionController {
     @GetMapping
     public ResponseEntity<ApiResponse> getAll(@RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") Date start_date, @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") Date end_date, @RequestParam String search) {
         try {
-            User user = serviceHelper.getLoggedInUser();
+            System.out.println("kaas");
+            User user = loggedInUserHelper.getLoggedInUser();
+            System.out.println(user.getUsername());
 
             List<Transaction> transactions = transactionService.getAll(user, start_date, end_date, search);
 
@@ -50,7 +54,7 @@ public class TransactionController {
     @GetMapping("/user")
     public ResponseEntity<ApiResponse> getAllByUserId() {
         try {
-            User user = serviceHelper.getLoggedInUser();
+            User user = loggedInUserHelper.getLoggedInUser();
 
             List<Transaction> transactions = transactionService.getAllByUser(user);
 
@@ -63,7 +67,7 @@ public class TransactionController {
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse> getById(@PathVariable Long id) {
         try {
-            User user = serviceHelper.getLoggedInUser();
+            User user = loggedInUserHelper.getLoggedInUser();
             //  Retrieve the data
             Transaction transaction = transactionService.getById(user, id);
 
@@ -77,7 +81,7 @@ public class TransactionController {
     @GetMapping("/accounts/{iban}")
     public ResponseEntity<ApiResponse> getAllByAccountIban(@PathVariable String iban, @RequestParam @DateTimeFormat(pattern="yyyy-MM-dd") Date start_date, @RequestParam @DateTimeFormat(pattern="yyyy-MM-dd") Date end_date, @RequestParam String search) {
         try {
-            User user = serviceHelper.getLoggedInUser();
+            User user = loggedInUserHelper.getLoggedInUser();
 
             List<Transaction> transactions = transactionService.getAllByAccountIban(user, iban, start_date, end_date, search);
 
@@ -90,7 +94,7 @@ public class TransactionController {
     @GetMapping("/owns/{id}")
     public ResponseEntity<ApiResponse<String>> transactionIsOwnedByUser(@PathVariable Long id) {
         try {
-            User user = serviceHelper.getLoggedInUser();
+            User user = loggedInUserHelper.getLoggedInUser();
 
             transactionService.transactionIsOwnedByUser(user, id);
 
@@ -101,9 +105,9 @@ public class TransactionController {
     }
 
     @PostMapping
-    public ResponseEntity<ApiResponse> add(@RequestBody(required = true) TransactionRequestDTO transactionIn) {
+    public ResponseEntity<ApiResponse> add(@Valid @RequestBody(required = true) TransactionRequestDTO transactionIn) {
         try {
-            User user = serviceHelper.getLoggedInUser();
+            User user = loggedInUserHelper.getLoggedInUser();
 
             //  Retrieve the data
             Transaction transaction = transactionService.add(user, transactionIn);
