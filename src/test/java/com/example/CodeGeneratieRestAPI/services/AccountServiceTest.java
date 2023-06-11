@@ -1,11 +1,13 @@
 package com.example.CodeGeneratieRestAPI.services;
 
+import com.example.CodeGeneratieRestAPI.dtos.AccountData;
 import com.example.CodeGeneratieRestAPI.dtos.AccountRequestDTO;
 import com.example.CodeGeneratieRestAPI.exceptions.AccountCannotBeDeletedException;
 import com.example.CodeGeneratieRestAPI.exceptions.AccountCreationException;
 import com.example.CodeGeneratieRestAPI.exceptions.AccountNotAccessibleException;
 import com.example.CodeGeneratieRestAPI.exceptions.AccountNotFoundException;
 import com.example.CodeGeneratieRestAPI.exceptions.AccountUpdateException;
+import com.example.CodeGeneratieRestAPI.helpers.IBANGenerator;
 import com.example.CodeGeneratieRestAPI.helpers.ServiceHelper;
 import com.example.CodeGeneratieRestAPI.models.Account;
 import com.example.CodeGeneratieRestAPI.models.User;
@@ -34,6 +36,10 @@ public class AccountServiceTest {
     private UserRepository userRepository;
     @Mock
     private ServiceHelper serviceHelper;
+    @Mock
+    private IBANGenerator ibanGenerator;
+    @Mock
+    private TransactionService transactionService;
     @InjectMocks
     private AccountService accountService;
 
@@ -136,8 +142,10 @@ public class AccountServiceTest {
         when(accountRepository.checkIfAccountBelongsToUser(accountToCheck.getIban(), user1.getId())).thenReturn(true);
 
         Account actualAccount = accountService.getAccountByIban(account.getIban(), user1);
+        //AccountData actualAccount = accountService.getAccountByIban(account.getIban(), user1);
 
         assertEquals(expectedAccountOptional.orElse(null), actualAccount);
+        //assertEquals(expectedAccountOptional.orElse(null), actualAccount.getAccount());
     }
 
     @Test

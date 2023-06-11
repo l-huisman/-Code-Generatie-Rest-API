@@ -9,7 +9,7 @@ import java.util.Date;
 public class AccountResponseDTO {
     private Long userId;
     private String iban;
-    private String accountName;
+    private String name;
     private Float dailyLimit;
     private Float transactionLimit;
     private Float absoluteLimit;
@@ -26,7 +26,7 @@ public class AccountResponseDTO {
     public AccountResponseDTO(Account account) {
         this.userId = account.getUserId();
         this.iban = account.getIban();
-        this.accountName = account.getName();
+        this.name = account.getName();
         this.dailyLimit = account.getDailyLimit();
         this.transactionLimit = account.getTransactionLimit();
         this.absoluteLimit = account.getAbsoluteLimit();
@@ -34,5 +34,9 @@ public class AccountResponseDTO {
         this.isSavings = account.getIsSavings();
         this.isActive = account.getIsActive();
         this.createdAt = account.getCreatedAt();
+    }
+    private Float calculateLimitRemaining() {
+        //  Get the lowest limit of all the limits
+        return Math.min(Math.min(transactionLimit, dailyLimit), this.balance - this.absoluteLimit);
     }
 }

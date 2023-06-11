@@ -121,5 +121,18 @@ public class DataSeeder implements ApplicationRunner {
             transactionService.add(user, transaction2);
             accountIndex++;
         });
+        // Add the bank's account
+        Account banksAccount = new Account();
+        banksAccount.setUser(null);
+        banksAccount.setUserId(null);
+        banksAccount.setName("Bank account");
+        banksAccount.setDailyLimit(10000000f);
+        banksAccount.setTransactionLimit(10000000f);
+        banksAccount.setAbsoluteLimit(0f);
+        banksAccount.setBalance(100000000f);
+        banksAccount.setIsSavings(false);
+        banksAccount.setCreatedAt(new Date());
+        banksAccount.setIsActive(true);
+        accountService.addSeededAccount("NL01-INHO-0000-0000-01", banksAccount);
     }
 }

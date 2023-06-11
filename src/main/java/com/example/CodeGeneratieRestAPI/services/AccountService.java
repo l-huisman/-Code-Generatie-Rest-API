@@ -1,5 +1,7 @@
 package com.example.CodeGeneratieRestAPI.services;
 
+import com.example.CodeGeneratieRestAPI.dtos.AccountData;
+import com.example.CodeGeneratieRestAPI.dtos.AccountLimitsLeft;
 import com.example.CodeGeneratieRestAPI.dtos.AccountRequestDTO;
 import com.example.CodeGeneratieRestAPI.exceptions.*;
 import com.example.CodeGeneratieRestAPI.helpers.IBANGenerator;
@@ -38,19 +40,19 @@ public class AccountService {
         this.serviceHelper = serviceHelper;
         ibanGenerator = new IBANGenerator(serviceHelper);
         loggedInUserHelper = new LoggedInUserHelper();
+
     }
 
     public Account add(AccountRequestDTO accountRequestDTO, User loggedInUser) {
         try {
-            //  To add the bank's own account, this is a special case
-            if (accountRequestDTO.getIban().equals("NL01-INHO-0000-0000-01"))
-                return addBankAccount(accountRequestDTO);
-
             //  Check if the accountRequestDTO is valid
             //this.checkIfAccountRequestDTOIsValid(accountRequestDTO, currentLoggedInUser);
 
             //  Check if the IBAN has not been set yet
             if (accountRequestDTO.getIban() != null) {
+                //  To add the bank's own account, this is a special case
+                if (accountRequestDTO.getIban().equals("NL01-INHO-0000-0000-01"))
+                    return addBankAccount(accountRequestDTO);
                 throw new AccountCreationException("You cannot set the IBAN of a new account");
             }
 
@@ -163,13 +165,33 @@ public class AccountService {
             return accountRepository.findAllBySearchTermAndUserId(search, active, loggedInUser.getId());
         }
     }
-    public Account getAccountByIban(String iban, User loggedInUser) {
-        //  Check account and get the account
-        Account account = this.checkAndGetAccount(iban, loggedInUser);
+//    public AccountData getAccountByIban(String iban, User loggedInUser) {
+//        //  Check account and get the account
+//        Account account = this.checkAndGetAccount(iban, loggedInUser);
+//
+//        //  Get the account limits left
+//        AccountLimitsLeft accountLimitsLeft = new AccountLimitsLeft();
+//        Double doubleValue = transactionService.getTodaysAccumulatedTransactionAmount(account.getIban());
+//        Float floatValue = doubleValue != null ? doubleValue.floatValue() : 0F;
+//
+//        accountLimitsLeft.setDailyLimitLeft(floatValue);
+//        accountLimitsLeft.setTransactionLimit(account.getTransactionLimit());
+//        accountLimitsLeft.setTotalLimitLeft(Math.min(accountLimitsLeft.getDailyLimitLeft(), accountLimitsLeft.getTransactionLimit()));
+//
+//        //  Return an AccountData object which contains the account and the account limits left
+//        return new AccountData(account, accountLimitsLeft);
+//    }
+public Account getAccountByIban(String iban, User loggedInUser) {
+    //  Check account and get the account
+    Account account = this.checkAndGetAccount(iban, loggedInUser);
 
-        //  Return the account
-        return account;
-    }
+    //  Get the account limits left
+    //AccountLimitsLeft accountLimitsLeft = new AccountLimitsLeft();
+    //accountLimitsLeft.setDailyLimitLeft(transactionService.getDailyLimitLeft(account));
+
+    //  Return the account
+    return account;
+}
 
     public List<Account> getAllAccountsByUserId(Long userId, User loggedInUser) {
         //  Check if the userId matches the id of the logged in user and throw an exception if it doesn't unless the user is an employee
@@ -255,5 +277,6 @@ public class AccountService {
     public void addSeededAccount(String iban, Account account) {
         account.setIban(iban);
         accountRepository.save(account);
+        System.out.println("Account with IBAN: " + iban + " has been added");
     }
 }
