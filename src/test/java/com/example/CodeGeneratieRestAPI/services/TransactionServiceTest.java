@@ -407,9 +407,9 @@ public class TransactionServiceTest {
 
         Page<Transaction> pageTransactions = new PageImpl<>(transactions, pageableRequest, transactions.size());
 
-        when(transactionRepository.findAll(endDate, startDate, search, pageableRequest)).thenReturn(pageTransactions);
+        when(transactionRepository.findAll(endDate, startDate, null, null, 0F, pageableRequest)).thenReturn(pageTransactions);
 
-        Page<Transaction> result = transactionService.getAll(user, startDate, endDate, search, 0, 10);
+        Page<Transaction> result = transactionService.getAll(user, startDate, endDate, null, null, 0F, 0, 10);
 
         Assertions.assertEquals(transactions.size(), result.getContent().size());
     }
@@ -427,7 +427,7 @@ public class TransactionServiceTest {
         String search = "test";
 
         Assertions.assertThrows(EmployeeOnlyException.class, () -> {
-            transactionService.getAll(user, startDate, endDate, search, 0, 10);
+            transactionService.getAll(user, startDate, endDate, null, null, 0F, 0, 10);
         });
     }
 

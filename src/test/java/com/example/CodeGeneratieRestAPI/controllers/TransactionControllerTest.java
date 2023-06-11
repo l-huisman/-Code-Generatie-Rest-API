@@ -137,7 +137,7 @@ class TransactionControllerTest {
 
         Page<Transaction> pageTransactions = new PageImpl<>(transactions, pageableRequest, transactions.size());
 
-        when(transactionService.getAll(user, startDate, endDate, search, pageNumber, pageSize)).thenReturn(pageTransactions);
+        when(transactionService.getAll(user, startDate, endDate, null, null, 0F, pageNumber, pageSize)).thenReturn(pageTransactions);
         when(userService.getLoggedInUser()).thenReturn(user);
 
         SimpleDateFormat DateFormat = new SimpleDateFormat("yyyy-MM-dd");

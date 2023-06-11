@@ -31,7 +31,7 @@ public class TransactionService {
     @Autowired
     private UserRepository userRepository;
 
-    public Page<Transaction> getAll(User user, Date startDate, Date endDate, String iban, String balanceRelation, Float amount, Integer pageNumber, Integer pageSize) {
+    public Page<Transaction> getAll(User user, Date startDate, Date endDate, String iban, String amountRelation, Float amount, Integer pageNumber, Integer pageSize) {
 
         Date startOfDay = getStartOfDay(startDate);
         Date endOfDay = getEndOfDay(endDate);
@@ -42,7 +42,7 @@ public class TransactionService {
         }
         Pageable pageableRequest = PageRequest.of(pageNumber, pageSize);
 
-        return transactionRepository.findAll(endOfDay, startOfDay, iban, balanceRelation, amount, pageableRequest);
+        return transactionRepository.findAll(endOfDay, startOfDay, iban, amountRelation, amount, pageableRequest);
     }
 
     public List<Transaction> getAllByUser(User user) {

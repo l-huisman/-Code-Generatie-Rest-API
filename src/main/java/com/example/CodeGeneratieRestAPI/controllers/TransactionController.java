@@ -39,11 +39,14 @@ public class TransactionController {
     }
 
     @GetMapping
-    public ResponseEntity<ApiResponse> getAll(@RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") Date start_date, @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") Date end_date, @RequestParam String search, @RequestParam int page_number, @RequestParam int page_size) {
+    public ResponseEntity<ApiResponse> getAll(@RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") Date start_date, @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") Date end_date, @RequestParam String iban, @RequestParam String amount_relation, @RequestParam Float amount, @RequestParam int page_number, @RequestParam int page_size) {
         try {
             User user = loggedInUserHelper.getLoggedInUser();
 
-            Page<Transaction> transactions = transactionService.getAll(user, start_date, end_date, search, page_number, page_size);
+            System.out.println(amount_relation);
+            System.out.println(amount);
+
+            Page<Transaction> transactions = transactionService.getAll(user, start_date, end_date, iban, amount_relation, amount, page_number, page_size);
 
             return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse<>(true, "" + transactions.getTotalElements(), Arrays.asList(modelMapper.map(transactions.getContent(), TransactionResponseDTO[].class))));
         } catch (Exception e) {
