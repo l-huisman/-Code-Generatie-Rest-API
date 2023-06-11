@@ -70,13 +70,14 @@ public class UserService {
     }
 
     public UserResponseDTO update(Long id, UserRequestDTO user) {
-        User userToUpdate = userRepository.findById(id).get();
-        if (userToUpdate == null) {
-            throw new UserNotFoundException("No user found with id: " + id);
+        Optional<User> userToUpdate = userRepository.findById(id);
+        if (userToUpdate.isPresent()) {
+            User updatedUser = UpdateFilledFields(user, userToUpdate.get());
+            userRepository.save(updatedUser);
+            return modelMapper.map(updatedUser, UserResponseDTO.class);
+        } else {
+            throw new UserNotFoundException("User not found with id: " + id);
         }
-        userToUpdate = UpdateFilledFields(user, userToUpdate);
-        userRepository.save(userToUpdate);
-        return modelMapper.map(userToUpdate, UserResponseDTO.class);
     }
 
     public UserResponseDTO getById(long id) {
