@@ -246,7 +246,7 @@ public class AccountService {
 
                 //  Check if the balance field is not null but is different from the one in the accountToUpdate object
                 //  and if so, throw an exception
-                if (field.getName().equals("balance") && field != null && !accountToUpdate.getBalance().equals(accountWithNewValues.getBalance()) && !loggedInUser.getUserType().getAuthority().equals("EMPLOYEE")) {
+                if (field.getName().equals("balance") && field != null && !accountToUpdate.getBalance().equals(accountWithNewValues.getBalance())) {
                     throw new AccountUpdateException("You cannot update the balance of an account");
                 }
 
