@@ -16,7 +16,6 @@ public class AccountResponseDTO {
     private Float balance;
     private Boolean isSavings;
     private Boolean isActive;
-    private Date createdAt;
 
     // Empty constructor
     public AccountResponseDTO() {
@@ -33,7 +32,6 @@ public class AccountResponseDTO {
         this.balance = account.getBalance();
         this.isSavings = account.getIsSavings();
         this.isActive = account.getIsActive();
-        this.createdAt = account.getCreatedAt();
     }
 
     private Float calculateLimitRemaining() {

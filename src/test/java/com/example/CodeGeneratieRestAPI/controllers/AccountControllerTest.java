@@ -3,6 +3,7 @@ package com.example.CodeGeneratieRestAPI.controllers;
 import com.example.CodeGeneratieRestAPI.dtos.AccountData;
 import com.example.CodeGeneratieRestAPI.dtos.AccountLimitsLeft;
 import com.example.CodeGeneratieRestAPI.dtos.AccountRequestDTO;
+import com.example.CodeGeneratieRestAPI.dtos.AccountResponseDTO;
 import com.example.CodeGeneratieRestAPI.dtos.TransactionRequestDTO;
 import com.example.CodeGeneratieRestAPI.exceptions.AccountCreationException;
 import com.example.CodeGeneratieRestAPI.exceptions.AccountNotFoundException;
@@ -210,7 +211,7 @@ public class AccountControllerTest {
         Account account = getMockAccount("NL01-INHO-0000-0000-44", 1000F, user, false);
 
         when(userService.getLoggedInUser()).thenReturn(user);
-        when(accountService.getAccountByIban(account.getIban(), user)).thenReturn(new AccountData(account, new AccountLimitsLeft()));
+        when(accountService.getAccountByIban(account.getIban(), user)).thenReturn(new AccountData(new AccountResponseDTO(account), new AccountLimitsLeft()));
 
         //  Check if we get a 200 OK
         //  And if the JSON content matches our expected object

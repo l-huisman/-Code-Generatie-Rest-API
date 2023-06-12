@@ -42,37 +42,95 @@ paths:
           description: The offset for the amount of accounts
       responses:
         "200":
-          description: The requested users
+          description: Users retrieved
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/UserRequest"
-        "400":
-          description: "Invalid data given"
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/Error"
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    description: "Boolean indicating if the request was successful"
+                    example: true
+                  message:
+                    type: string
+                    description: "Message returned from the request"
+                    example: "User successfully deleted"
+              examples:
+                success:
+                  summary: "Successful response"
+                  value:
+                    success: true
+                    message: "User(s) successfully retrieved"
+                    data:
+                      type: object
+                      description: "Data returned from the request"
+                      example:
+                        user:
+                          - id: 1
+                            firstName: "John"
+                            lastName: "Doe"
+                            username: "JohnDoe"
+                            email: "johnDoe@gmail.com"
+                            userType: "USER"
+                error:
+                  summary: "Error response"
+                  value:
+                    success: false
+                    message: "Invalid request parameters"
+                    data: null
         "401":
           description: You are unauthorized
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/Error"
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    description: "Boolean indicating if the request was successful"
+                    example: false
+                  message:
+                    type: string
+                    description: "Message returned from the request"
+                    example: "Unauthorized"
+                  data:
+                    type: object
+                    description: "Data returned from the request"
+                    example: null
+              examples:
+                error:
+                  summary: "Error response"
+                  value:
+                    success: false
+                    message: "Unauthorized"
+                    data: null
         "409":
           description: Something went wrong
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/Error"
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    description: "Boolean indicating if the request was successful"
+                    example: false
+                  message:
+                    type: string
+                    description: "Message returned from the request"
+                    example: "Something went wrong"
+                  data:
+                    type: object
+                    description: "Data returned from the request"
+                    example: null
+              examples:
+                error:
+                  summary: "Error"
+                  value:
+                    success: false
+                    message: "Something went wrong"
+                    data: null
     post:
       tags:
         - User
@@ -91,35 +149,95 @@ paths:
               $ref: "#/components/schemas/UserRequest"
       responses:
         "201":
-          description: User created
+          description: Account added
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/UserRequest"
-        "400":
-          description: "Invalid data given"
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/Error"
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    description: "Boolean indicating if the request was successful"
+                    example: true
+                  message:
+                    type: string
+                    description: "Message returned from the request"
+                    example: "User successfully added"
+              examples:
+                success:
+                  summary: "Successful response"
+                  value:
+                    success: true
+                    message: "Data retrieved successfully"
+                    data:
+                      type: object
+                      description: "Data returned from the request"
+                      example:
+                        user:
+                          - id: 1
+                            firstName: "John"
+                            lastName: "Doe"
+                            username: "JohnDoe"
+                            email: "johnDoe@gmail.com"
+                            userType: "USER"
+                error:
+                  summary: "Error response"
+                  value:
+                    success: false
+                    message: "Invalid request parameters"
+                    data: null
         "401":
           description: You are unauthorized
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/Error"
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    description: "Boolean indicating if the request was successful"
+                    example: false
+                  message:
+                    type: string
+                    description: "Message returned from the request"
+                    example: "Unauthorized"
+                  data:
+                    type: object
+                    description: "Data returned from the request"
+                    example: null
+              examples:
+                error:
+                  summary: "Error response"
+                  value:
+                    success: false
+                    message: "Unauthorized"
+                    data: null
         "409":
           description: Something went wrong
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/Error"
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    description: "Boolean indicating if the request was successful"
+                    example: false
+                  message:
+                    type: string
+                    description: "Message returned from the request"
+                    example: "Something went wrong"
+                  data:
+                    type: object
+                    description: "Data returned from the request"
+                    example: null
+              examples:
+                error:
+                  summary: "Error"
+                  value:
+                    success: false
+                    message: "Something went wrong"
+                    data: null
   /users/{user_id}:
     get:
       tags:
@@ -137,35 +255,95 @@ paths:
             format: int64
       responses:
         "200":
-          description: The requested user
+          description: Account deleted
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/UserResponse"
-        "400":
-          description: Invalid data given
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/Error"
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    description: "Boolean indicating if the request was successful"
+                    example: true
+                  message:
+                    type: string
+                    description: "Message returned from the request"
+                    example: "User successfully deleted"
+              examples:
+                success:
+                  summary: "Successful response"
+                  value:
+                    success: true
+                    message: "User successfully retrieved"
+                    data:
+                      type: object
+                      description: "Data returned from the request"
+                      example:
+                        user:
+                          - id: 1
+                            firstName: "John"
+                            lastName: "Doe"
+                            username: "JohnDoe"
+                            email: "johnDoe@gmail.com"
+                            userType: "USER"
+                error:
+                  summary: "Error response"
+                  value:
+                    success: false
+                    message: "Invalid request parameters"
+                    data: null
         "401":
           description: You are unauthorized
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/Error"
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    description: "Boolean indicating if the request was successful"
+                    example: false
+                  message:
+                    type: string
+                    description: "Message returned from the request"
+                    example: "Unauthorized"
+                  data:
+                    type: object
+                    description: "Data returned from the request"
+                    example: null
+              examples:
+                error:
+                  summary: "Error response"
+                  value:
+                    success: false
+                    message: "Unauthorized"
+                    data: null
         "409":
           description: Something went wrong
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/Error"
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    description: "Boolean indicating if the request was successful"
+                    example: false
+                  message:
+                    type: string
+                    description: "Message returned from the request"
+                    example: "Something went wrong"
+                  data:
+                    type: object
+                    description: "Data returned from the request"
+                    example: null
+              examples:
+                error:
+                  summary: "Error"
+                  value:
+                    success: false
+                    message: "Something went wrong"
+                    data: null
     put:
       tags:
         - User
@@ -187,35 +365,95 @@ paths:
               $ref: "#/components/schemas/UserResponse"
       responses:
         "200":
-          description: User updated
+          description: Account Updated
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/UserResponse"
-        "400":
-          description: Invalid data given
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/Error"
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    description: "Boolean indicating if the request was successful"
+                    example: true
+                  message:
+                    type: string
+                    description: "Message returned from the request"
+                    example: "User successfully updated"
+              examples:
+                success:
+                  summary: "Successful response"
+                  value:
+                    success: true
+                    message: "User successfully deleted"
+                    data:
+                      type: object
+                      description: "Data returned from the request"
+                      example:
+                        user:
+                          - id: 1
+                            firstName: "John"
+                            lastName: "Doe"
+                            username: "JohnDoe"
+                            email: "johnDoe@gmail.com"
+                            userType: "USER"
+                error:
+                  summary: "Error response"
+                  value:
+                    success: false
+                    message: "Invalid request parameters"
+                    data: null
         "401":
           description: You are unauthorized
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/Error"
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    description: "Boolean indicating if the request was successful"
+                    example: false
+                  message:
+                    type: string
+                    description: "Message returned from the request"
+                    example: "Unauthorized"
+                  data:
+                    type: object
+                    description: "Data returned from the request"
+                    example: null
+              examples:
+                error:
+                  summary: "Error response"
+                  value:
+                    success: false
+                    message: "Unauthorized"
+                    data: null
         "409":
           description: Something went wrong
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/Error"
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    description: "Boolean indicating if the request was successful"
+                    example: false
+                  message:
+                    type: string
+                    description: "Message returned from the request"
+                    example: "Something went wrong"
+                  data:
+                    type: object
+                    description: "Data returned from the request"
+                    example: null
+              examples:
+                error:
+                  summary: "Error"
+                  value:
+                    success: false
+                    message: "Something went wrong"
+                    data: null
     delete:
       tags:
         - User
@@ -233,97 +471,92 @@ paths:
       responses:
         "200":
           description: User deleted
-        "400":
-          description: "Invalid data given"
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/Error"
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    description: "Boolean indicating if the request was successful"
+                    example: true
+                  message:
+                    type: string
+                    description: "Message returned from the request"
+                    example: "User successfully deleted"
+              examples:
+                success:
+                  summary: "Successful response"
+                  value:
+                    success: true
+                    message: "User successfully deleted"
+                    data: null
+                error:
+                  summary: "Error response"
+                  value:
+                    success: false
+                    message: "Invalid request parameters"
+                    data: null
         "401":
           description: You are unauthorized
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/Error"
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    description: "Boolean indicating if the request was successful"
+                    example: false
+                  message:
+                    type: string
+                    description: "Message returned from the request"
+                    example: "Unauthorized"
+                  data:
+                    type: object
+                    description: "Data returned from the request"
+                    example: null
+              examples:
+                error:
+                  summary: "Error response"
+                  value:
+                    success: false
+                    message: "Unauthorized"
+                    data: null
         "409":
           description: Something went wrong
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/Error"
-  # /users/login:
-  #   post:
-  #     security: []
-  #     tags:
-  #       - User
-  #     summary: Logs user into the system
-  #     description: Logs user into the system
-  #     operationId: loginUser
-  #     parameters:
-  #       - name: email
-  #         in: query
-  #         description: The email for login
-  #         required: true
-  #         schema:
-  #           type: string
-  #       - name: password
-  #         in: query
-  #         description: The password for login in clear text
-  #         required: true
-  #         schema:
-  #           type: string
-  #     responses:
-  #       "200":
-  #         description: User logged in
-  #         content:
-  #           application/json:
-  #             schema:
-  #               $ref: "#/components/schemas/User"
-  #       "400":
-  #         description: "Invalid data given"
-  #         content:
-  #           application/json:
-  #             schema:
-  #               type: array
-  #               items:
-  #                 $ref: "#/components/schemas/Error"
-  #       "401":
-  #         description: You are unauthorized
-  #         content:
-  #           application/json:
-  #             schema:
-  #               type: array
-  #               items:
-  #                 $ref: "#/components/schemas/Error"
-  #       "405":
-  #         description: Invalid input
-  #         content:
-  #           application/json:
-  #             schema:
-  #               type: array
-  #               items:
-  #                 $ref: "#/components/schemas/Error"
-  #       "409":
-  #         description: Something went wrong
-  #         content:
-  #           application/json:
-  #             schema:
-  #               type: array
-  #               items:
-  #                 $ref: "#/components/schemas/Error"
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    description: "Boolean indicating if the request was successful"
+                    example: false
+                  message:
+                    type: string
+                    description: "Message returned from the request"
+                    example: "Something went wrong"
+                  data:
+                    type: object
+                    description: "Data returned from the request"
+                    example: null
+              examples:
+                error:
+                  summary: "Error"
+                  value:
+                    success: false
+                    message: "Something went wrong"
+                    data: null
   /accounts:
     get:
       tags:
         - Employee
         - Account
+        - Customer
       summary: Get all accounts
-      description: this can only be done by admins and employees
+      description: this retrieves all the accounts if user is employee, otherwise only the accounts of the user
       operationId: getAllAccounts
       parameters:
         - in: query
@@ -345,15 +578,77 @@ paths:
           description: Search
       responses:
         "200":
-          description: accounts succesfully retrieved
+          description: Accounts retrieved
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/AccountResponse"
-        "400":
-          description: "No accounts found"
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    description: "Boolean indicating if the request was successful"
+                    example: true
+                  message:
+                    type: string
+                    description: "Message returned from the request"
+                    example: "Account(s) successfully retrieved"
+              examples:
+                success:
+                  summary: "Successful response"
+                  value:
+                    success: true
+                    message: "Data retrieved successfully"
+                    data:
+                      type: object
+                      description: "Data returned from the request"
+                      example:
+                        account:
+                          - userId: 1
+                            iban: "NL61-INHO-0897-9124-92"
+                            name: "account name"
+                            dailyLimit: 100.0
+                            transactionLimit: 500.0
+                            absoluteLimit: 0.0
+                            balance: 1000.0
+                            isSavings: false
+                            isActive: true
+                        accountLimitsLeft:
+                          - dailyLimitLeft: 100.0
+                            transactionLimit: 500.0
+                            amountSpendableOnNextTransaction: 0.0
+                            differenceBalanceAndAbsoluteLimit: 0.0
+                error:
+                  summary: "Error response"
+                  value:
+                    success: false
+                    message: "Invalid request parameters"
+                    data: null
+        "401":
+          description: You are unauthorized
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    description: "Boolean indicating if the request was successful"
+                    example: false
+                  message:
+                    type: string
+                    description: "Message returned from the request"
+                    example: "Unauthorized"
+                  data:
+                    type: object
+                    description: "Data returned from the request"
+                    example: null
+              examples:
+                error:
+                  summary: "Error response"
+                  value:
+                    success: false
+                    message: "Unauthorized"
+                    data: null
     post:
       tags:
         - Employee
@@ -363,12 +658,104 @@ paths:
       description: Add a new account to an existing user
       operationId: addAccount
       responses:
-        '201':
-          description: Account created
-        '400':
-          description: 'Invalid input given'
-        '409':
-          description: This account already exists
+        "200":
+          description: Account added
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    description: "Boolean indicating if the request was successful"
+                    example: true
+                  message:
+                    type: string
+                    description: "Message returned from the request"
+                    example: "Account successfully added"
+              examples:
+                success:
+                  summary: "Successful response"
+                  value:
+                    success: true
+                    message: "Data retrieved successfully"
+                    data:
+                      type: object
+                      description: "Data returned from the request"
+                      example:
+                        account:
+                          - userId: 1
+                            iban: "NL61-INHO-0897-9124-92"
+                            name: "account name"
+                            dailyLimit: 100.0
+                            transactionLimit: 500.0
+                            absoluteLimit: 0.0
+                            balance: 1000.0
+                            isSavings: false
+                            isActive: true
+                        accountLimitsLeft:
+                          - dailyLimitLeft: 100.0
+                            transactionLimit: 500.0
+                            amountSpendableOnNextTransaction: 0.0
+                            differenceBalanceAndAbsoluteLimit: 0.0
+                error:
+                  summary: "Error response"
+                  value:
+                    success: false
+                    message: "Invalid request parameters"
+                    data: null
+        "401":
+          description: You are unauthorized
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    description: "Boolean indicating if the request was successful"
+                    example: false
+                  message:
+                    type: string
+                    description: "Message returned from the request"
+                    example: "Unauthorized"
+                  data:
+                    type: object
+                    description: "Data returned from the request"
+                    example: null
+              examples:
+                error:
+                  summary: "Error response"
+                  value:
+                    success: false
+                    message: "Unauthorized"
+                    data: null
+        "409":
+          description: Something went wrong
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    description: "Boolean indicating if the request was successful"
+                    example: false
+                  message:
+                    type: string
+                    description: "Message returned from the request"
+                    example: "Something went wrong"
+                  data:
+                    type: object
+                    description: "Data returned from the request"
+                    example: null
+              examples:
+                error:
+                  summary: "Error"
+                  value:
+                    success: false
+                    message: "Something went wrong"
+                    data: null
       requestBody:
         content:
           application/json:
@@ -394,15 +781,77 @@ paths:
             format: int64
       responses:
         "200":
-          description: account succesfully retrieved
+          description: Account retrieved
           content:
             application/json:
               schema:
                 type: object
-                items:
-                  $ref: "#/components/schemas/AccountResponse"
-        "400":
-          description: "No account found"
+                properties:
+                  success:
+                    type: boolean
+                    description: "Boolean indicating if the request was successful"
+                    example: true
+                  message:
+                    type: string
+                    description: "Message returned from the request"
+                    example: "Account successfully retrieved"
+              examples:
+                success:
+                  summary: "Successful response"
+                  value:
+                    success: true
+                    message: "Data retrieved successfully"
+                    data:
+                      type: object
+                      description: "Data returned from the request"
+                      example:
+                        account:
+                          - userId: 1
+                            iban: "NL61-INHO-0897-9124-92"
+                            name: "account name"
+                            dailyLimit: 100.0
+                            transactionLimit: 500.0
+                            absoluteLimit: 0.0
+                            balance: 1000.0
+                            isSavings: false
+                            isActive: true
+                        accountLimitsLeft:
+                          - dailyLimitLeft: 100.0
+                            transactionLimit: 500.0
+                            amountSpendableOnNextTransaction: 0.0
+                            differenceBalanceAndAbsoluteLimit: 0.0
+                error:
+                  summary: "Error response"
+                  value:
+                    success: false
+                    message: "Invalid request parameters"
+                    data: null
+        "401":
+          description: You are unauthorized
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    description: "Boolean indicating if the request was successful"
+                    example: false
+                  message:
+                    type: string
+                    description: "Message returned from the request"
+                    example: "Unauthorized"
+                  data:
+                    type: object
+                    description: "Data returned from the request"
+                    example: null
+              examples:
+                error:
+                  summary: "Error response"
+                  value:
+                    success: false
+                    message: "Unauthorized"
+                    data: null
     put:
       tags:
         - Employee
@@ -420,22 +869,115 @@ paths:
             type: integer
             format: int64
       responses:
-        "201":
+        "200":
           description: Account updated
-        "400":
-          description: "Invalid data given"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    description: "Boolean indicating if the request was successful"
+                    example: true
+                  message:
+                    type: string
+                    description: "Message returned from the request"
+                    example: "Account successfully updated"
+              examples:
+                success:
+                  summary: "Successful response"
+                  value:
+                    success: true
+                    message: "Data retrieved successfully"
+                    data:
+                      type: object
+                      description: "Data returned from the request"
+                      example:
+                        account:
+                          - userId: 1
+                            iban: "NL61-INHO-0897-9124-92"
+                            name: "account name"
+                            dailyLimit: 100.0
+                            transactionLimit: 500.0
+                            absoluteLimit: 0.0
+                            balance: 1000.0
+                            isSavings: false
+                            isActive: true
+                        accountLimitsLeft:
+                          - dailyLimitLeft: 100.0
+                            transactionLimit: 500.0
+                            amountSpendableOnNextTransaction: 0.0
+                            differenceBalanceAndAbsoluteLimit: 0.0
+                error:
+                  summary: "Error response"
+                  value:
+                    success: false
+                    message: "Invalid request parameters"
+                    data: null
+        "401":
+          description: You are unauthorized
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    description: "Boolean indicating if the request was successful"
+                    example: false
+                  message:
+                    type: string
+                    description: "Message returned from the request"
+                    example: "Unauthorized"
+                  data:
+                    type: object
+                    description: "Data returned from the request"
+                    example: null
+              examples:
+                error:
+                  summary: "Error response"
+                  value:
+                    success: false
+                    message: "Unauthorized"
+                    data: null
         "409":
-          description: This account does not exist
+          description: Something went wrong
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    description: "Boolean indicating if the request was successful"
+                    example: false
+                  message:
+                    type: string
+                    description: "Message returned from the request"
+                    example: "Something went wrong"
+                  data:
+                    type: object
+                    description: "Data returned from the request"
+                    example: null
+              examples:
+                error:
+                  summary: "Error"
+                  value:
+                    success: false
+                    message: "Something went wrong"
+                    data: null
       requestBody:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/AccountResponse"
+              $ref: "#/components/schemas/ApiResponse"
         description: Account to update
     delete:
       tags:
         - Employee
         - Account
+        - Customer
       summary: Delete account
       operationId: deleteAccount
       parameters:
@@ -449,10 +991,159 @@ paths:
       responses:
         "200":
           description: Account deleted
-        "400":
-          description: "Invalid data given"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    description: "Boolean indicating if the request was successful"
+                    example: true
+                  message:
+                    type: string
+                    description: "Message returned from the request"
+                    example: "Account successfully deleted"
+              examples:
+                success:
+                  summary: "Successful response"
+                  value:
+                    success: true
+                    message: "Account successfully deleted"
+                    data: null
+                error:
+                  summary: "Error response"
+                  value:
+                    success: false
+                    message: "Invalid request parameters"
+                    data: null
+        "401":
+          description: You are unauthorized
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    description: "Boolean indicating if the request was successful"
+                    example: false
+                  message:
+                    type: string
+                    description: "Message returned from the request"
+                    example: "Unauthorized"
+                  data:
+                    type: object
+                    description: "Data returned from the request"
+                    example: null
+              examples:
+                error:
+                  summary: "Error response"
+                  value:
+                    success: false
+                    message: "Unauthorized"
+                    data: null
         "409":
-          description: This account does not exist
+          description: Something went wrong
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    description: "Boolean indicating if the request was successful"
+                    example: false
+                  message:
+                    type: string
+                    description: "Message returned from the request"
+                    example: "Something went wrong"
+                  data:
+                    type: object
+                    description: "Data returned from the request"
+                    example: null
+              examples:
+                error:
+                  summary: "Error"
+                  value:
+                    success: false
+                    message: "Something went wrong"
+                    data: null
+  /accounts/user/{userId}:
+    get:
+      tags:
+        - Account
+        - Employee
+      summary: Get all accounts for a user
+      description: Retrieve all accounts for a user
+      parameters:
+        - name: userId
+          in: path
+          description: "The id that needs to be fetched. Use 1 for testing. "
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "200":
+          description: Accounts retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    description: "Boolean indicating if the request was successful"
+                    example: true
+                  message:
+                    type: string
+                    description: "Message returned from the request"
+                    example: "Data retrieved successfully"
+                  data:
+                    type: object
+                    description: "Data returned from the request"
+                    example:
+                      accounts:
+                        - userId: 1
+                          iban: "NL61-INHO-0897-9124-92"
+                          name: "account name"
+                          dailyLimit: 100.0
+                          transactionLimit: 500.0
+                          absoluteLimit: 0.0
+                          balance: 1000.0
+                          isSavings: false
+                          isActive: true
+                      accountLimitsLeft:
+                        - dailyLimitLeft: 100.0
+                          transactionLimit: 500.0
+                          amountSpendableOnNextTransaction: 0.0
+                          differenceBalanceAndAbsoluteLimit: 0.0
+              examples:
+                success:
+                  summary: "Successful response"
+                  value:
+                    success: true
+                    message: "Data retrieved successfully"
+                    data:
+                      type: object
+                      description: "Data returned from the request"
+                      example:
+                        accounts:
+                          - userId: 1
+                            iban: "NL61-INHO-0897-9124-92"
+                            name: "account name"
+                            dailyLimit: 100.0
+                            transactionLimit: 500.0
+                            absoluteLimit: 0.0
+                            balance: 1000.0
+                            isSavings: false
+                            isActive: true
+                        accountLimitsLeft:
+                          - dailyLimitLeft: 100.0
+                            transactionLimit: 500.0
+                            amountSpendableOnNextTransaction: 0.0
+                            differenceBalanceAndAbsoluteLimit:
   /transactions:
     get:
       tags:
@@ -511,25 +1202,115 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/TransactionResponse"
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    description: "Boolean indicating if the request was successful"
+                    example: true
+                  message:
+                    type: string
+                    description: "Message returned from the request"
+                    example: "Data retrieved successfully"
+                  data:
+                    type: object
+                    description: "Data returned from the request"
+                    example:
+                      transactions:
+                        - id: 1
+                          account_id: 1
+                          transaction_type_id: 1
+                          amount: 100.0
+                          balance: 500.0
+                          description: "Payment received"
+                          created_at: "2022-01-01T00:00:00Z"
+                        - id: 2
+                          account_id: 2
+                          transaction_type_id: 2
+                          amount: -50.0
+                          balance: 450.0
+                          description: "Payment sent"
+                          created_at: "2022-01-02T00:00:00Z"
+              examples:
+                success:
+                  summary: "Successful response"
+                  value:
+                    success: true
+                    message: "Data retrieved successfully"
+                    data:
+                      transactions:
+                        - id: 1
+                          account_id: 1
+                          transaction_type_id: 1
+                          amount: 100.0
+                          balance: 500.0
+                          description: "Payment received"
+                          created_at: "2022-01-01T00:00:00Z"
+                        - id: 2
+                          account_id: 2
+                          transaction_type_id: 2
+                          amount: -50.0
+                          balance: 450.0
+                          description: "Payment sent"
+                          created_at: "2022-01-02T00:00:00Z"
+                error:
+                  summary: "Error response"
+                  value:
+                    success: false
+                    message: "Invalid request parameters"
+                    data: null
         "401":
           description: You are unauthorized
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/Error"
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    description: "Boolean indicating if the request was successful"
+                    example: false
+                  message:
+                    type: string
+                    description: "Message returned from the request"
+                    example: "Unauthorized"
+                  data:
+                    type: object
+                    description: "Data returned from the request"
+                    example: null
+              examples:
+                success:
+                  summary: "Successful response"
+                  value:
+                    success: false
+                    message: "Unauthorized"
+                    data: null
         "409":
           description: Something went wrong
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/Error"
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    description: "Boolean indicating if the request was successful"
+                    example: false
+                  message:
+                    type: string
+                    description: "Message returned from the request"
+                    example: "Something went wrong"
+                  data:
+                    type: object
+                    description: "Data returned from the request"
+                    example: null
+              examples:
+                success:
+                  summary: "Successful response"
+                  value:
+                    success: false
+                    message: "Something went wrong"
+                    data: null
     post:
       tags:
         - Transaction
@@ -546,94 +1327,186 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/TransactionResponse"
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    description: "Boolean indicating if the request was successful"
+                    example: true
+                  message:
+                    type: string
+                    description: "Message returned from the request"
+                    example: "Transaction created successfully"
+                  data:
+                    type: object
+                    description: "Data returned from the request"
+                    example:
+                      transaction:
+                        id: 1
+                        account_id: 1
+                        transaction_type_id: 1
+                        amount: 100.0
+                        balance: 500.0
+                        description: "Payment received"
+                        created_at: "2022-01-01T00:00:00Z"
+              examples:
+                success:
+                  summary: "Successful response"
+                  value:
+                    success: true
+                    message: "Transaction created successfully"
+                    data:
+                      transaction:
+                        id: 1
+                        account_id: 1
+                        transaction_type_id: 1
+                        amount: 100.0
+                        balance: 500.0
+                        description: "Payment received"
+                        created_at: "2022-01-01T00:00:00Z"
+                error:
+                  summary: "Error response"
+                  value:
+                    success: false
+                    message: "Invalid request parameters"
+                    data: null
         "401":
           description: You are unauthorized
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/Error"
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    description: "Boolean indicating if the request was successful"
+                    example: false
+                  message:
+                    type: string
+                    description: "Message returned from the request"
+                    example: "Unauthorized"
+                  data:
+                    type: object
+                    description: "Data returned from the request"
+                    example: null
+              examples:
+                success:
+                  summary: "Successful response"
+                  value:
+                    success: false
+                    message: "Unauthorized"
+                    data: null
         "409":
           description: Something went wrong
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/Error"
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    description: "Boolean indicating if the request was successful"
+                    example: false
+                  message:
+                    type: string
+                    description: "Message returned from the request"
+                    example: "Something went wrong"
+                  data:
+                    type: object
+                    description: "Data returned from the request"
+                    example: null
+              examples:
+                success:
+                  summary: "Successful response"
+                  value:
+                    success: false
+                    message: "Something went wrong"
+                    data: null
         "400":
           description: Bad input parameter
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/Error"
+                $ref: "#/components/schemas/ApiResponse"
   /transactions/{id}:
     get:
       tags:
         - Transaction
-      summary: Retrieve a specific transactions
-      description: Retrieve a specific transaction by id
+      summary: Retrieve a specific transaction
+      description: Retrieve a specific transaction by ID
       parameters:
         - name: id
           in: path
-          description: "The id that needs to be fetched. Use 1 for testing. "
+          description: "The ID of the transaction to retrieve"
           required: true
           schema:
             type: integer
             format: int64
-          examples:
-            one:
-              value: 1
-              summary: A sample transaction id
+          example: 1
       responses:
         "200":
           description: The requested transaction
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/TransactionResponse"
+                $ref: "#/components/schemas/TransactionResponse"
+              examples:
+                success:
+                  summary: "Successful response"
+                  value:
+                    id: 1
+                    account_id: 1
+                    transaction_type_id: 1
+                    amount: 100.0
+                    balance: 500.0
+                    description: "Payment received"
+                    created_at: "2022-01-01T00:00:00Z"
+                error:
+                  summary: "Error response"
+                  value:
+                    success: false
+                    message: "Invalid request parameters"
+                    data: null
         "401":
           description: You are unauthorized
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/Error"
+                $ref: "#/components/schemas/ApiResponse"
+              examples:
+                success:
+                  summary: "Successful response"
+                  value:
+                    success: false
+                    message: "Unauthorized"
+                    data: null
         "409":
           description: Something went wrong
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/Error"
+                $ref: "#/components/schemas/ApiResponse"
+              examples:
+                success:
+                  summary: "Successful response"
+                  value:
+                    success: false
+                    message: "Something went wrong"
+                    data: null
   /transactions/accounts/{iban}:
     get:
       tags:
         - Transaction
-      summary: Retrieve all transactions for account
-      description: Retrieve all transactions for account by id
+      summary: Retrieve all transactions for an account
+      description: Retrieve all transactions for an account by IBAN
       parameters:
         - name: iban
           in: path
-          description: "The iban that needs to be fetched. Use 1 for testing. "
+          description: "The IBAN of the account to retrieve transactions for"
           required: true
           schema:
-            type: integer
-            format: int64
-          examples:
-            one:
-              value: 1
-              summary: A sample account id
+            type: string
+          example: "NL61-INHO-0897-9124-90"
       responses:
         "200":
           description: The requested transactions
@@ -643,22 +1516,56 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/TransactionResponse"
+              examples:
+                success:
+                  summary: "Successful response"
+                  value:
+                    - id: 1
+                      account_id: 1
+                      transaction_type_id: 1
+                      amount: 100.0
+                      balance: 500.0
+                      description: "Payment received"
+                      created_at: "2022-01-01T00:00:00Z"
+                    - id: 2
+                      account_id: 1
+                      transaction_type_id: 2
+                      amount: -50.0
+                      balance: 450.0
+                      description: "Groceries"
+                      created_at: "2022-01-02T00:00:00Z"
+                error:
+                  summary: "Error response"
+                  value:
+                    success: false
+                    message: "Invalid request parameters"
+                    data: null
         "401":
           description: You are unauthorized
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/Error"
+                $ref: "#/components/schemas/ApiResponse"
+              examples:
+                success:
+                  summary: "Successful response"
+                  value:
+                    success: false
+                    message: "Unauthorized"
+                    data: null
         "409":
           description: Something went wrong
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/Error"
+                $ref: "#/components/schemas/ApiResponse"
+              examples:
+                success:
+                  summary: "Successful response"
+                  value:
+                    success: false
+                    message: "Something went wrong"
+                    data: null
 components:
   schemas:
     UserResponse:
@@ -800,16 +1707,16 @@ components:
     AccountResponse:
       type: object
       required:
-        - user_id
-        - iban_number
-        - account_name
-        - daily_limit
-        - transaction_limit
-        - absolute_limit
-        - account_type_id
-        - created_at
+        - userId
+        - iban
+        - name
+        - dailyLimit
+        - transactionLimit
+        - absoluteLimit
         - balance
-        - is_active
+        - isSavings
+        - isActive
+        - createdAt
       properties:
         id:
           type: integer
@@ -819,7 +1726,7 @@ components:
           example: 3457
         iban_number:
           type: string
-          example: "MRBANKIE-4132-6745-3452"
+          example: "NL96-INHO-0875-9496-09"
         account_name:
           type: string
           example: "Saving for car"
@@ -849,14 +1756,13 @@ components:
       required:
         - userId
         - iban
-        - account_name
-        - daily_limit
-        - transaction_limit
-        - absolute_limit
-        - account_type_id
-        - created_at
+        - name
+        - dailyLimit
+        - transactionLimit
+        - absoluteLimit
         - balance
-        - is_active
+        - isSavings
+        - isActive
       properties:
         id:
           type: integer
@@ -891,17 +1797,57 @@ components:
         is_active:
           type: boolean
           example: true
-    Error:
+    AccountData:
       type: object
       required:
-        - code
+        - account
+        - accountLimitsLeft
+      properties:
+        account:
+          $ref: '#/components/schemas/ApiResponse'
+        accountLimitsLeft:
+          $ref: '#/components/schemas/AccountLimitsLeft'
+    AccountLimitsLeft:
+      type: object
+      required:
+        - dailyLimitLeft
+        - transactionLimit
+        - amountSpendableOnNextTransaction
+        - differenceBalanceAndAbsoluteLimit
+      properties:
+        dailyLimitLeft:
+          type: number
+          example: 1200
+        transactionLimit:
+          type: number
+          example: 1500
+        amountSpendableOnNextTransaction:
+          type: number
+          example: 2000
+        differenceBalanceAndAbsoluteLimit:
+          type: number
+          example: 40000
+    ApiResponse:
+      type: object
+      required:
+        - success
         - message
       properties:
-        code:
-          type: integer
-          format: int32
+        success:
+          type: boolean
+          description: "Boolean indicating if the request was successful"
+          example: true
         message:
           type: string
+          description: "Message returned from the request"
+          example: "Account created successfully"
+        data:
+          type: object
+          description: "Data returned from the request"
+          example:
+            success: true
+            message: "Data retrieved successfully"
+            data: object
   securitySchemes:
     bearerAuth:
       type: http

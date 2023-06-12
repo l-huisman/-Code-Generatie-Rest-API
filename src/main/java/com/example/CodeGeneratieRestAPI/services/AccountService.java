@@ -3,6 +3,7 @@ package com.example.CodeGeneratieRestAPI.services;
 import com.example.CodeGeneratieRestAPI.dtos.AccountData;
 import com.example.CodeGeneratieRestAPI.dtos.AccountLimitsLeft;
 import com.example.CodeGeneratieRestAPI.dtos.AccountRequestDTO;
+import com.example.CodeGeneratieRestAPI.dtos.AccountResponseDTO;
 import com.example.CodeGeneratieRestAPI.exceptions.*;
 import com.example.CodeGeneratieRestAPI.helpers.IBANGenerator;
 import com.example.CodeGeneratieRestAPI.helpers.LoggedInUserHelper;
@@ -166,16 +167,6 @@ public class AccountService {
             throw new AccountNotAccessibleException("Account with IBAN: " + iban + " does not belong to the logged in user");
         }
 
-//        // Check if the iban is valid
-//        if (!serviceHelper.checkIfObjectExistsByIdentifier(iban, new Account())) {
-//            throw new AccountNotFoundException("Account with IBAN: " + iban + " does not exist");
-//        }
-
-        //Check if the account belongs to the user, if not, check if the user is an employee and if so, allow the user to access the account
-//        if (!checkIfAccountBelongsToUser(iban, loggedInUser) && !loggedInUser.getUserType().equals(UserType.EMPLOYEE)) {
-//            throw new AccountNotAccessibleException("Account with IBAN: " + iban + " does not belong to the logged in user");
-//        }
-
         return account;
     }
 
@@ -200,13 +191,14 @@ public class AccountService {
         Double doubleValue = transactionService.getTodaysAccumulatedTransactionAmount(account.getIban());
         Float floatValue = doubleValue != null ? doubleValue.floatValue() : 0F;
 
+        //  Set the account limits left
         accountLimitsLeft.setDailyLimitLeft(floatValue);
         accountLimitsLeft.setTransactionLimit(account.getTransactionLimit());
         accountLimitsLeft.setAmountSpendableOnNextTransaction(Math.min(accountLimitsLeft.getDailyLimitLeft(), accountLimitsLeft.getTransactionLimit()));
         accountLimitsLeft.setDifferenceBalanceAndAbsoluteLimit(account.getBalance() - account.getAbsoluteLimit());
 
-        //  Return an AccountData object which contains the account and the account limits left
-        return new AccountData(account, accountLimitsLeft);
+        //  Return an AccountData object which contains the account (converted to an AccountResponseDTO object) and the account limits left
+        return new AccountData(new AccountResponseDTO(account), accountLimitsLeft);
     }
 
     public List<Account> getAllAccountsByUserId(Long userId, User loggedInUser) {
