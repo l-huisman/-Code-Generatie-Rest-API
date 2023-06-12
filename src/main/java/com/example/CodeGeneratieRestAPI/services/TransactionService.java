@@ -141,11 +141,16 @@ public class TransactionService {
     public Transaction transactionIsOwnedByUser(User user, Long id) {
         Transaction transaction = transactionRepository.findById(id).orElseThrow(() -> new TransactionNotFoundException("This transaction does not exist."));
 
+        if (user.getUserType().equals(UserType.EMPLOYEE)) {
+            throw new UserOnlyException("This user is not an employee.");
+        }
+
         if (!user.getUserType().equals(UserType.EMPLOYEE) && transaction.getFromAccount() != null && !transaction.getFromAccount().getUser().getId().equals(user.getId())) {
             throw new TransactionNotOwnedException("This user does not own the specified transaction");
         } else if (!user.getUserType().equals(UserType.EMPLOYEE) && transaction.getToAccount() != null && !transaction.getToAccount().getUser().getId().equals(user.getId())) {
             throw new TransactionNotOwnedException("This user does not own the specified transaction");
         }
+
         return transaction;
     }
 
