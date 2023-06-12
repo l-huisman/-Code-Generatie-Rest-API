@@ -15,14 +15,12 @@ import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import io.cucumber.spring.CucumberContextConfiguration;
 import org.junit.jupiter.api.Assertions;
-import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
-import org.junit.runner.RunWith;
 
 import java.util.Arrays;
 import java.util.List;
@@ -58,7 +56,7 @@ public class AccountStepDefinitions extends BaseStepDefinitions {
 
 
 
-    @Given("I am logged in as {string} with password {string}")
+    @Given("I am logged in as {string} with password {string} to do some account stuff")
     public void iAmLoggedIn(String username, String password) throws Throwable {
         httpHeaders.add("Content-Type", "application/json");
         response = restTemplate
@@ -70,7 +68,7 @@ public class AccountStepDefinitions extends BaseStepDefinitions {
         token = JsonPath.read(response.getBody(), "$.token");
         httpHeaders.add("Authorization", "Bearer " + token);
     }
-    @Given("The endpoint for {string} is available for method {string}")
+    @Given("The endpoint for {string} is available for method {string} to do some account stuff")
     public void theEndPointsForIsAvailableForMethod(String endpoint, String method) throws Throwable{
         response = restTemplate
                 .exchange("/" + endpoint,
