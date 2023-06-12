@@ -774,8 +774,6 @@ components:
     TransactionRequest:
       type: object
       required:
-        - fromAccountIban
-        - toAccountIban
         - amount
         - transactionType
         - label
@@ -849,8 +847,8 @@ components:
     AccountRequest:
       type: object
       required:
-        - user_id
-        - iban_number
+        - userId
+        - iban
         - account_name
         - daily_limit
         - transaction_limit
@@ -863,10 +861,10 @@ components:
         id:
           type: integer
           example: 435
-        user_id:
+        userId:
           type: integer
           example: 3457
-        iban_number:
+        iban:
           type: string
           example: "MRBANKIE-4132-6745-3452"
         account_name:
