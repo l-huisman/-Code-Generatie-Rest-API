@@ -82,7 +82,6 @@ public class UserControllerTest {
         userResponseDTO.setUsername("johndoe");
         userResponseDTO.setEmail("johndoe@example.com");
         userResponseDTO.setUserType(UserType.USER);
-        userResponseDTO.setCreatedAt(new Date().toString());
         return userResponseDTO;
     }
 

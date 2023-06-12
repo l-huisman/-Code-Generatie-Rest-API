@@ -2,6 +2,10 @@ package com.example.CodeGeneratieRestAPI.controllers;
 
 import com.example.CodeGeneratieRestAPI.dtos.UserRequestDTO;
 import com.example.CodeGeneratieRestAPI.dtos.UserResponseDTO;
+import com.example.CodeGeneratieRestAPI.exceptions.UserAlreadyExistsException;
+import com.example.CodeGeneratieRestAPI.exceptions.UserDeletionException;
+import com.example.CodeGeneratieRestAPI.exceptions.UserNotFoundException;
+import com.example.CodeGeneratieRestAPI.exceptions.UserUpdateException;
 import com.example.CodeGeneratieRestAPI.models.ApiResponse;
 import com.example.CodeGeneratieRestAPI.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,28 +25,31 @@ public class UserController {
     @GetMapping
     public ResponseEntity<ApiResponse<List<UserResponseDTO>>> getAll() {
         try {
-            return ResponseEntity.status(HttpStatus.FOUND)
-                    .body(new ApiResponse<>(true, "Users found!", userService.getAll()));
+            return ResponseEntity.status(HttpStatus.FOUND).body(new ApiResponse<>(true, "Users found!", userService.getAll()));
+        } catch (UserNotFoundException e) {
+            return ResponseEntity.status(e.getStatusCode()).body(new ApiResponse<>(false, e.getMessage()));
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse<>(false, e.getMessage()));
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ApiResponse<>(false, e.getMessage()));
         }
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse<UserResponseDTO>> getById(@PathVariable long id) {
         try {
-            return ResponseEntity.status(HttpStatus.FOUND)
-                    .body(new ApiResponse<>(true, "User found!", userService.getById(id)));
+            return ResponseEntity.status(HttpStatus.FOUND).body(new ApiResponse<>(true, "User found!", userService.getById(id)));
+        } catch (UserNotFoundException e) {
+            return ResponseEntity.status(e.getStatusCode()).body(new ApiResponse<>(false, e.getMessage()));
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse<>(false, e.getMessage()));
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ApiResponse<>(false, e.getMessage()));
         }
     }
 
     @GetMapping("/me")
     public ResponseEntity<ApiResponse<UserResponseDTO>> getMe(@RequestHeader("Authorization") String token) {
         try {
-            return ResponseEntity.status(HttpStatus.FOUND)
-                    .body(new ApiResponse<>(true, "User found!", userService.getMe(token)));
+            return ResponseEntity.status(HttpStatus.FOUND).body(new ApiResponse<>(true, "User found!", userService.getMe(token)));
+        } catch (UserNotFoundException e) {
+            return ResponseEntity.status(e.getStatusCode()).body(new ApiResponse<>(false, e.getMessage()));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ApiResponse<>(false, e.getMessage()));
         }
@@ -51,23 +58,22 @@ public class UserController {
     @PostMapping
     public ResponseEntity<ApiResponse<UserResponseDTO>> add(@RequestBody UserRequestDTO user) {
         try {
-            return ResponseEntity.status(HttpStatus.CREATED)
-                    .body(new ApiResponse<>(true, "User created!", userService.add(user)));
+            return ResponseEntity.status(HttpStatus.CREATED).body(new ApiResponse<>(true, "User created!", userService.add(user)));
+        } catch (UserUpdateException | UserAlreadyExistsException e) {
+            return ResponseEntity.status(e.getStatusCode()).body(new ApiResponse<>(false, e.getMessage()));
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(new ApiResponse<>(false, e.getMessage()));
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ApiResponse<>(false, e.getMessage()));
         }
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ApiResponse<UserResponseDTO>> update(@PathVariable Long id,
-                                                               @RequestBody UserRequestDTO user) {
+    public ResponseEntity<ApiResponse<UserResponseDTO>> update(@PathVariable Long id, @RequestBody UserRequestDTO user) {
         try {
-            return ResponseEntity.status(HttpStatus.OK)
-                    .body(new ApiResponse<>(true, "User updated!", userService.update(id, user)));
+            return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse<>(true, "User updated!", userService.update(id, user)));
+        } catch (UserNotFoundException e) {
+            return ResponseEntity.status(e.getStatusCode()).body(new ApiResponse<>(false, e.getMessage()));
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(new ApiResponse<>(false, e.getMessage()));
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ApiResponse<>(false, e.getMessage()));
         }
     }
 
@@ -76,9 +82,10 @@ public class UserController {
         try {
             userService.delete(id);
             return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse<>(true, "User deleted!"));
+        } catch (UserDeletionException e) {
+            return ResponseEntity.status(e.getStatusCode()).body(new ApiResponse<>(false, e.getMessage()));
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(new ApiResponse<>(false, e.getMessage()));
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ApiResponse<>(false, e.getMessage()));
         }
     }
 }

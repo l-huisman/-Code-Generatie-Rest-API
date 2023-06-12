@@ -74,12 +74,12 @@ public class UserServiceTest {
 
     private UserResponseDTO getMockUserResponseDTO() {
         UserResponseDTO userResponseDTO = new UserResponseDTO();
+        userResponseDTO.setId(1L);
         userResponseDTO.setFirstName("John");
         userResponseDTO.setLastName("Doe");
         userResponseDTO.setUsername("johndoe");
         userResponseDTO.setEmail("johndoe@example.com");
         userResponseDTO.setUserType(UserType.USER);
-        userResponseDTO.setCreatedAt(new Date().toString());
         return userResponseDTO;
     }
 
