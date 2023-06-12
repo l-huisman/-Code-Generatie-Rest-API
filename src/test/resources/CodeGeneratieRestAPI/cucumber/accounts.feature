@@ -19,3 +19,7 @@ Feature: Accounts CRUD operations
     Then I should receive the new account
 
   Scenario: Creating an account with invalid IBAN
+    Given I am logged in as "admin" with password "admin" to do some account stuff
+    And The endpoint for "accounts" is available for method "POST" to do some account stuff
+    When I create a new account with IBAN "NL61-INHO-0897-9124-95"
+    Then I should receive an error
