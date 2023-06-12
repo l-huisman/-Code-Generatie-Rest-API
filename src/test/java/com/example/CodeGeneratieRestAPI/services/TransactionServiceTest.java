@@ -436,7 +436,7 @@ public class TransactionServiceTest {
     public void testGetById() {
         User user = new User();
         user.setId(1L);
-        user.setUserType(UserType.EMPLOYEE);
+        user.setUserType(UserType.USER);
         user.setUsername("john");
 
         Account account = new Account();
