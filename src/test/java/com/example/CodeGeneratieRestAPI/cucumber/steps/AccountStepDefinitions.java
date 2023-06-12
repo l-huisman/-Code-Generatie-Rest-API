@@ -136,7 +136,7 @@ public class AccountStepDefinitions extends BaseStepDefinitions {
     }
     @Then("I should receive an error")
     public void iShouldReceiveAnError(){
-        String actual = JsonPath.read(response.getBody(), "$.error");
+        String actual = JsonPath.read(response.getBody(), "$.message");
         Assertions.assertEquals("Account already exists", actual);
     }
 }
