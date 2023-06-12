@@ -196,6 +196,8 @@ public class AccountService {
         //  Set the account limits left
         accountLimitsLeft.setDailyLimitLeft(account.getDailyLimit() - floatValue);
         accountLimitsLeft.setTransactionLimit(account.getTransactionLimit());
+
+        //  The amount spendable on the next transaction is the minimum of the daily limit left, the transaction limit and the balance minus the absolute limit
         accountLimitsLeft.setAmountSpendableOnNextTransaction(Math.min(Math.min(accountLimitsLeft.getDailyLimitLeft(), accountLimitsLeft.getTransactionLimit()), account.getBalance() - account.getAbsoluteLimit()));
         accountLimitsLeft.setDifferenceBalanceAndAbsoluteLimit(account.getBalance() - account.getAbsoluteLimit());
 
