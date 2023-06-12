@@ -484,22 +484,27 @@ paths:
             format: int64
           description: The transaction_type_id to filter transactions for
         - in: query
-          name: balance
+          name: balance_relation
           schema:
             type: string
+          description: The relation to the balance filter
+        - in: query
+          name: balance
+          schema:
+            type: number
           description: The balance to filter for
         - in: query
-          name: limit
+          name: page_number
           schema:
             type: integer
             format: int64
-          description: The limit for the max amount of transactions
+          description: The page number for the pagination
         - in: query
-          name: offset
+          name: page_size
           schema:
             type: integer
             format: int64
-          description: The offset for the amount of transactions
+          description: The size for the pagination
       responses:
         "200":
           description: The requested transactions
@@ -731,91 +736,69 @@ components:
     TransactionResponse:
       type: object
       required:
-        - user_id
-        - from_account_id
-        - to_account_id
+        - id
+        - fromAccountIban
+        - toIban
         - amount
-        - transaction_type_id
-        - balance_before
-        - created_at
+        - transactionType
+        - label
+        - description
+        - createdAt
       properties:
         id:
           type: integer
           format: int64
           example: 1
-        user_id:
-          type: integer
-          format: int64
-          example: 1
-        from_account_id:
-          type: integer
-          format: int64
-          example: 1
-        to_account_id:
-          type: integer
-          format: int64
-          example: 2
+        fromAccountIban:
+          type: string
+          example: "MRBANKIE-4132-6745-3452"
+        toIban:
+          type: string
+          example: "MRBANKIE-4132-6745-3452"
         amount:
           type: number
           example: 20.00
-        transaction_type_id:
-          type: integer
-          format: int64
-          example: 1
-        balance_before:
-          type: number
-          example: 312.69
+        transactionType:
+          type: string
+          example: "WITHDRAW"
+        label:
+          type: string
+          example: "Hema"
         description:
           type: string
           example: "Betaling voor broodje kaas"
-        created_at:
+        createdAt:
           type: string
           format: date-time
           example: "2023-08-29T09:12:33.001Z"
     TransactionRequest:
       type: object
       required:
-        - user_id
-        - from_account_id
-        - to_iban
+        - fromAccountIban
+        - toAccountIban
         - amount
-        - transaction_type_id
-        - balance_before
-        - created_at
+        - transactionType
+        - label
+        - description
       properties:
-        id:
-          type: integer
-          format: int64
-          example: 1
-        user_id:
-          type: integer
-          format: int64
-          example: 1
-        from_account_id:
-          type: integer
-          format: int64
-          example: 1
-        to_iban:
-          type: integer
-          format: int64
-          example: 2
+        fromAccountIban:
+          type: string
+          example: "MRBANKIE-4132-6745-3452"
+        toIban:
+          type: string
+          example: "MRBANKIE-4132-6745-3452"
         amount:
           type: number
           example: 20.00
-        transaction_type_id:
-          type: integer
-          format: int64
-          example: 1
-        balance_before:
-          type: number
-          example: 312.69
+        transactionType:
+          type: string
+          example: "WITHDRAW"
+        label:
+          type: string
+          example: "Hema"
         description:
           type: string
           example: "Betaling voor broodje kaas"
-        created_at:
-          type: string
-          format: date-time
-          example: "2023-08-29T09:12:33.001Z"
     AccountResponse:
       type: object
       required:
