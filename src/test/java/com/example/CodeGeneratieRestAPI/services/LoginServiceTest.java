@@ -2,7 +2,6 @@ package com.example.CodeGeneratieRestAPI.services;
 
 import com.example.CodeGeneratieRestAPI.dtos.LoginRequestDTO;
 import com.example.CodeGeneratieRestAPI.dtos.LoginResponseDTO;
-import com.example.CodeGeneratieRestAPI.dtos.UserResponseDTO;
 import com.example.CodeGeneratieRestAPI.exceptions.InvalidTokenException;
 import com.example.CodeGeneratieRestAPI.exceptions.PasswordValidationException;
 import com.example.CodeGeneratieRestAPI.exceptions.UserNotFoundException;
@@ -20,7 +19,6 @@ import org.mockito.MockitoAnnotations;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 class LoginServiceTest {
