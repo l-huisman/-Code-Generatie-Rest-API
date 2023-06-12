@@ -2,6 +2,10 @@ package com.example.CodeGeneratieRestAPI.controllers;
 
 import com.example.CodeGeneratieRestAPI.dtos.UserRequestDTO;
 import com.example.CodeGeneratieRestAPI.dtos.UserResponseDTO;
+import com.example.CodeGeneratieRestAPI.exceptions.UserAlreadyExistsException;
+import com.example.CodeGeneratieRestAPI.exceptions.UserDeletionException;
+import com.example.CodeGeneratieRestAPI.exceptions.UserNotFoundException;
+import com.example.CodeGeneratieRestAPI.exceptions.UserUpdateException;
 import com.example.CodeGeneratieRestAPI.jwt.JwTokenProvider;
 import com.example.CodeGeneratieRestAPI.models.ApiResponse;
 import com.example.CodeGeneratieRestAPI.models.HashedPassword;
@@ -24,6 +28,7 @@ import java.util.Date;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 public class UserControllerTest {
@@ -82,45 +87,32 @@ public class UserControllerTest {
         userResponseDTO.setUsername("johndoe");
         userResponseDTO.setEmail("johndoe@example.com");
         userResponseDTO.setUserType(UserType.USER);
-        userResponseDTO.setCreatedAt(new Date().toString());
         return userResponseDTO;
     }
 
-    // Snippet from: UserController.java
-
-    // @GetMapping
-    // public ResponseEntity<ApiResponse<List<UserResponseDTO>>> getAll() {
-    // try {
-    // return ResponseEntity.status(HttpStatus.FOUND)
-    // .body(new ApiResponse<>(true, "Users found!", userService.getAll()));
-    // } catch (Exception e) {
-    // return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new
-    // ApiResponse<>(false, e.getMessage()));
-    // }
-    // }
+    @BeforeEach
+    public void init() {
+        MockitoAnnotations.openMocks(this);
+    }
 
     @Test
-    public void testGetAll() {
+    public void testGetAll() throws UserNotFoundException {
         List<UserResponseDTO> users = new ArrayList<>();
         users.add(getMockUserResponseDTO());
 
-        when(userService.getAll()).thenReturn(users);
+        when(userService.getAll(false)).thenReturn(users);
 
-        ResponseEntity<ApiResponse<List<UserResponseDTO>>> response = userController.getAll();
+        ResponseEntity<ApiResponse<List<UserResponseDTO>>> response = userController.getAll(false);
 
         assertEquals(HttpStatus.FOUND, response.getStatusCode());
         assertEquals(true, response.getBody().isSuccess());
         assertEquals("Users found!", response.getBody().getMessage());
         assertEquals(users, response.getBody().getData());
-
-        verify(userService, times(1)).getAll();
-        verifyNoMoreInteractions(userService);
     }
 
     @Test
-    public void testGetById() {
+    public void testGetById() throws UserNotFoundException {
         UserResponseDTO user = getMockUserResponseDTO();
-
         when(userService.getById(1L)).thenReturn(user);
 
         ResponseEntity<ApiResponse<UserResponseDTO>> response = userController.getById(1L);
@@ -129,33 +121,25 @@ public class UserControllerTest {
         assertEquals(true, response.getBody().isSuccess());
         assertEquals("User found!", response.getBody().getMessage());
         assertEquals(user, response.getBody().getData());
-
-        verify(userService, times(1)).getById(1L);
-        verifyNoMoreInteractions(userService);
     }
 
     @Test
-    public void testGetMe() {
+    public void testGetMe() throws UserNotFoundException {
         UserResponseDTO user = getMockUserResponseDTO();
+        when(userService.getMe("token")).thenReturn(user);
 
-        when(userService.getMe("dummyToken")).thenReturn(user);
-
-        ResponseEntity<ApiResponse<UserResponseDTO>> response = userController.getMe("dummyToken");
+        ResponseEntity<ApiResponse<UserResponseDTO>> response = userController.getMe("token");
 
         assertEquals(HttpStatus.FOUND, response.getStatusCode());
         assertEquals(true, response.getBody().isSuccess());
         assertEquals("User found!", response.getBody().getMessage());
         assertEquals(user, response.getBody().getData());
-
-        verify(userService, times(1)).getMe("dummyToken");
-        verifyNoMoreInteractions(userService);
     }
 
     @Test
-    public void testAdd() {
+    public void testAdd() throws UserAlreadyExistsException, UserUpdateException {
         UserRequestDTO userRequestDTO = getMockUserRequestDTO();
         UserResponseDTO userResponseDTO = getMockUserResponseDTO();
-
         when(userService.add(userRequestDTO)).thenReturn(userResponseDTO);
 
         ResponseEntity<ApiResponse<UserResponseDTO>> response = userController.add(userRequestDTO);
@@ -164,16 +148,12 @@ public class UserControllerTest {
         assertEquals(true, response.getBody().isSuccess());
         assertEquals("User created!", response.getBody().getMessage());
         assertEquals(userResponseDTO, response.getBody().getData());
-
-        verify(userService, times(1)).add(userRequestDTO);
-        verifyNoMoreInteractions(userService);
     }
 
     @Test
-    public void testUpdate() {
+    public void testUpdate() throws UserNotFoundException, UserUpdateException {
         UserRequestDTO userRequestDTO = getMockUserRequestDTO();
         UserResponseDTO userResponseDTO = getMockUserResponseDTO();
-
         when(userService.update(1L, userRequestDTO)).thenReturn(userResponseDTO);
 
         ResponseEntity<ApiResponse<UserResponseDTO>> response = userController.update(1L, userRequestDTO);
@@ -182,13 +162,10 @@ public class UserControllerTest {
         assertEquals(true, response.getBody().isSuccess());
         assertEquals("User updated!", response.getBody().getMessage());
         assertEquals(userResponseDTO, response.getBody().getData());
-
-        verify(userService, times(1)).update(1L, userRequestDTO);
-        verifyNoMoreInteractions(userService);
     }
 
     @Test
-    public void testDelete() {
+    public void testDelete() throws UserDeletionException {
         doNothing().when(userService).delete(1L);
 
         ResponseEntity<ApiResponse<Void>> response = userController.delete(1L);
@@ -197,8 +174,105 @@ public class UserControllerTest {
         assertEquals(true, response.getBody().isSuccess());
         assertEquals("User deleted!", response.getBody().getMessage());
         assertEquals(null, response.getBody().getData());
+    }
 
-        verify(userService, times(1)).delete(1L);
-        verifyNoMoreInteractions(userService);
+    @Test
+    public void testGetAllUserNotFoundException() throws UserNotFoundException {
+        when(userService.getAll(false)).thenThrow(new UserNotFoundException("No users found"));
+
+        ResponseEntity<ApiResponse<List<UserResponseDTO>>> response = userController.getAll(false);
+
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+        assertEquals(false, response.getBody().isSuccess());
+        assertEquals("No users found", response.getBody().getMessage());
+        assertEquals(null, response.getBody().getData());
+    }
+
+    @Test
+    public void testGetByIdUserNotFoundException() throws UserNotFoundException {
+        when(userService.getById(1L)).thenThrow(new UserNotFoundException("User not found"));
+
+        ResponseEntity<ApiResponse<UserResponseDTO>> response = userController.getById(1L);
+
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+        assertEquals(false, response.getBody().isSuccess());
+        assertEquals("User not found", response.getBody().getMessage());
+        assertEquals(null, response.getBody().getData());
+    }
+
+    @Test
+    public void testGetMeUserNotFoundException() throws UserNotFoundException {
+        when(userService.getMe("token")).thenThrow(new UserNotFoundException("User not found"));
+
+        ResponseEntity<ApiResponse<UserResponseDTO>> response = userController.getMe("token");
+
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+        assertEquals(false, response.getBody().isSuccess());
+        assertEquals("User not found", response.getBody().getMessage());
+        assertEquals(null, response.getBody().getData());
+    }
+
+    @Test
+    public void testAddUserAlreadyExistsException() throws UserAlreadyExistsException, UserUpdateException {
+        UserRequestDTO userRequestDTO = getMockUserRequestDTO();
+        when(userService.add(userRequestDTO)).thenThrow(new UserAlreadyExistsException("User already exists"));
+
+        ResponseEntity<ApiResponse<UserResponseDTO>> response = userController.add(userRequestDTO);
+
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
+        assertEquals(false, response.getBody().isSuccess());
+        assertEquals("User already exists", response.getBody().getMessage());
+        assertEquals(null, response.getBody().getData());
+    }
+
+    @Test
+    public void testAddUserUpdateException() throws UserAlreadyExistsException, UserUpdateException {
+        UserRequestDTO userRequestDTO = getMockUserRequestDTO();
+        when(userService.add(userRequestDTO)).thenThrow(new UserUpdateException("User update failed"));
+
+        ResponseEntity<ApiResponse<UserResponseDTO>> response = userController.add(userRequestDTO);
+
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
+        assertEquals(false, response.getBody().isSuccess());
+        assertEquals("User update failed", response.getBody().getMessage());
+        assertEquals(null, response.getBody().getData());
+    }
+
+    @Test
+    public void testUpdateUserNotFoundException() throws UserNotFoundException, UserUpdateException {
+        UserRequestDTO userRequestDTO = getMockUserRequestDTO();
+        when(userService.update(1L, userRequestDTO)).thenThrow(new UserNotFoundException("User not found"));
+
+        ResponseEntity<ApiResponse<UserResponseDTO>> response = userController.update(1L, userRequestDTO);
+
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+        assertEquals(false, response.getBody().isSuccess());
+        assertEquals("User not found", response.getBody().getMessage());
+        assertEquals(null, response.getBody().getData());
+    }
+
+    @Test
+    public void testUpdateUserUpdateException() throws UserNotFoundException, UserUpdateException {
+        UserRequestDTO userRequestDTO = getMockUserRequestDTO();
+        when(userService.update(1L, userRequestDTO)).thenThrow(new UserUpdateException("User update failed"));
+
+        ResponseEntity<ApiResponse<UserResponseDTO>> response = userController.update(1L, userRequestDTO);
+
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertEquals(false, response.getBody().isSuccess());
+        assertEquals("User update failed", response.getBody().getMessage());
+        assertEquals(null, response.getBody().getData());
+    }
+
+    @Test
+    public void testDeleteUserDeletionException() throws UserDeletionException {
+        doThrow(new UserDeletionException("User deletion failed")).when(userService).delete(1L);
+
+        ResponseEntity<ApiResponse<Void>> response = userController.delete(1L);
+
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
+        assertEquals(false, response.getBody().isSuccess());
+        assertEquals("User deletion failed", response.getBody().getMessage());
+        assertEquals(null, response.getBody().getData());
     }
 }

@@ -9,7 +9,6 @@ import com.example.CodeGeneratieRestAPI.models.User;
 import com.example.CodeGeneratieRestAPI.services.TransactionService;
 import jakarta.annotation.Nullable;
 import jakarta.validation.Valid;
-import org.modelmapper.Converter;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.config.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -1,7 +1,6 @@
 package com.example.CodeGeneratieRestAPI.dtos;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.Data;
 
 // Class representing the JSON object
@@ -18,7 +17,6 @@ public class AccountLimitsLeft {
 
     @JsonProperty("Difference balance and absolute limit")
     private float differenceBalanceAndAbsoluteLimit;
-
 
 
 }

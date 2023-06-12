@@ -1,5 +1,6 @@
 package com.example.CodeGeneratieRestAPI.cucumber.steps;
 
+import com.example.CodeGeneratieRestAPI.dtos.AccountRequestDTO;
 import com.example.CodeGeneratieRestAPI.dtos.TransactionRequestDTO;
 import com.example.CodeGeneratieRestAPI.models.Account;
 import com.example.CodeGeneratieRestAPI.models.Transaction;
@@ -13,7 +14,6 @@ import com.jayway.jsonpath.JsonPath;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
-import io.cucumber.spring.CucumberContextConfiguration;
 import org.junit.jupiter.api.Assertions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.web.client.TestRestTemplate;
@@ -54,8 +54,6 @@ public class AccountStepDefinitions extends BaseStepDefinitions {
     private RuntimeException exception;
 
 
-
-
     @Given("I am logged in as {string} with password {string} to do some account stuff")
     public void iAmLoggedIn(String username, String password) throws Throwable {
         httpHeaders.add("Content-Type", "application/json");
@@ -68,8 +66,9 @@ public class AccountStepDefinitions extends BaseStepDefinitions {
         token = JsonPath.read(response.getBody(), "$.token");
         httpHeaders.add("Authorization", "Bearer " + token);
     }
+
     @Given("The endpoint for {string} is available for method {string} to do some account stuff")
-    public void theEndPointsForIsAvailableForMethod(String endpoint, String method) throws Throwable{
+    public void theEndPointsForIsAvailableForMethod(String endpoint, String method) throws Throwable {
         response = restTemplate
                 .exchange("/" + endpoint,
                         HttpMethod.OPTIONS,
@@ -83,22 +82,34 @@ public class AccountStepDefinitions extends BaseStepDefinitions {
                 .toList();
         Assertions.assertTrue(options.contains(method.toUpperCase()));
     }
+
     @When("I retrieve all accounts")
-    public void iRetrieveAllAccounts(){
+    public void iRetrieveAllAccounts() {
         response = restTemplate.exchange(restTemplate.getRootUri() + "/accounts", HttpMethod.GET, new HttpEntity<>(null, httpHeaders), String.class);
     }
+
     @Then("I should receive all accounts")
-    public void iShouldReceiveAllAccounts(){
+    public void iShouldReceiveAllAccounts() {
         int actual = JsonPath.read(response.getBody(), "$.data.size()");
         Assertions.assertEquals(9, actual);
     }
+
     @When("I retrieve account with IBAN {string}")
-    public void iRetrieveAccountWithIBAN(String iban){
+    public void iRetrieveAccountWithIBAN(String iban) {
         response = restTemplate.exchange(restTemplate.getRootUri() + "/accounts/" + iban, HttpMethod.GET, new HttpEntity<>(null, httpHeaders), String.class);
     }
+
     @Then("I should receive account with IBAN {string}")
-    public void iShouldReceiveAccountWithIBAN(String iban){
+    public void iShouldReceiveAccountWithIBAN(String iban) {
         String actual = JsonPath.read(response.getBody(), "$.data.account.iban");
         Assertions.assertEquals(iban, actual);
     }
+//    @When("I create a new account")
+//    public void iCreateANewAccount(){
+//        AccountRequestDTO account = new AccountRequestDTO();
+//        account.setName("Account name");
+//        account.setDailyLimit(1000F);
+//        account.();
+//        response = restTemplate.exchange(restTemplate.getRootUri() + "/accounts", HttpMethod.POST, new HttpEntity<>(account, httpHeaders), String.class);
+//    }
 }

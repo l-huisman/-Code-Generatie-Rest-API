@@ -9,7 +9,6 @@ import com.example.CodeGeneratieRestAPI.models.Account;
 import com.example.CodeGeneratieRestAPI.models.ApiResponse;
 import com.example.CodeGeneratieRestAPI.models.User;
 import com.example.CodeGeneratieRestAPI.services.AccountService;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.Nullable;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.PropertyMap;
@@ -62,10 +61,9 @@ public class AccountController {
 
             //  Return the data
             return ResponseEntity.status(HttpStatus.CREATED).body(new ApiResponse<>(true, "Account created successfully", new AccountResponseDTO(account)));
-        } catch(UserNotFoundException | AccountCreationException | IBANGenerationException e) {
+        } catch (UserNotFoundException | AccountCreationException | IBANGenerationException e) {
             return ResponseEntity.status(e.getStatusCode()).body(new ApiResponse<>(false, e.getMessage()));
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             //TODO: handle exception
             //System.out.println(e);
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ApiResponse<>(false, e.getMessage()));
@@ -84,10 +82,9 @@ public class AccountController {
 
             //  Return the data
             return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse(true, accounts.stream().count() + " Accounts retrieved", Arrays.asList(modelMapper.map(accounts, AccountResponseDTO[].class))));
-        } catch(UserNotFoundException e) {
+        } catch (UserNotFoundException e) {
             return ResponseEntity.status(e.getStatusCode()).body(new ApiResponse<>(false, e.getMessage()));
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ApiResponse<>(false, e.getMessage()));
         }
     }
@@ -103,10 +100,9 @@ public class AccountController {
 
             //  Return the data
             return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse(true, accounts.stream().count() + " Accounts retrieved", Arrays.asList(modelMapper.map(accounts, AccountResponseDTO[].class))));
-        }catch (AccountNotFoundException | UserNotFoundException | AccountNotAccessibleException e) {
+        } catch (AccountNotFoundException | UserNotFoundException | AccountNotAccessibleException e) {
             return ResponseEntity.status(e.getStatusCode()).body(new ApiResponse<>(false, e.getMessage()));
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ApiResponse<>(false, e.getMessage()));
         }
     }
@@ -125,8 +121,7 @@ public class AccountController {
             return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse<>(true, "Account retrieved successfully", accountData));
         } catch (AccountNotFoundException | UserNotFoundException | AccountNotAccessibleException e) {
             return ResponseEntity.status(e.getStatusCode()).body(new ApiResponse<>(false, e.getMessage()));
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ApiResponse<>(false, e.getMessage()));
         }
     }
@@ -143,10 +138,10 @@ public class AccountController {
 
             //  Return the data
             return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse<>(true, "Account updated successfully", new AccountResponseDTO(account)));
-        } catch (AccountNoDataChangedException | UserNotFoundException | AccountUpdateException | AccountNotAccessibleException | AccountNotFoundException e) {
+        } catch (AccountNoDataChangedException | UserNotFoundException | AccountUpdateException |
+                 AccountNotAccessibleException | AccountNotFoundException e) {
             return ResponseEntity.status(e.getStatusCode()).body(new ApiResponse<>(false, e.getMessage()));
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ApiResponse<>(false, e.getMessage()));
         }
     }
@@ -165,10 +160,10 @@ public class AccountController {
             // Return a response entity with the response body and the status code
             return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse<>(true, responseBody));
 
-        } catch (AccountNotFoundException | UserNotFoundException | AccountNotAccessibleException | AccountCannotBeDeletedException e) {
+        } catch (AccountNotFoundException | UserNotFoundException | AccountNotAccessibleException |
+                 AccountCannotBeDeletedException e) {
             return ResponseEntity.status(e.getStatusCode()).body(new ApiResponse<>(false, e.getMessage()));
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             //TODO: handle exception
             //System.out.println(e);
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ApiResponse<>(false, e.getMessage()));

@@ -134,5 +134,10 @@ public class DataSeeder implements ApplicationRunner {
         banksAccount.setCreatedAt(new Date());
         banksAccount.setIsActive(true);
         accountService.addSeededAccount("NL01-INHO-0000-0000-01", banksAccount);
+
+        // Create another default customer user
+        UserRequestDTO defaultCustomer4 = new UserRequestDTO("John", "Doe", "Johny", "hereIs!",
+                "John.Doe@inholland.nl", UserType.USER);
+        userService.add(defaultCustomer4);
     }
 }

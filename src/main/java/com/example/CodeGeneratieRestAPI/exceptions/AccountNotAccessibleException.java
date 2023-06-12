@@ -8,6 +8,7 @@ public class AccountNotAccessibleException extends RuntimeException implements C
     public AccountNotAccessibleException(String message) {
         super(message);
     }
+
     @Override
     public HttpStatus getStatusCode() {
         return HttpStatus.BAD_REQUEST;
