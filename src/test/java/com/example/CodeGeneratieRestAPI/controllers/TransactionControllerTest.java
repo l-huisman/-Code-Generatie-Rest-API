@@ -203,7 +203,7 @@ class TransactionControllerTest {
         transactions.add(getMockTransaction(1L, user, 60F, TransactionType.WITHDRAW, fromAccount, null));
         transactions.add(getMockTransaction(2L, user, 60F, TransactionType.WITHDRAW, fromAccount, null));
 
-        when(transactionService.getAllByAccountIban(user, fromAccount.getIban(), startDate, endDate, search)).thenReturn(transactions);
+        when(transactionService.getAllByAccountIban(user, fromAccount.getIban(), startDate, endDate, "", "", 0F, 0, 10)).thenReturn(transactions);
         when(userService.getLoggedInUser()).thenReturn(user);
 
         SimpleDateFormat DateFormat = new SimpleDateFormat("yyyy-MM-dd");
