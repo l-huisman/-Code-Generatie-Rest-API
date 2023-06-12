@@ -104,12 +104,20 @@ public class AccountStepDefinitions extends BaseStepDefinitions {
         String actual = JsonPath.read(response.getBody(), "$.data.account.iban");
         Assertions.assertEquals(iban, actual);
     }
-//    @When("I create a new account")
-//    public void iCreateANewAccount(){
-//        AccountRequestDTO account = new AccountRequestDTO();
-//        account.setName("Account name");
-//        account.setDailyLimit(1000F);
-//        account.();
-//        response = restTemplate.exchange(restTemplate.getRootUri() + "/accounts", HttpMethod.POST, new HttpEntity<>(account, httpHeaders), String.class);
-//    }
+    @When("I create a new account")
+    public void iCreateANewAccount(){
+        AccountRequestDTO account = new AccountRequestDTO();
+        account.setName("Account name");
+        account.setDailyLimit(1000F);
+        account.setTransactionLimit(1000F);
+        account.setAbsoluteLimit(1000F);
+        account.setIsSavings(false);
+        account.setIsActive(true);
+        response = restTemplate.exchange(restTemplate.getRootUri() + "/accounts", HttpMethod.POST, new HttpEntity<>(account, httpHeaders), String.class);
+    }
+    @Then("I should receive the new account")
+    public void iShouldReceiveTheNewAccount(){
+        String actual = JsonPath.read(response.getBody(), "$.data.account.name");
+        Assertions.assertEquals("Account name", actual);
+    }
 }
