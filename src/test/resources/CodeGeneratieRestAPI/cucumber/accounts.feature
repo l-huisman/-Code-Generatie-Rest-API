@@ -5,3 +5,13 @@ Feature: Accounts CRUD operations
     And The endpoint for "accounts" is available for method "GET"
     When I retrieve all accounts
     Then I should receive all accounts
+  Scenario: Getting an account
+    Given I am logged in as "admin" with password "admin"
+    And The endpoint for "accounts" is available for method "GET"
+    When I retrieve account with IBAN "NL61-INHO-0897-9124-95"
+    Then I should receive account with IBAN "NL61-INHO-0897-9124-95"
+  Scenario: Creating an account
+    Given I am logged in as "admin" with password "admin"
+    And The endpoint for "accounts" is available for method "POST"
+    When I create an account with  and balance "1000"
+    Then I should receive account with IBAN "NL61-INHO-0897-9124-95" and balance "1000"

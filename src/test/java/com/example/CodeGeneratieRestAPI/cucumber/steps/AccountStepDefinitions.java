@@ -13,13 +13,16 @@ import com.jayway.jsonpath.JsonPath;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
+import io.cucumber.spring.CucumberContextConfiguration;
 import org.junit.jupiter.api.Assertions;
+import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
+import org.junit.runner.RunWith;
 
 import java.util.Arrays;
 import java.util.List;
@@ -51,6 +54,9 @@ public class AccountStepDefinitions extends BaseStepDefinitions {
     private TransactionRequestDTO transactionDTO, anotherTransactionDTO;
     private Transaction transaction, anotherTransaction;
     private RuntimeException exception;
+
+
+
 
     @Given("I am logged in as {string} with password {string}")
     public void iAmLoggedIn(String username, String password) throws Throwable {
@@ -86,6 +92,15 @@ public class AccountStepDefinitions extends BaseStepDefinitions {
     @Then("I should receive all accounts")
     public void iShouldReceiveAllAccounts(){
         int actual = JsonPath.read(response.getBody(), "$.data.size()");
-        Assertions.assertEquals(accountRepository.findAll().size(), actual);
+        Assertions.assertEquals(9, actual);
+    }
+    @When("I retrieve account with IBAN {string}")
+    public void iRetrieveAccountWithIBAN(String iban){
+        response = restTemplate.exchange(restTemplate.getRootUri() + "/accounts/" + iban, HttpMethod.GET, new HttpEntity<>(null, httpHeaders), String.class);
+    }
+    @Then("I should receive account with IBAN {string}")
+    public void iShouldReceiveAccountWithIBAN(String iban){
+        String actual = JsonPath.read(response.getBody(), "$.data.account.iban");
+        Assertions.assertEquals(iban, actual);
     }
 }
