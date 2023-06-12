@@ -196,8 +196,8 @@ public class AccountService {
         //  Set the account limits left
         accountLimitsLeft.setDailyLimitLeft(account.getDailyLimit() - floatValue);
         accountLimitsLeft.setTransactionLimit(account.getTransactionLimit());
-        accountLimitsLeft.setAmountSpendableOnNextTransaction(Math.min(accountLimitsLeft.getDailyLimitLeft(), accountLimitsLeft.getTransactionLimit()));
-        accountLimitsLeft.setDifferenceBalanceAndAbsoluteLimit(Math.min((account.getBalance() - account.getAbsoluteLimit()), accountLimitsLeft.getAmountSpendableOnNextTransaction()));
+        accountLimitsLeft.setAmountSpendableOnNextTransaction(Math.min(Math.min(accountLimitsLeft.getDailyLimitLeft(), accountLimitsLeft.getTransactionLimit()), account.getBalance() - account.getAbsoluteLimit()));
+        accountLimitsLeft.setDifferenceBalanceAndAbsoluteLimit(account.getBalance() - account.getAbsoluteLimit());
 
         //  Return an AccountData object which contains the account (converted to an AccountResponseDTO object) and the account limits left
         return new AccountData(new AccountResponseDTO(account), accountLimitsLeft);
