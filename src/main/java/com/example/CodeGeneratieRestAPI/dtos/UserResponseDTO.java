@@ -9,10 +9,10 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class UserResponseDTO {
+    private Long id;
     private String firstName;
     private String lastName;
     private String username;
     private String email;
     private UserType userType;
-    private String createdAt;
 }

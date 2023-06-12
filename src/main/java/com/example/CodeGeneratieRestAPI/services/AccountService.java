@@ -80,18 +80,21 @@ public class AccountService {
         }
 
     }
-    private Account addBankAccount(AccountRequestDTO accountRequestDTO){
+
+    private Account addBankAccount(AccountRequestDTO accountRequestDTO) {
         //  Check if the account with this IBAN already exists
         if (serviceHelper.checkIfObjectExistsByIdentifier(accountRequestDTO.getIban(), new Account())) {
             throw new AccountAlreadyExistsException("The bank's account already exists");
         }
         return accountRepository.save(new Account(accountRequestDTO, null));
     }
+
     private Date getCurrentDate() {
         //TODO: Make the ZoneId configurable
         ZoneId zone = ZoneId.of("Europe/Amsterdam");
         return Date.from(LocalDateTime.now(zone).atZone(zone).toInstant());
     }
+
     private void checkIfAccountRequestDTOIsValidForAdd(AccountRequestDTO accountRequestDTO) {
         //  Check if the accountRequestDTO is null
         if (accountRequestDTO == null) {
@@ -118,6 +121,7 @@ public class AccountService {
             throw new AccountUpdateException(e.getMessage());
         }
     }
+
     private void checkIfAccountRequestDTOIsValidForUpdate(AccountRequestDTO accountRequestDTO) {
         //  Check if the accountRequestDTO is null
         if (accountRequestDTO == null) {
@@ -153,7 +157,7 @@ public class AccountService {
     }
 
     private Account checkAndGetAccount(String iban, User loggedInUser) {
-        if (iban.equals("NL01-INHO-0000-0000-01")){
+        if (iban.equals("NL01-INHO-0000-0000-01")) {
             throw new AccountNotAccessibleException("This is the bank's account, you cannot access this account");
         }
 
@@ -167,6 +171,7 @@ public class AccountService {
 
         return account;
     }
+
     public List<Account> getAllAccounts(String search, Boolean active, User loggedInUser) {
         // Check if the user is an employee
         if (loggedInUser.getUserType().getAuthority().equals("EMPLOYEE")) {
@@ -178,6 +183,7 @@ public class AccountService {
             return accountRepository.findAllBySearchTermAndUserId(search, active, loggedInUser.getId());
         }
     }
+
     public AccountData getAccountByIban(String iban, User loggedInUser) {
         //  Check account and get the account
         Account account = this.checkAndGetAccount(iban, loggedInUser);

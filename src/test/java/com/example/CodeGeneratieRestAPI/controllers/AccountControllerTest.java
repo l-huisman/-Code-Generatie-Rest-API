@@ -4,11 +4,8 @@ import com.example.CodeGeneratieRestAPI.dtos.AccountData;
 import com.example.CodeGeneratieRestAPI.dtos.AccountLimitsLeft;
 import com.example.CodeGeneratieRestAPI.dtos.AccountRequestDTO;
 import com.example.CodeGeneratieRestAPI.dtos.AccountResponseDTO;
-import com.example.CodeGeneratieRestAPI.dtos.TransactionRequestDTO;
 import com.example.CodeGeneratieRestAPI.exceptions.AccountCreationException;
 import com.example.CodeGeneratieRestAPI.exceptions.AccountNotFoundException;
-import com.example.CodeGeneratieRestAPI.exceptions.TransactionAmountNotValidException;
-import com.example.CodeGeneratieRestAPI.exceptions.TransactionNotOwnedException;
 import com.example.CodeGeneratieRestAPI.jwt.JwTokenProvider;
 import com.example.CodeGeneratieRestAPI.models.*;
 import com.example.CodeGeneratieRestAPI.repositories.AccountRepository;
@@ -18,7 +15,6 @@ import com.example.CodeGeneratieRestAPI.services.AccountService;
 import com.example.CodeGeneratieRestAPI.services.TransactionService;
 import com.example.CodeGeneratieRestAPI.services.UserService;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,18 +26,13 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.text.SimpleDateFormat;
-import java.time.LocalDate;
-import java.time.ZoneId;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -93,6 +84,7 @@ public class AccountControllerTest {
         account.setIsSavings(isSavings);
         return account;
     }
+
     private AccountRequestDTO getMockAccountRequestDTO() {
         AccountRequestDTO accountRequestDTO = new AccountRequestDTO();
         accountRequestDTO.setBalance(1000.0F);
@@ -133,6 +125,7 @@ public class AccountControllerTest {
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.data.iban").value("NL01-INHO-0000-0000-44"));
     }
+
     @Test
     @WithMockUser(username = "Dewi", password = "Dewi123", roles = "USER")
     void addInvalidAccount() throws Exception {
@@ -150,6 +143,7 @@ public class AccountControllerTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message").value("You cannot set the IBAN of a new account"));
     }
+
     @Test
     @WithMockUser(username = "Dewi", password = "Dewi123", roles = "USER")
     void getAllAccounts() throws Exception {
@@ -170,6 +164,7 @@ public class AccountControllerTest {
                 .andExpect(jsonPath("$.data[1].iban").value("NL01-INHO-0000-0000-45"))
                 .andExpect(jsonPath("$.data", hasSize(2)));
     }
+
     @Test
     @WithMockUser(username = "Dewi", password = "Dewi123", roles = "USER")
     void getAllAccountsByUserId() throws Exception {
@@ -190,6 +185,7 @@ public class AccountControllerTest {
                 .andExpect(jsonPath("$.data[1].iban").value("NL01-INHO-0000-0000-45"))
                 .andExpect(jsonPath("$.data", hasSize(2)));
     }
+
     @Test
     @WithMockUser(username = "Dewi", password = "Dewi123", roles = "USER")
     void getAllAccountsByUserIdThrowsException() throws Exception {
@@ -204,6 +200,7 @@ public class AccountControllerTest {
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.message").value("No accounts found"));
     }
+
     @Test
     @WithMockUser(username = "Dewi", password = "Dewi123", roles = "USER")
     void getAccountByIban() throws Exception {
@@ -234,6 +231,7 @@ public class AccountControllerTest {
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.message").value("No account found"));
     }
+
     @Test
     @WithMockUser(username = "Dewi", password = "Dewi123", roles = "USER")
     void updateAccount() throws Exception {
@@ -258,6 +256,7 @@ public class AccountControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.iban").value("NL01-INHO-0000-0000-44"));
     }
+
     @Test
     @WithMockUser(username = "Dewi", password = "Dewi123", roles = "USER")
     void updateAccountThrowsException() throws Exception {
@@ -281,6 +280,7 @@ public class AccountControllerTest {
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.message").value("No account found"));
     }
+
     @Test
     @WithMockUser(username = "Dewi", password = "Dewi123", roles = "USER")
     void deleteAccount() throws Exception {
@@ -297,6 +297,7 @@ public class AccountControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.message").value("Account with IBAN: " + account.getIban() + " has been set to inactive"));
     }
+
     @Test
     @WithMockUser(username = "Dewi", password = "Dewi123", roles = "USER")
     void deleteAccountThrowsException() throws Exception {

@@ -74,12 +74,12 @@ public class UserServiceTest {
 
     private UserResponseDTO getMockUserResponseDTO() {
         UserResponseDTO userResponseDTO = new UserResponseDTO();
+        userResponseDTO.setId(1L);
         userResponseDTO.setFirstName("John");
         userResponseDTO.setLastName("Doe");
         userResponseDTO.setUsername("johndoe");
         userResponseDTO.setEmail("johndoe@example.com");
         userResponseDTO.setUserType(UserType.USER);
-        userResponseDTO.setCreatedAt(new Date().toString());
         return userResponseDTO;
     }
 
@@ -90,7 +90,7 @@ public class UserServiceTest {
         when(userRepository.findAll()).thenReturn(users);
         when(modelMapper.map(any(User.class), eq(UserResponseDTO.class))).thenReturn(getMockUserResponseDTO());
 
-        List<UserResponseDTO> result = userService.getAll();
+        List<UserResponseDTO> result = userService.getAll(false);
 
         assertEquals(1, result.size());
         verify(userRepository, times(1)).findAll();
@@ -100,7 +100,7 @@ public class UserServiceTest {
     public void testGetAllNoUsersFound() {
         when(userRepository.findAll()).thenReturn(new ArrayList<>());
 
-        List<UserResponseDTO> result = userService.getAll();
+        List<UserResponseDTO> result = userService.getAll(false);
 
         assertEquals(0, result.size());
         verify(userRepository, times(1)).findAll();

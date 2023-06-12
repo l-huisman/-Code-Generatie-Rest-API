@@ -3,8 +3,6 @@ package com.example.CodeGeneratieRestAPI.dtos;
 import com.example.CodeGeneratieRestAPI.models.Account;
 import lombok.Data;
 
-import java.util.Date;
-
 @Data
 public class AccountResponseDTO {
     private Long userId;
@@ -33,6 +31,7 @@ public class AccountResponseDTO {
         this.isSavings = account.getIsSavings();
         this.isActive = account.getIsActive();
     }
+
     private Float calculateLimitRemaining() {
         //  Get the lowest limit of all the limits
         return Math.min(Math.min(transactionLimit, dailyLimit), this.balance - this.absoluteLimit);
