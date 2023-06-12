@@ -1,0 +1,313 @@
+openapi: 3.0.0
+servers:
+  - description: SwaggerHub API Auto Mocking
+    url: https://virtserver.swaggerhub.com/684651_1/Mr.Banky/1.0.0
+info:
+  description: This the the API Documentation for the Mr. Banky API
+  version: "1.0.0"
+  title: Mr. Banky API
+tags:
+  - name: User
+    description: Endpoints for managing users
+  - name: Login
+    description: Endpoints for login and token validation
+security:
+  - BearerAuth: []
+paths:
+  /users:
+    get:
+      tags:
+        - User
+      summary: Get all users
+      security:
+        - BearerAuth: []
+      responses:
+        "302":
+          description: found"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+                properties:
+                  object:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/UserResponseDTO"
+        "404":
+          description: "not found"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+    post:
+      tags:
+        - User
+      summary: Add a user
+      security:
+        - BearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserRequestDTO"
+      responses:
+        "201":
+          description: "created"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+                properties:
+                  object:
+                    $ref: "#/components/schemas/UserResponseDTO"
+        "500":
+          description: "internal server error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+  /users/{id}:
+    get:
+      tags:
+        - User
+      summary: Get a user
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "302":
+          description: "found"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+                properties:
+                  object:
+                    $ref: "#/components/schemas/UserResponseDTO"
+        "404":
+          description: "not found"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+    put:
+      tags:
+        - User
+      summary: Update a user
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserRequestDTO"
+      responses:
+        "200":
+          description: "ok"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+                properties:
+                  object:
+                    $ref: "#/components/schemas/UserResponseDTO"
+        "500":
+          description: "internal server error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+    delete:
+      tags:
+        - User
+      summary: Delete a user
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: "ok"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+        "500":
+          description: "internal server error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+  /users/me:
+    get: 
+      tags:
+        - User
+      summary: Get current user
+      security:
+        - BearerAuth: []
+      responses:
+        "302":
+          description: "found"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+                properties:
+                  object:
+                    $ref: "#/components/schemas/UserResponseDTO"
+        "400":
+          description: "bad request"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+  /login:
+    post:
+      tags:
+        - Login
+      summary: Login
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginRequestDTO"
+      responses:
+        "200":
+          description: "ok"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+                properties:
+                  object:
+                    $ref: "#/components/schemas/LoginResponseDTO"
+        "500":
+          description: "internal server error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+  /login/validate:
+    get:
+      tags:
+        - Login
+      summary: Validate token
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: "ok"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+        "401":
+          description: "unauthorized"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+components:
+  schemas:
+    ApiResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: "Success"
+        object:
+          type: object
+    LoginRequestDTO:
+      type: object
+      properties:
+        username:
+          type: string
+          example: "john"
+        password:
+          type: string
+          example: "secret"
+      required:
+        - username
+        - password
+    LoginResponseDTO:
+      type: object
+      properties:
+        token:
+          type: string
+          example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9"
+        user:
+          type: object
+          $ref: "#/components/schemas/UserResponseDTO"
+    UserRequestDTO:
+      type: object
+      properties:
+        firstName:
+          type: string
+          example: "John"
+        lastName:
+          type: string
+          example: "Doe"
+        username:
+          type: string
+          example: "john"
+        password:
+          type: string
+          example: "secret"
+        email:
+          type: string
+          example: "johndoe@example.com"
+        userType:
+          type: string
+          example: "USER"
+      required:
+        - firstName
+        - lastName
+        - username
+        - password
+        - email
+        - userType
+    UserResponseDTO:
+      type: object
+      properties:
+        firstName:
+          type: string
+          example: "John"
+        lastName:
+          type: string
+          example: "Doe"
+        username:
+          type: string
+          example: "john"
+        email:
+          type: string
+          example: "johndoe@example.com"
+        userType:
+          type: string
+          example: "USER"
+        createdAt:
+          type: string
+          format: date-time
+          example: "2021-01-01T00:00:00.000Z"
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
