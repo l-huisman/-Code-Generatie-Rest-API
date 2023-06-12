@@ -72,7 +72,7 @@ public class TransactionStepDefinitions extends BaseStepDefinitions {
                         new HttpEntity<>("{\"username\":\"" + username + "\", \"password\":\"" + password + "\"}", httpHeaders), // null because OPTIONS does not have a body
                         String.class);
 
-        token = JsonPath.read(response.getBody(), "$.token");
+        token = JsonPath.read(response.getBody(), "$.data.token");
         httpHeaders.add("Authorization", "Bearer " + token);
     }
 
