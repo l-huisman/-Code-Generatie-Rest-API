@@ -98,6 +98,11 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse<>(false, e.getMessage()));
     }
 
+    @ExceptionHandler(UserOnlyException.class)
+    public ResponseEntity<ApiResponse<String>> handleUserOnlyException(UserOnlyException e) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse<>(false, e.getMessage()));
+    }
+
     @ExceptionHandler(UserCreationException.class)
     public ResponseEntity<ApiResponse<String>> handleUserCreationException(UserCreationException e) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
