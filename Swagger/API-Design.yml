@@ -70,59 +70,129 @@ paths:
                     success: false
                     message: "Invalid request parameters"
                     data: null
+        "401":
+          description: You are unauthorized
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    description: "Boolean indicating if the request was successful"
+                    example: false
+                  message:
+                    type: string
+                    description: "Message returned from the request"
+                    example: "Unauthorized"
+                  data:
+                    type: object
+                    description: "Data returned from the request"
+                    example: null
+              examples:
+                error:
+                  summary: "Error response"
+                  value:
+                    success: false
+                    message: "Unauthorized"
+                    data: null
         "404":
-            description: User not found
-            content:
-                application/json:
-                schema:
+          description: User not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    description: "Boolean indicating if the request was successful"
+                    example: false
+                  message:
+                    type: string
+                    description: "Message returned from the request"
+                    example: "User not found"
+                  data:
                     type: object
-                    properties:
-                    success:
-                        type: boolean
-                        description: "Boolean indicating if the request was successful"
-                        example: false
-                    message:
-                        type: string
-                        description: "Message returned from the request"
-                        example: "User not found"
+                    description: "Data returned from the request"
+                    example: null
+              examples:
+                error:
+                  summary: "Error response"
+                  value:
+                    success: false
+                    message: "User not found"
+                    data: null
+  /login/validate:
+    get:
+      tags:
+        - Login
+      summary: Validate a user's login status
+      description: Validate a user's login status
+      responses:
+        "200":
+          description: User logged in
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    description: "Boolean indicating if the request was successful"
+                    example: true
+                  message:
+                    type: string
+                    description: "Message returned from the request"
+                    example: "User successfully logged in"
+              examples:
+                success:
+                  summary: "Successful response"
+                  value:
+                    success: true
+                    message: "User successfully logged in"
                     data:
-                        type: object
-                        description: "Data returned from the request"
-                        example: null
-                examples:
-                    error:
-                    summary: "Error response"
-                    value:
-                        success: false
-                        message: "User not found"
-                        data: null
-        "500":
-            description: Something went wrong
-            content:
-                application/json:
-                schema:
+                      type: object
+                      description: "Data returned from the request"
+                      example:
+                        user:
+                          id: 1
+                          firstName: "John"
+                          lastName: "Doe"
+                          username: "JohnDoe"
+                          email: "johndoe@example.com"
+                          userType: "USER"
+                error:
+                  summary: "Error response"
+                  value:
+                    success: false
+                    message: "Invalid request parameters"
+                    data: null
+        "401":
+          description: Invalid token
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    description: "Boolean indicating if the request was successful"
+                    example: false
+                  message:
+                    type: string
+                    description: "Message returned from the request"
+                    example: "Unauthorized"
+                  data:
                     type: object
-                    properties:
-                    success:
-                        type: boolean
-                        description: "Boolean indicating if the request was successful"
-                        example: false
-                    message:
-                        type: string
-                        description: "Message returned from the request"
-                        example: "Something went wrong"
-                    data:
-                        type: object
-                        description: "Data returned from the request"
-                        example: null
-                examples:
-                    error:
-                    summary: "Error"
-                    value:
-                        success: false
-                        message: "Something went wrong"
-                        data: null
-
+                    description: "Data returned from the request"
+                    example: null
+              examples:
+                error:
+                  summary: "Error response"
+                  value:
+                    success: false
+                    message: "Unauthorized"
+                    data: null
 
   /users:
     get:
@@ -653,6 +723,59 @@ paths:
                     success: false
                     message: "Something went wrong"
                     data: null
+  /users/me:
+    get:
+      tags:
+        - User
+      summary: Get user
+      description: Get user
+      operationId: getUser
+      responses:
+        "301":
+          description: User found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    description: "Boolean indicating if the request was successful"
+                    example: true
+                  message:
+                    type: string
+                    description: "Message returned from the request"
+                    example: "User successfully retrieved"
+                  data:
+                    type: object
+                    description: "Data returned from the request"
+                    example:
+                      user:
+                        - id: 1
+                          firstName: "John"
+                          lastName: "Doe"
+                          username: "JohnDoe"
+                          email: "johndoe@example.com"
+                          userType: "USER"
+        "404":
+          description: User not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    description: "Boolean indicating if the request was successful"
+                    example: false
+                  message:
+                    type: string
+                    description: "Message returned from the request"
+                    example: "User not found"
+                  data:
+                    type: object
+                    description: "Data returned from the request"
+                    example: null
   /accounts:
     get:
       tags:

@@ -10,8 +10,6 @@ import com.example.CodeGeneratieRestAPI.jwt.JwTokenProvider;
 import com.example.CodeGeneratieRestAPI.models.User;
 import com.example.CodeGeneratieRestAPI.models.UserType;
 import com.example.CodeGeneratieRestAPI.repositories.LoginRepository;
-
-import org.hibernate.cfg.NotYetImplementedException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -30,7 +28,7 @@ public class LoginService {
     public LoginResponseDTO login(LoginRequestDTO request) {
         User user = loginRepository.findByUsername(request.getUsername())
                 .orElseThrow(() -> new UserNotFoundException("User not found"));
-        if (!user.getHashedPassword().validatePassword(request.getPassword())){
+        if (!user.getHashedPassword().validatePassword(request.getPassword())) {
             throw new PasswordValidationException("Password is incorrect");
         }
         String token = tokenProvider.createToken(user.getId(), user.getUsername(), user.getUserType());
