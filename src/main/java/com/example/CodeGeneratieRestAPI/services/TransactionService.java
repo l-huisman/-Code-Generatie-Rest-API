@@ -39,7 +39,7 @@ public class TransactionService {
         if (!amountRelation.isEmpty() && !(amountRelation.equals(">") || amountRelation.equals("<") || amountRelation.equals("="))) {
             throw new RuntimeException("The transaction amount relation is not valid.");
         } else if (!amountRelation.isEmpty() && amount == 0) {
-            throw new RuntimeException("The transaction amount relation is not valid.");
+            throw new RuntimeException("The amount filter can not be empty with the amount relation.");
         }
 
         //Check if user is not an employee and if the doesn't user owns the account
@@ -141,24 +141,32 @@ public class TransactionService {
     public Transaction transactionIsOwnedByUser(User user, Long id) {
         Transaction transaction = transactionRepository.findById(id).orElseThrow(() -> new TransactionNotFoundException("This transaction does not exist."));
 
-        if (transaction.getFromAccount() != null && !transaction.getFromAccount().getUser().getId().equals(user.getId())) {
+        if (!user.getUserType().equals(UserType.EMPLOYEE) && transaction.getFromAccount() != null && !transaction.getFromAccount().getUser().getId().equals(user.getId())) {
             throw new TransactionNotOwnedException("This user does not own the specified transaction");
-        } else if (transaction.getToAccount() != null && !transaction.getToAccount().getUser().getId().equals(user.getId())) {
+        } else if (!user.getUserType().equals(UserType.EMPLOYEE) && transaction.getToAccount() != null && !transaction.getToAccount().getUser().getId().equals(user.getId())) {
             throw new TransactionNotOwnedException("This user does not own the specified transaction");
         }
         return transaction;
     }
 
-    public List<Transaction> getAllByAccountIban(User user, String iban, Date startDate, Date endDate, String search) {
+    public List<Transaction> getAllByAccountIban(User user, String iban, Date startDate, Date endDate, String searchIban, String amountRelation, Float amount, Integer pageNumber, Integer pageSize) {
         Date startOfDay = getStartOfDay(startDate);
         Date endOfDay = getEndOfDay(endDate);
+
+        if (!amountRelation.isEmpty() && !(amountRelation.equals(">") || amountRelation.equals("<") || amountRelation.equals("="))) {
+            throw new RuntimeException("The transaction amount relation is not valid.");
+        } else if (!amountRelation.isEmpty() && amount == 0) {
+            throw new RuntimeException("The amount filter can not be empty with the amount relation.");
+        }
+
+        Pageable pageableRequest = PageRequest.of(pageNumber, pageSize);
 
         //Check if user is not an employee and if the user doesn't own the account
         if (!user.getUserType().equals(UserType.EMPLOYEE) && (user.getAccounts() == null || !user.getAccounts().stream().anyMatch(account -> account.getIban().equals(iban)))) {
             throw new AccountNotOwnedException("This user does not own the specified account");
         }
 
-        return transactionRepository.findAllByIban(endOfDay, startOfDay, iban, search);
+        return transactionRepository.findAllByIban(endOfDay, startOfDay, iban, searchIban, amountRelation, amount, pageableRequest);
     }
 
     public Double getTodaysAccumulatedTransactionAmount(String iban) {

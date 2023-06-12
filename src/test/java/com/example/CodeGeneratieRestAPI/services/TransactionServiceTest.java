@@ -523,7 +523,6 @@ public class TransactionServiceTest {
         LocalDate today = LocalDate.now();
         Date startDate = Date.from(today.atStartOfDay(ZoneId.systemDefault()).toInstant());
         Date endDate = Date.from(today.atTime(LocalTime.MAX).atZone(ZoneId.systemDefault()).toInstant());
-        String search = "test";
 
         List<Account> accounts = new ArrayList<>();
         Account account = getMockAccount(iban, 1000F, user, false);
@@ -533,14 +532,16 @@ public class TransactionServiceTest {
         List<Transaction> transactions = new ArrayList<>();
 
         Transaction transaction = getMockTransaction(user, 100F, TransactionType.DEPOSIT, null, account);
-        ;
         transaction.setLabel("test");
         transactions.add(transaction);
         transactions.add(getMockTransaction(user, 100F, TransactionType.DEPOSIT, null, account));
 
-        when(transactionRepository.findAllByIban(endDate, startDate, iban, search)).thenReturn(transactions);
+        Pageable pageableRequest = PageRequest.of(0, 10);
 
-        List<Transaction> result = transactionService.getAllByAccountIban(user, iban, startDate, endDate, search);
+        when(transactionRepository.findAllByIban(endDate, startDate, iban, "", "", 0F, pageableRequest)).thenReturn(transactions);
+
+
+        List<Transaction> result = transactionService.getAllByAccountIban(user, iban, startDate, endDate, "", "", 0F, 0, 10);
 
         Assertions.assertEquals(transactions, result);
     }
@@ -554,7 +555,6 @@ public class TransactionServiceTest {
         LocalDate today = LocalDate.now();
         Date startDate = Date.from(today.atStartOfDay(ZoneId.systemDefault()).toInstant());
         Date endDate = Date.from(today.atTime(LocalTime.MAX).atZone(ZoneId.systemDefault()).toInstant());
-        String search = "test";
 
         List<Account> accounts = new ArrayList<>();
         Account account = getMockAccount(iban, 1000F, user1, false);
@@ -564,14 +564,15 @@ public class TransactionServiceTest {
         List<Transaction> transactions = new ArrayList<>();
 
         Transaction transaction = getMockTransaction(user1, 100F, TransactionType.DEPOSIT, null, account);
-        ;
         transaction.setLabel("test");
         transactions.add(transaction);
         transactions.add(getMockTransaction(user1, 100F, TransactionType.DEPOSIT, null, account));
 
-        when(transactionRepository.findAllByIban(endDate, startDate, iban, search)).thenReturn(transactions);
+        Pageable pageableRequest = PageRequest.of(0, 10);
 
-        Assertions.assertThrows(AccountNotOwnedException.class, () -> transactionService.getAllByAccountIban(user, iban, startDate, endDate, search));
+        when(transactionRepository.findAllByIban(endDate, startDate, iban, "", "", 0F, pageableRequest)).thenReturn(transactions);
+
+        Assertions.assertThrows(AccountNotOwnedException.class, () -> transactionService.getAllByAccountIban(user, iban, startDate, endDate, "", "", 0F, 0, 10));
     }
 
     @Test
