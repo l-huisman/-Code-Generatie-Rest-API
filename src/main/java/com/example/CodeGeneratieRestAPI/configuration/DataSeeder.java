@@ -45,7 +45,7 @@ public class DataSeeder implements ApplicationRunner {
         userService.add(defaultCustomer);
 
         // Create another default customer user
-        UserRequestDTO defaultCustomer2 = new UserRequestDTO("Devon", "van Wichen", "Devon", "Devon",
+        UserRequestDTO defaultCustomer2 = new UserRequestDTO("Devon", "van Wichen", "Devon", "devon",
                 "650122@student.inholland.nl", UserType.USER);
         userService.add(defaultCustomer2);
 
