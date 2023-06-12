@@ -38,7 +38,7 @@ public class LoginController {
         try {
             return ResponseEntity.status(HttpStatus.OK)
                     .body(new ApiResponse<>(true, "User logged in!", loginService.login(req)));
-        } catch (PasswordValidationException | UserNotFoundException e) /* 500 & 404 */ {
+        } catch (PasswordValidationException | UserNotFoundException e) /* 401 & 404 */ {
             return ResponseEntity.status(e.getStatusCode()).body(new ApiResponse<>(false, e.getMessage()));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
