@@ -35,6 +35,7 @@ public class AccountResponseDTO {
         this.isActive = account.getIsActive();
         this.createdAt = account.getCreatedAt();
     }
+
     private Float calculateLimitRemaining() {
         //  Get the lowest limit of all the limits
         return Math.min(Math.min(transactionLimit, dailyLimit), this.balance - this.absoluteLimit);

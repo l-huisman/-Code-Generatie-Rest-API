@@ -7,6 +7,7 @@ public class PasswordValidationException extends RuntimeException implements Cus
     public PasswordValidationException(String message) {
         super(message);
     }
+
     @Override
     public org.springframework.http.HttpStatus getStatusCode() {
         return org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;

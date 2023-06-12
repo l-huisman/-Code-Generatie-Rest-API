@@ -5,7 +5,6 @@ import com.example.CodeGeneratieRestAPI.dtos.UserResponseDTO;
 import com.example.CodeGeneratieRestAPI.exceptions.UserCreationException;
 import com.example.CodeGeneratieRestAPI.exceptions.UserDeletionException;
 import com.example.CodeGeneratieRestAPI.exceptions.UserNotFoundException;
-import com.example.CodeGeneratieRestAPI.exceptions.UserUpdateException;
 import com.example.CodeGeneratieRestAPI.models.HashedPassword;
 import com.example.CodeGeneratieRestAPI.models.User;
 import com.example.CodeGeneratieRestAPI.repositories.UserRepository;
