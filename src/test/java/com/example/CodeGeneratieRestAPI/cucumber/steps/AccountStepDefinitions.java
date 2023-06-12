@@ -107,6 +107,7 @@ public class AccountStepDefinitions extends BaseStepDefinitions {
     @When("I create a new account")
     public void iCreateANewAccount(){
         AccountRequestDTO account = new AccountRequestDTO();
+        account.setUserId(1L);
         account.setName("Account name");
         account.setDailyLimit(1000F);
         account.setTransactionLimit(1000F);
@@ -117,7 +118,7 @@ public class AccountStepDefinitions extends BaseStepDefinitions {
     }
     @Then("I should receive the new account")
     public void iShouldReceiveTheNewAccount(){
-        String actual = JsonPath.read(response.getBody(), "$.data.account.name");
+        String actual = JsonPath.read(response.getBody(), "$.data.name");
         Assertions.assertEquals("Account name", actual);
     }
 }
