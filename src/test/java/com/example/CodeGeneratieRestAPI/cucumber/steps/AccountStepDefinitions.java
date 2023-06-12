@@ -1,5 +1,6 @@
 package com.example.CodeGeneratieRestAPI.cucumber.steps;
 
+import com.example.CodeGeneratieRestAPI.dtos.AccountRequestDTO;
 import com.example.CodeGeneratieRestAPI.dtos.TransactionRequestDTO;
 import com.example.CodeGeneratieRestAPI.models.Account;
 import com.example.CodeGeneratieRestAPI.models.Transaction;
@@ -103,4 +104,12 @@ public class AccountStepDefinitions extends BaseStepDefinitions {
         String actual = JsonPath.read(response.getBody(), "$.data.account.iban");
         Assertions.assertEquals(iban, actual);
     }
+//    @When("I create a new account")
+//    public void iCreateANewAccount(){
+//        AccountRequestDTO account = new AccountRequestDTO();
+//        account.setName("Account name");
+//        account.setDailyLimit(1000F);
+//        account.();
+//        response = restTemplate.exchange(restTemplate.getRootUri() + "/accounts", HttpMethod.POST, new HttpEntity<>(account, httpHeaders), String.class);
+//    }
 }
