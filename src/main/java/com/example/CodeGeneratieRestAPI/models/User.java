@@ -45,14 +45,12 @@ public class User {
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "user")
     private List<Transaction> transactions;
 
-
-    public boolean validatePassword(String password) {
-        HashedPassword hashedPassword = new HashedPassword(password);
-        return hashedPassword.validatePassword(password);
-    }
-
     public String getPassword() {
         return password.getPassword();
+    }
+
+    public HashedPassword getHashedPassword() {
+        return password;
     }
 
     @Override
