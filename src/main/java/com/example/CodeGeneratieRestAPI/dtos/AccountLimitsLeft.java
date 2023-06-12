@@ -6,16 +6,16 @@ import lombok.Data;
 // Class representing the JSON object
 @Data
 public class AccountLimitsLeft {
-    @JsonProperty("Daily limit left")
+    @JsonProperty("dailyLimitLeft")
     private float dailyLimitLeft;
 
-    @JsonProperty("Transaction Limit")
+    @JsonProperty("transactionLimit")
     private float transactionLimit;
 
-    @JsonProperty("Amount spendable on next transaction")
+    @JsonProperty("amountSpendableOnNextTransaction")
     private float amountSpendableOnNextTransaction;
 
-    @JsonProperty("Difference balance and absolute limit")
+    @JsonProperty("differenceBalanceAndAbsoluteLimit")
     private float differenceBalanceAndAbsoluteLimit;
 
 

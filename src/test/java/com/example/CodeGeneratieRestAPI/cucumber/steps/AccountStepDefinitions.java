@@ -1,5 +1,6 @@
 package com.example.CodeGeneratieRestAPI.cucumber.steps;
 
+import com.example.CodeGeneratieRestAPI.dtos.AccountRequestDTO;
 import com.example.CodeGeneratieRestAPI.dtos.TransactionRequestDTO;
 import com.example.CodeGeneratieRestAPI.models.Account;
 import com.example.CodeGeneratieRestAPI.models.Transaction;
@@ -102,5 +103,40 @@ public class AccountStepDefinitions extends BaseStepDefinitions {
     public void iShouldReceiveAccountWithIBAN(String iban) {
         String actual = JsonPath.read(response.getBody(), "$.data.account.iban");
         Assertions.assertEquals(iban, actual);
+    }
+    @When("I create a new account")
+    public void iCreateANewAccount(){
+        AccountRequestDTO account = new AccountRequestDTO();
+        account.setUserId(1L);
+        account.setName("Account name");
+        account.setDailyLimit(1000F);
+        account.setTransactionLimit(1000F);
+        account.setAbsoluteLimit(1000F);
+        account.setIsSavings(false);
+        account.setIsActive(true);
+        response = restTemplate.exchange(restTemplate.getRootUri() + "/accounts", HttpMethod.POST, new HttpEntity<>(account, httpHeaders), String.class);
+    }
+    @Then("I should receive the new account")
+    public void iShouldReceiveTheNewAccount(){
+        String actual = JsonPath.read(response.getBody(), "$.data.name");
+        Assertions.assertEquals("Account name", actual);
+    }
+    @When("I create a new account with IBAN {string}")
+    public void iCreateANewAccountWithIBAN(String iban){
+        AccountRequestDTO account = new AccountRequestDTO();
+        account.setIban(iban);
+        account.setUserId(1L);
+        account.setName("Account name");
+        account.setDailyLimit(1000F);
+        account.setTransactionLimit(1000F);
+        account.setAbsoluteLimit(1000F);
+        account.setIsSavings(false);
+        account.setIsActive(true);
+        response = restTemplate.exchange(restTemplate.getRootUri() + "/accounts", HttpMethod.POST, new HttpEntity<>(account, httpHeaders), String.class);
+    }
+    @Then("I should receive an error")
+    public void iShouldReceiveAnError(){
+        String actual = JsonPath.read(response.getBody(), "$.error");
+        Assertions.assertEquals("Account already exists", actual);
     }
 }

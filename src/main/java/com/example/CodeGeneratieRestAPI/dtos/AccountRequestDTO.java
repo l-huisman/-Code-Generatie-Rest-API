@@ -19,6 +19,7 @@ public class AccountRequestDTO {
 
     public AccountRequestDTO(Long userId, String iban, String accountName, Float dailyLimit, Float transactionLimit, Float absoluteLimit, Float balance, Boolean isSavings, Boolean isActive) {
         this.userId = userId;
+        this.iban = iban;
         this.name = accountName;
         this.dailyLimit = dailyLimit;
         this.transactionLimit = transactionLimit;

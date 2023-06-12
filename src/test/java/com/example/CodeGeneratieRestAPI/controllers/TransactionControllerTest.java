@@ -203,14 +203,14 @@ class TransactionControllerTest {
         transactions.add(getMockTransaction(1L, user, 60F, TransactionType.WITHDRAW, fromAccount, null));
         transactions.add(getMockTransaction(2L, user, 60F, TransactionType.WITHDRAW, fromAccount, null));
 
-        when(transactionService.getAllByAccountIban(user, fromAccount.getIban(), startDate, endDate, search)).thenReturn(transactions);
+        when(transactionService.getAllByAccountIban(user, fromAccount.getIban(), startDate, endDate, "", "", 0F, 0, 10)).thenReturn(transactions);
         when(userService.getLoggedInUser()).thenReturn(user);
 
         SimpleDateFormat DateFormat = new SimpleDateFormat("yyyy-MM-dd");
 
         // Check if we get a 200 OK
         // And if the JSON content matches our expectations
-        this.mockMvc.perform(get("/transactions/accounts/" + fromAccount.getIban() + "?start_date=" + DateFormat.format(startDate) + "&end_date=" + DateFormat.format(endDate) + "&search=").header("Authorization", "test")).andDo(print())
+        this.mockMvc.perform(get("/transactions/accounts/" + fromAccount.getIban() + "?start_date=" + DateFormat.format(startDate) + "&end_date=" + DateFormat.format(endDate) + "&search_iban=&amount_relation=&amount=&page_number=" + 0 + "&page_size=" + 10).header("Authorization", "test")).andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data", hasSize(transactions.size())))
                 .andExpect(jsonPath("$.data[0].amount").value("60.0"));
