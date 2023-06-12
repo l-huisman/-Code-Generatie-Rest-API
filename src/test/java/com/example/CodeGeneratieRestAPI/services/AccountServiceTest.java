@@ -2,6 +2,7 @@ package com.example.CodeGeneratieRestAPI.services;
 
 import com.example.CodeGeneratieRestAPI.dtos.AccountData;
 import com.example.CodeGeneratieRestAPI.dtos.AccountRequestDTO;
+import com.example.CodeGeneratieRestAPI.dtos.AccountResponseDTO;
 import com.example.CodeGeneratieRestAPI.exceptions.*;
 import com.example.CodeGeneratieRestAPI.helpers.IBANGenerator;
 import com.example.CodeGeneratieRestAPI.helpers.ServiceHelper;
@@ -144,7 +145,7 @@ public class AccountServiceTest {
         AccountData actualAccount = accountService.getAccountByIban(account.getIban(), user1);
 
         //assertEquals(expectedAccountOptional.orElse(null), actualAccount);
-        assertEquals(expectedAccountOptional.orElse(null), actualAccount.getAccount());
+        assertEquals(new AccountResponseDTO(expectedAccountOptional.orElse(null)), actualAccount.getAccount());
     }
 
     @Test
