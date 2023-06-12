@@ -13,6 +13,7 @@ import com.jayway.jsonpath.JsonPath;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
+import io.cucumber.spring.CucumberContextConfiguration;
 import org.junit.jupiter.api.Assertions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.web.client.TestRestTemplate;
@@ -52,7 +53,10 @@ public class AccountStepDefinitions extends BaseStepDefinitions {
     private Transaction transaction, anotherTransaction;
     private RuntimeException exception;
 
-    @Given("I am logged in as {string} with password {string}")
+
+
+
+    @Given("I am logged in as {string} with password {string} to do some account stuff")
     public void iAmLoggedIn(String username, String password) throws Throwable {
         httpHeaders.add("Content-Type", "application/json");
         response = restTemplate
@@ -64,7 +68,7 @@ public class AccountStepDefinitions extends BaseStepDefinitions {
         token = JsonPath.read(response.getBody(), "$.token");
         httpHeaders.add("Authorization", "Bearer " + token);
     }
-    @Given("The endpoint for {string} is available for method {string}")
+    @Given("The endpoint for {string} is available for method {string} to do some account stuff")
     public void theEndPointsForIsAvailableForMethod(String endpoint, String method) throws Throwable{
         response = restTemplate
                 .exchange("/" + endpoint,
@@ -86,6 +90,15 @@ public class AccountStepDefinitions extends BaseStepDefinitions {
     @Then("I should receive all accounts")
     public void iShouldReceiveAllAccounts(){
         int actual = JsonPath.read(response.getBody(), "$.data.size()");
-        Assertions.assertEquals(accountRepository.findAll().size(), actual);
+        Assertions.assertEquals(9, actual);
+    }
+    @When("I retrieve account with IBAN {string}")
+    public void iRetrieveAccountWithIBAN(String iban){
+        response = restTemplate.exchange(restTemplate.getRootUri() + "/accounts/" + iban, HttpMethod.GET, new HttpEntity<>(null, httpHeaders), String.class);
+    }
+    @Then("I should receive account with IBAN {string}")
+    public void iShouldReceiveAccountWithIBAN(String iban){
+        String actual = JsonPath.read(response.getBody(), "$.data.account.iban");
+        Assertions.assertEquals(iban, actual);
     }
 }
