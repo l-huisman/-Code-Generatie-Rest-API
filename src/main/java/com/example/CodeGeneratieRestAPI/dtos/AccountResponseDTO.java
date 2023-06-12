@@ -3,8 +3,6 @@ package com.example.CodeGeneratieRestAPI.dtos;
 import com.example.CodeGeneratieRestAPI.models.Account;
 import lombok.Data;
 
-import java.util.Date;
-
 @Data
 public class AccountResponseDTO {
     private Long userId;

@@ -23,9 +23,9 @@ public class UserController {
     private UserService userService;
 
     @GetMapping
-    public ResponseEntity<ApiResponse<List<UserResponseDTO>>> getAll() {
+    public ResponseEntity<ApiResponse<List<UserResponseDTO>>> getAll(@RequestParam boolean hasNoAccounts) {
         try {
-            return ResponseEntity.status(HttpStatus.FOUND).body(new ApiResponse<>(true, "Users found!", userService.getAll()));
+            return ResponseEntity.status(HttpStatus.FOUND).body(new ApiResponse<>(true, "Users found!", userService.getAll(hasNoAccounts)));
         } catch (UserNotFoundException e) {
             return ResponseEntity.status(e.getStatusCode()).body(new ApiResponse<>(false, e.getMessage()));
         } catch (Exception e) {

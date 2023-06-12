@@ -7,6 +7,7 @@ import com.example.CodeGeneratieRestAPI.exceptions.UserDeletionException;
 import com.example.CodeGeneratieRestAPI.exceptions.UserNotFoundException;
 import com.example.CodeGeneratieRestAPI.models.HashedPassword;
 import com.example.CodeGeneratieRestAPI.models.User;
+import com.example.CodeGeneratieRestAPI.models.UserType;
 import com.example.CodeGeneratieRestAPI.repositories.UserRepository;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeMap;
@@ -50,13 +51,19 @@ public class UserService {
                 "User with username: " + userDetails.getUsername() + " does not exist"));
     }
 
-    public List<UserResponseDTO> getAll() {
+    public List<UserResponseDTO> getAll(boolean hasNoAccounts) {
         Iterable<User> users = userRepository.findAll();
         if (users == null) {
             throw new UserNotFoundException("No users found");
         }
         List<UserResponseDTO> userResponseDTOs = new ArrayList<>();
         for (User user : users) {
+            if (hasNoAccounts) {
+                if (user.getAccounts().isEmpty() && !user.getUserType().equals(UserType.EMPLOYEE)) {
+                    userResponseDTOs.add(modelMapper.map(user, UserResponseDTO.class));
+                }
+                continue;
+            }
             userResponseDTOs.add(modelMapper.map(user, UserResponseDTO.class));
         }
         return userResponseDTOs;
