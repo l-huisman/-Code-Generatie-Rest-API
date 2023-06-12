@@ -41,7 +41,7 @@ public class AccountService {
     public Account add(AccountRequestDTO accountRequestDTO, User loggedInUser) {
         try {
             //  Check if the accountRequestDTO is valid
-            //this.checkIfAccountRequestDTOIsValid(accountRequestDTO, currentLoggedInUser);
+            this.checkIfAccountRequestDTOIsValidForAdd(accountRequestDTO);
 
             //  Check if the IBAN has not been set yet
             if (accountRequestDTO.getIban() != null) {
@@ -64,14 +64,8 @@ public class AccountService {
             //  Get the user
             User user = userRepository.findById(accountRequestDTO.getUserId()).orElse(null);
 
-//            //  Set the userId on the account
-//            accountRequestDTO.setUserId(user.getId());
-
-            //  Generate a new unique IBAN
-            String iban = ibanGenerator.getUniqueIban();
-
-            //  Set the IBAN of the accountRequestDTO
-            accountRequestDTO.setIban(iban);
+            //  Generate a new unique IBAN and set it to the accountRequestDTO
+            accountRequestDTO.setIban(ibanGenerator.getUniqueIban());
 
             //  Create new account object and save it to the database
             Account newAccount = new Account(accountRequestDTO, user);
@@ -97,8 +91,31 @@ public class AccountService {
         ZoneId zone = ZoneId.of("Europe/Amsterdam");
         return Date.from(LocalDateTime.now(zone).atZone(zone).toInstant());
     }
+    private void checkIfAccountRequestDTOIsValidForAdd(AccountRequestDTO accountRequestDTO) {
+        //  Check if the accountRequestDTO is null
+        if (accountRequestDTO == null) {
+            throw new IllegalArgumentException("The provided data cannot be null");
+        }
 
-    private void checkIfAccountRequestDTOIsValid(AccountRequestDTO accountRequestDTO) {
+        //  Check if all fields other than iban and userId are set, if not, throw an exception because there is nothing to update
+        //  This code can throw an IllegalAccessException, which is why this piece of code is in a try catch block
+        try {
+            for (Field field : accountRequestDTO.getClass().getDeclaredFields()) {
+                field.setAccessible(true);
+                //  The userId is allowed to be null if the user is adding an account for itself
+                //  If the user is an employee, the userId must be set, but this is checked later
+                //  The IBAN is allowed to be null, because it will be generated later
+                if (!field.getName().equals("iban") && !field.getName().equals("userId")) {
+                    if (field.get(accountRequestDTO) == null) {
+                        throw new AccountCreationException("All fields (other then the IBAN) must be filled out");
+                    }
+                }
+            }
+        } catch (IllegalAccessException e) {
+            throw new AccountUpdateException(e.getMessage());
+        }
+    }
+    private void checkIfAccountRequestDTOIsValidForUpdate(AccountRequestDTO accountRequestDTO) {
         //  Check if the accountRequestDTO is null
         if (accountRequestDTO == null) {
             throw new IllegalArgumentException("The provided data cannot be null");
@@ -125,11 +142,11 @@ public class AccountService {
         }
     }
 
-    private Boolean checkIfAccountBelongsToUser(String iban, User loggedInUser) {
+    private Boolean checkIfAccountBelongsToUser(Account account, User loggedInUser) {
         if (loggedInUser.getUserType().equals(UserType.EMPLOYEE)) {
             return true;
         }
-        return accountRepository.checkIfAccountBelongsToUser(iban, loggedInUser.getId());
+        return account.getUserId().equals(loggedInUser.getId());
     }
 
     private Account checkAndGetAccount(String iban, User loggedInUser) {
@@ -137,17 +154,25 @@ public class AccountService {
             throw new AccountNotAccessibleException("This is the bank's account, you cannot access this account");
         }
 
-        // Check if the iban is valid
-        if (!serviceHelper.checkIfObjectExistsByIdentifier(iban, new Account())) {
-            throw new AccountNotFoundException("Account with IBAN: " + iban + " does not exist");
-        }
+        //  Get the account
+        Account account = accountRepository.getAccountByIban(iban).orElseThrow(() -> new AccountNotFoundException("Account with IBAN: " + iban + " does not exist"));
 
-        //Check if the account belongs to the user, if not, check if the user is an employee and if so, allow the user to access the account
-        if (!checkIfAccountBelongsToUser(iban, loggedInUser) && !loggedInUser.getUserType().equals(UserType.EMPLOYEE)) {
+        //  Check if the account belongs to the user or if the user is an employee
+        if (!checkIfAccountBelongsToUser(account, loggedInUser)) {
             throw new AccountNotAccessibleException("Account with IBAN: " + iban + " does not belong to the logged in user");
         }
 
-        return accountRepository.getAccountByIban(iban).orElseThrow(() -> new AccountNotFoundException("Account with IBAN: " + iban + " does not exist"));
+//        // Check if the iban is valid
+//        if (!serviceHelper.checkIfObjectExistsByIdentifier(iban, new Account())) {
+//            throw new AccountNotFoundException("Account with IBAN: " + iban + " does not exist");
+//        }
+
+        //Check if the account belongs to the user, if not, check if the user is an employee and if so, allow the user to access the account
+//        if (!checkIfAccountBelongsToUser(iban, loggedInUser) && !loggedInUser.getUserType().equals(UserType.EMPLOYEE)) {
+//            throw new AccountNotAccessibleException("Account with IBAN: " + iban + " does not belong to the logged in user");
+//        }
+
+        return account;
     }
     public List<Account> getAllAccounts(String search, Boolean active, User loggedInUser) {
         // Check if the user is an employee
@@ -177,17 +202,6 @@ public class AccountService {
         //  Return an AccountData object which contains the account and the account limits left
         return new AccountData(account, accountLimitsLeft);
     }
-//public Account getAccountByIban(String iban, User loggedInUser) {
-//    //  Check account and get the account
-//    Account account = this.checkAndGetAccount(iban, loggedInUser);
-//
-//    //  Get the account limits left
-//    //AccountLimitsLeft accountLimitsLeft = new AccountLimitsLeft();
-//    //accountLimitsLeft.setDailyLimitLeft(transactionService.getDailyLimitLeft(account));
-//
-//    //  Return the account
-//    return account;
-//}
 
     public List<Account> getAllAccountsByUserId(Long userId, User loggedInUser) {
         //  Check if the userId matches the id of the logged in user and throw an exception if it doesn't unless the user is an employee
@@ -199,7 +213,7 @@ public class AccountService {
 
     public Account update(AccountRequestDTO account, User loggedInUser) {
         // Check if the accountRequestDTO is valid
-        this.checkIfAccountRequestDTOIsValid(account);
+        this.checkIfAccountRequestDTOIsValidForUpdate(account);
 
         // Check if the account exists and get the account
         Account accountToUpdate = checkAndGetAccount(account.getIban(), loggedInUser);

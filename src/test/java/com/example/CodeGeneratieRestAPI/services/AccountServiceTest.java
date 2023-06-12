@@ -66,6 +66,7 @@ public class AccountServiceTest {
         accountRequestDTO.setTransactionLimit(100F);
         accountRequestDTO.setName("Test account");
         accountRequestDTO.setIsActive(true);
+        accountRequestDTO.setIsSavings(false);
         return accountRequestDTO;
     }
 
@@ -150,6 +151,7 @@ public class AccountServiceTest {
     void testGetAccountByIbanThrowsAccountNotAccessibleException() {
         User user1 = getMockUser(UserType.USER);
         User user2 = getMockUser(UserType.USER);
+        user2.setId(2L);
         AccountRequestDTO account = getMockAccountRequestDTO();
 
         when(ibanGenerator.getUniqueIban()).thenReturn("NL01-INHO-0000-0000-05");
@@ -159,8 +161,8 @@ public class AccountServiceTest {
         Optional<Account> expectedAccountOptional = Optional.of(accountToCheck);
         when(accountRepository.getAccountByIban(accountToCheck.getIban())).thenReturn(expectedAccountOptional);
         when(accountRepository.checkIfAccountBelongsToUser(accountToCheck.getIban(), user1.getId())).thenReturn(false);
-        when(serviceHelper.checkIfObjectExistsByIdentifier(any(), any())).thenReturn(true);
-        when(accountRepository.getAccountByIban(account.getIban())).thenReturn(Optional.empty());
+        //when(serviceHelper.checkIfObjectExistsByIdentifier(any(), any())).thenReturn(true);
+        //when(accountRepository.getAccountByIban(account.getIban())).thenReturn(Optional.empty());
 
         AccountNotAccessibleException exception = Assertions.assertThrows(AccountNotAccessibleException.class, () -> accountService.getAccountByIban(account.getIban(), user2));
         assertEquals("Account with IBAN: " + accountToCheck.getIban() + " does not belong to the logged in user", exception.getMessage());
