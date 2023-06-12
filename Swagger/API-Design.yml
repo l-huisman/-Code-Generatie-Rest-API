@@ -20,6 +20,83 @@ tags:
 security:
   - bearerAuth: [ ]
 paths:
+  /login:
+    post:
+      tags:
+        - User
+      summary: Login a user
+      description: Login a user
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginRequest"
+      responses:
+        "200":
+          description: User logged in
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    description: "Boolean indicating if the request was successful"
+                    example: true
+                  message:
+                    type: string
+                    description: "Message returned from the request"
+                    example: "User successfully logged in"
+              examples:
+                success:
+                  summary: "Successful response"
+                  value:
+                    success: true
+                    message: "User successfully logged in"
+                    data:
+                      type: object
+                      description: "Data returned from the request"
+                      example:
+                        user:
+                          id: 1
+                          firstName: "John"
+                          lastName: "Doe"
+                          username: "JohnDoe"
+                          email: "johndoe@example.com"
+                          userType: "USER"
+                error:
+                  summary: "Error response"
+                  value:
+                    success: false
+                    message: "Invalid request parameters"
+                    data: null
+        "401":
+          description: You are unauthorized
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    description: "Boolean indicating if the request was successful"
+                    example: false
+                  message:
+                    type: string
+                    description: "Message returned from the request"
+                    example: "Unauthorized"
+                  data:
+                    type: object
+                    description: "Data returned from the request"
+                    example: null
+              examples:
+                error:
+                  summary: "Error response"
+                  value:
+                    success: false
+                    message: "Unauthorized"
+                    data: null
+
   /users:
     get:
       tags:
@@ -1827,6 +1904,27 @@ components:
         differenceBalanceAndAbsoluteLimit:
           type: number
           example: 40000
+    LoginRequest:
+      type: object
+      properties:
+        username:
+          type: string
+          example: "john"
+        password:
+          type: string
+          example: "secret"
+      required:
+        - username
+        - password
+    LoginResponse:
+      type: object
+      properties:
+        token:
+          type: string
+          example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9"
+        user:
+          type: object
+          $ref: "#/components/schemas/UserResponseDTO"
     ApiResponse:
       type: object
       required:
