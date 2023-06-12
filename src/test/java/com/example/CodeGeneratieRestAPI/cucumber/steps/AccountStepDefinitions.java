@@ -137,6 +137,43 @@ public class AccountStepDefinitions extends BaseStepDefinitions {
     @Then("I should receive an error")
     public void iShouldReceiveAnError(){
         String actual = JsonPath.read(response.getBody(), "$.message");
-        Assertions.assertEquals("Account already exists", actual);
+        Assertions.assertEquals("You cannot set the IBAN of a new account", actual);
+    }
+    @Then("I should receive an error that the account does not exist")
+    public void iShouldReceiveAnErrorThatTheAccountDoesNotExist(){
+        String actual = JsonPath.read(response.getBody(), "$.message");
+        Assertions.assertEquals("Account with IBAN: NL61-AAAA-0897-9124-11 does not exist", actual);
+    }
+    @When("I update an account with IBAN {string}")
+    public void iUpdateAnAccountWithIBAN(String iban){
+        AccountRequestDTO account = new AccountRequestDTO();
+        account.setIban(iban);
+        account.setUserId(1L);
+        account.setName("Account name");
+        account.setDailyLimit(1000F);
+        account.setTransactionLimit(1000F);
+        account.setAbsoluteLimit(1000F);
+        account.setIsSavings(false);
+        account.setIsActive(true);
+        response = restTemplate.exchange(restTemplate.getRootUri() + "/accounts", HttpMethod.PUT, new HttpEntity<>(account, httpHeaders), String.class);
+    }
+    @Then("I should receive the updated account")
+    public void iShouldReceiveTheUpdatedAccount(){
+        String actual = JsonPath.read(response.getBody(), "$.data.name");
+        Assertions.assertEquals("Account name", actual);
+    }
+    @Then("I should receive an error that I don't own the account")
+    public void iShouldReceiveAnErrorThatIDonTOwnTheAccount(){
+        String actual = JsonPath.read(response.getBody(), "$.message");
+        Assertions.assertEquals("Account with IBAN: NL61-INHO-0897-9124-95 does not belong to the logged in user", actual);
+    }
+    @When("I delete an account with IBAN {string}")
+    public void iDeleteAnAccountWithIBAN(String iban){
+        response = restTemplate.exchange(restTemplate.getRootUri() + "/accounts/" + iban, HttpMethod.DELETE, new HttpEntity<>(null, httpHeaders), String.class);
+    }
+    @Then("I should receive a message that the account is deleted")
+    public void iShouldReceiveAMessageThatTheAccountIsDeleted(){
+        String actual = JsonPath.read(response.getBody(), "$.message");
+        Assertions.assertEquals("Account with IBAN: NL61-INHO-0897-9124-95 is deleted", actual);
     }
 }
