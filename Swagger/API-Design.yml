@@ -67,7 +67,8 @@ paths:
                       description: "Data returned from the request"
                       example:
                         user:
-                          - firstName: "John"
+                          - id: 1
+                            firstName: "John"
                             lastName: "Doe"
                             username: "JohnDoe"
                             email: "johnDoe@gmail.com"
@@ -173,7 +174,8 @@ paths:
                       description: "Data returned from the request"
                       example:
                         user:
-                          - firstName: "John"
+                          - id: 1
+                            firstName: "John"
                             lastName: "Doe"
                             username: "JohnDoe"
                             email: "johnDoe@gmail.com"
@@ -278,7 +280,8 @@ paths:
                       description: "Data returned from the request"
                       example:
                         user:
-                          - firstName: "John"
+                          - id: 1
+                            firstName: "John"
                             lastName: "Doe"
                             username: "JohnDoe"
                             email: "johnDoe@gmail.com"
@@ -387,7 +390,8 @@ paths:
                       description: "Data returned from the request"
                       example:
                         user:
-                          - firstName: "John"
+                          - id: 1
+                            firstName: "John"
                             lastName: "Doe"
                             username: "JohnDoe"
                             email: "johnDoe@gmail.com"
