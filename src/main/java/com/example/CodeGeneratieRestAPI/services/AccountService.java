@@ -97,6 +97,8 @@ public class AccountService {
         if (accountRequestDTO == null) {
             throw new IllegalArgumentException("The provided data cannot be null");
         }
+        //  The balance must always be 0 when creating a new account
+        accountRequestDTO.setBalance(0.0F);
 
         //  Check if all fields other than iban and userId are set, if not, throw an exception because there is nothing to update
         //  This code can throw an IllegalAccessException, which is why this piece of code is in a try catch block
@@ -105,7 +107,7 @@ public class AccountService {
                 field.setAccessible(true);
                 //  The userId is allowed to be null if the user is adding an account for itself
                 //  If the user is an employee, the userId must be set, but this is checked later
-                //  The IBAN is allowed to be null, because it will be generated later
+                //  The IBAN is required to be null, because it will be generated later
                 if (!field.getName().equals("iban") && !field.getName().equals("userId")) {
                     if (field.get(accountRequestDTO) == null) {
                         throw new AccountCreationException("All fields (other then the IBAN) must be filled out");
@@ -186,17 +188,17 @@ public class AccountService {
         Float floatValue = doubleValue != null ? doubleValue.floatValue() : 0F;
 
         //  Set the account limits left
-        accountLimitsLeft.setDailyLimitLeft(floatValue);
+        accountLimitsLeft.setDailyLimitLeft(account.getDailyLimit() - floatValue);
         accountLimitsLeft.setTransactionLimit(account.getTransactionLimit());
         accountLimitsLeft.setAmountSpendableOnNextTransaction(Math.min(accountLimitsLeft.getDailyLimitLeft(), accountLimitsLeft.getTransactionLimit()));
-        accountLimitsLeft.setDifferenceBalanceAndAbsoluteLimit(account.getBalance() - account.getAbsoluteLimit());
+        accountLimitsLeft.setDifferenceBalanceAndAbsoluteLimit(Math.min((account.getBalance() - account.getAbsoluteLimit()), accountLimitsLeft.getAmountSpendableOnNextTransaction()));
 
         //  Return an AccountData object which contains the account (converted to an AccountResponseDTO object) and the account limits left
         return new AccountData(new AccountResponseDTO(account), accountLimitsLeft);
     }
 
     public List<Account> getAllAccountsByUserId(Long userId, User loggedInUser) {
-        //  Check if the userId matches the id of the logged in user and throw an exception if it doesn't unless the user is an employee
+        //  Check if the userId matches the id of the logged-in user and throw an exception if it doesn't unless the user is an employee
         if (!loggedInUser.getUserType().getAuthority().equals("EMPLOYEE") && !userId.equals(loggedInUser.getId())) {
             throw new AccountNotAccessibleException("You cannot access the accounts of another user");
         }
