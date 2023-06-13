@@ -98,9 +98,6 @@ public class UserService {
     }
 
     public UserResponseDTO update(Long id, UserRequestDTO user) {
-        if (!checkDTOValues(user)) {
-            throw new UserDTOException("Not all required fields are filled in");
-        }
         Optional<User> userToUpdate = userRepository.findById(id);
         if (userToUpdate.isPresent()) {
             User updatedUser = UpdateFilledFields(user, userToUpdate.get());
