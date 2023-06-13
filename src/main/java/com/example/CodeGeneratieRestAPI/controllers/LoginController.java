@@ -3,6 +3,7 @@ package com.example.CodeGeneratieRestAPI.controllers;
 import com.example.CodeGeneratieRestAPI.dtos.LoginRequestDTO;
 import com.example.CodeGeneratieRestAPI.dtos.LoginResponseDTO;
 import com.example.CodeGeneratieRestAPI.exceptions.InvalidTokenException;
+import com.example.CodeGeneratieRestAPI.exceptions.LoginDTOException;
 import com.example.CodeGeneratieRestAPI.exceptions.PasswordValidationException;
 import com.example.CodeGeneratieRestAPI.exceptions.UserNotFoundException;
 import com.example.CodeGeneratieRestAPI.models.ApiResponse;
@@ -38,7 +39,7 @@ public class LoginController {
         try {
             return ResponseEntity.status(HttpStatus.OK)
                     .body(new ApiResponse<>(true, "User logged in!", loginService.login(req)));
-        } catch (PasswordValidationException | UserNotFoundException e) /* 401 & 404 */ {
+        } catch (LoginDTOException | PasswordValidationException | UserNotFoundException e) {
             return ResponseEntity.status(e.getStatusCode()).body(new ApiResponse<>(false, e.getMessage()));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)

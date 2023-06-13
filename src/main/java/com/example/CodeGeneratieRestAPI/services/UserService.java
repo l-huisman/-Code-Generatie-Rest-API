@@ -2,10 +2,7 @@ package com.example.CodeGeneratieRestAPI.services;
 
 import com.example.CodeGeneratieRestAPI.dtos.UserRequestDTO;
 import com.example.CodeGeneratieRestAPI.dtos.UserResponseDTO;
-import com.example.CodeGeneratieRestAPI.exceptions.UserCreationException;
-import com.example.CodeGeneratieRestAPI.exceptions.UserDeletionException;
-import com.example.CodeGeneratieRestAPI.exceptions.UserNotFoundException;
-import com.example.CodeGeneratieRestAPI.exceptions.UserUpdateException;
+import com.example.CodeGeneratieRestAPI.exceptions.*;
 import com.example.CodeGeneratieRestAPI.models.HashedPassword;
 import com.example.CodeGeneratieRestAPI.models.User;
 import com.example.CodeGeneratieRestAPI.models.UserType;
@@ -82,7 +79,7 @@ public class UserService {
 
     public UserResponseDTO add(UserRequestDTO user) {
         if (!checkDTOValues(user)) {
-            throw new UserCreationException("Not all required fields are filled in");
+            throw new UserDTOException("Not all required fields are filled in");
         }
         User userToSave = modelMapper.map(user, User.class);
         userToSave.setPassword(new HashedPassword(user.getPassword()));
@@ -101,7 +98,7 @@ public class UserService {
 
     public UserResponseDTO update(Long id, UserRequestDTO user) {
         if (!checkDTOValues(user)) {
-            throw new UserUpdateException("Not all required fields are filled in");
+            throw new UserDTOException("Not all required fields are filled in");
         }
         Optional<User> userToUpdate = userRepository.findById(id);
         if (userToUpdate.isPresent()) {
