@@ -119,14 +119,7 @@ public class UserService {
 
     public void delete(long id) {
         try {
-            // soft delete
-            Optional<User> user = userRepository.findById(id);
-            if (user.isPresent()) {
-                user.get().setIsActive(false);
-                userRepository.save(user.get());
-            } else {
-                throw new UserNotFoundException("User not found with id: " + id);
-            }
+            userRepository.deleteById(id);
         } catch (Exception e) {
             throw new UserDeletionException("User with id: " + id + " could not be deleted");
         }
