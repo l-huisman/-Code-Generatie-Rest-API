@@ -83,9 +83,8 @@ public class TransactionController {
         try {
             User user = loggedInUserHelper.getLoggedInUser();
 
-            List<Transaction> transactions = transactionService.getAllByAccountIban(user, iban, start_date, end_date, search_iban, amount_relation, amount, page_number, page_size);
-
-            return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse<>(true, "All transactions retrieved", Arrays.asList(modelMapper.map(transactions, TransactionResponseDTO[].class))));
+            Page<Transaction> transactions = transactionService.getAllByAccountIban(user, iban, start_date, end_date, search_iban, amount_relation, amount, page_number, page_size);
+            return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse<>(true, "" + transactions.getTotalElements(), Arrays.asList(modelMapper.map(transactions.getContent(), TransactionResponseDTO[].class))));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ApiResponse<>(false, e.getMessage()));
         }
@@ -113,7 +112,7 @@ public class TransactionController {
             Transaction transaction = transactionService.add(user, transactionIn);
 
             //  Return the data
-            return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse<>(true, "Transaction retrieved", new TransactionResponseDTO(transaction)));
+            return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse<>(true, "Transaction added", new TransactionResponseDTO(transaction)));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ApiResponse<>(false, e.getMessage()));
         }
