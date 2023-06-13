@@ -110,18 +110,18 @@ public class Account {
 //
 //    }
 
-    public Account update(Account account) {
-        this.iban = account.getIban();
-        this.name = account.getName();
-        this.dailyLimit = account.getDailyLimit();
-        this.transactionLimit = account.getTransactionLimit();
-        this.absoluteLimit = account.getAbsoluteLimit();
-        this.balance = account.getBalance();
-        this.isSavings = account.getIsSavings();
-        this.isActive = account.getIsActive();
-        this.createdAt = account.getCreatedAt();
-        return this;
-    }
+//    public Account update(Account account) {
+//        this.iban = account.getIban();
+//        this.name = account.getName();
+//        this.dailyLimit = account.getDailyLimit();
+//        this.transactionLimit = account.getTransactionLimit();
+//        this.absoluteLimit = account.getAbsoluteLimit();
+//        this.balance = account.getBalance();
+//        this.isSavings = account.getIsSavings();
+//        this.isActive = account.getIsActive();
+//        this.createdAt = account.getCreatedAt();
+//        return this;
+//    }
 
     //  This is technically duplicate code, as this is also already done in the TransactionService class
     //  However, this is done to make sure that the Account class is self-sufficient
