@@ -2,7 +2,10 @@ package com.example.CodeGeneratieRestAPI.services;
 
 import com.example.CodeGeneratieRestAPI.dtos.UserRequestDTO;
 import com.example.CodeGeneratieRestAPI.dtos.UserResponseDTO;
-import com.example.CodeGeneratieRestAPI.exceptions.*;
+import com.example.CodeGeneratieRestAPI.exceptions.UserCreationException;
+import com.example.CodeGeneratieRestAPI.exceptions.UserDTOException;
+import com.example.CodeGeneratieRestAPI.exceptions.UserDeletionException;
+import com.example.CodeGeneratieRestAPI.exceptions.UserNotFoundException;
 import com.example.CodeGeneratieRestAPI.models.HashedPassword;
 import com.example.CodeGeneratieRestAPI.models.User;
 import com.example.CodeGeneratieRestAPI.models.UserType;
@@ -45,11 +48,10 @@ public class UserService {
     public User getLoggedInUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-        return userRepository.findUserByUsername(userDetails.getUsername()).orElseThrow(() -> new UserNotFoundException(
-                "User with username: " + userDetails.getUsername() + " does not exist"));
+        return userRepository.findUserByUsername(userDetails.getUsername()).orElseThrow(() -> new UserNotFoundException("User with username: " + userDetails.getUsername() + " does not exist"));
     }
 
-    public List<UserResponseDTO> getAll(boolean hasNoAccounts) {
+    public List<UserResponseDTO> getAll(Boolean hasNoAccounts) {
         Iterable<User> users = userRepository.findAll();
         if (users == null) {
             throw new UserNotFoundException("No users found");
@@ -84,10 +86,9 @@ public class UserService {
         User userToSave = modelMapper.map(user, User.class);
         userToSave.setPassword(new HashedPassword(user.getPassword()));
         userToSave.setCreatedAt(CreationDate());
-        userRepository.findUserByEmail(user.getEmail())
-                .ifPresent(existingUser -> {
-                    throw new UserCreationException("User with email " + user.getEmail() + " already exists");
-                });
+        userRepository.findUserByEmail(user.getEmail()).ifPresent(existingUser -> {
+            throw new UserCreationException("User with email " + user.getEmail() + " already exists");
+        });
         try {
             userRepository.save(userToSave);
             return modelMapper.map(userToSave, UserResponseDTO.class);
@@ -133,7 +134,7 @@ public class UserService {
     }
 
     private boolean checkDTOValues(UserRequestDTO user) {
-        return user.getFirstName() != null && user.getLastName() != null && user.getUsername() != null && user.getEmail() != null && user.getPassword() != null && user.getUserType() != null;
+        return user.getFirstName() != null && user.getLastName() != null && user.getUsername() != null && user.getEmail() != null && user.getPassword() != null && user.getUserType() != null && !user.getFirstName().isEmpty() && !user.getLastName().isEmpty() && !user.getUsername().isEmpty() && !user.getEmail().isEmpty() && !user.getPassword().isEmpty() && !user.getUserType().toString().isEmpty();
     }
 
     private User UpdateFilledFields(UserRequestDTO user, User userToUpdate) {
