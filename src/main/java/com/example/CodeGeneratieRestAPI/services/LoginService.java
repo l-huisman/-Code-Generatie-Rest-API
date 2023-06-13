@@ -30,14 +30,12 @@ public class LoginService {
         if (!checkDTOValues(request)) {
             throw new LoginDTOException("Username or password is empty");
         }
-        User user = loginRepository.findByUsername(request.getUsername())
-                .orElseThrow(() -> new UserNotFoundException("User not found"));
+        User user = loginRepository.findByUsername(request.getUsername()).orElseThrow(() -> new UserNotFoundException("User not found"));
         if (!user.getHashedPassword().validatePassword(request.getPassword())) {
             throw new PasswordValidationException("Password is incorrect");
         }
         String token = tokenProvider.createToken(user.getId(), user.getUsername(), user.getUserType());
-        UserResponseDTO userResponseDTO = new UserResponseDTO(user.getId(), user.getFirstName(), user.getLastName(),
-                user.getUsername(), user.getEmail(), user.getUserType());
+        UserResponseDTO userResponseDTO = new UserResponseDTO(user.getId(), user.getFirstName(), user.getLastName(), user.getUsername(), user.getEmail(), user.getUserType());
         return new LoginResponseDTO(token, userResponseDTO);
     }
 
@@ -50,6 +48,6 @@ public class LoginService {
     }
 
     private boolean checkDTOValues(LoginRequestDTO request) {
-        return request.getUsername() != null && request.getPassword() != null;
+        return request.getUsername() != null && request.getPassword() != null && !request.getUsername().isEmpty() && !request.getPassword().isEmpty();
     }
 }

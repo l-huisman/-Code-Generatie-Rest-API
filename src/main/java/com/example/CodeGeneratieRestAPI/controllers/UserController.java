@@ -5,6 +5,7 @@ import com.example.CodeGeneratieRestAPI.dtos.UserResponseDTO;
 import com.example.CodeGeneratieRestAPI.exceptions.*;
 import com.example.CodeGeneratieRestAPI.models.ApiResponse;
 import com.example.CodeGeneratieRestAPI.services.UserService;
+import jakarta.annotation.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,7 +21,7 @@ public class UserController {
     private UserService userService;
 
     @GetMapping
-    public ResponseEntity<ApiResponse<List<UserResponseDTO>>> getAll(@RequestParam boolean hasNoAccounts) {
+    public ResponseEntity<ApiResponse<List<UserResponseDTO>>> getAll(@Nullable @RequestParam(required = false, defaultValue = "") Boolean hasNoAccounts) {
         try {
             return ResponseEntity.status(HttpStatus.FOUND).body(new ApiResponse<>(true, "Users found!", userService.getAll(hasNoAccounts)));
         } catch (UserNotFoundException e) {

@@ -24,26 +24,22 @@ public class LoginController {
     @GetMapping("/validate")
     public ResponseEntity<ApiResponse<Enum<UserType>>> validate(@RequestHeader("Authorization") String token) {
         try {
-            return ResponseEntity.status(HttpStatus.OK)
-                    .body(new ApiResponse<>(true, "User validated!", loginService.validate(token)));
+            return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse<>(true, "User validated!", loginService.validate(token)));
         } catch (InvalidTokenException e) {
             return ResponseEntity.status(e.getStatusCode()).body(new ApiResponse<>(false, e.getMessage()));
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(new ApiResponse<>(false, e.getMessage()));
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ApiResponse<>(false, e.getMessage()));
         }
     }
 
     @PostMapping
     public ResponseEntity<ApiResponse<LoginResponseDTO>> login(@RequestBody LoginRequestDTO req) {
         try {
-            return ResponseEntity.status(HttpStatus.OK)
-                    .body(new ApiResponse<>(true, "User logged in!", loginService.login(req)));
+            return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse<>(true, "User logged in!", loginService.login(req)));
         } catch (LoginDTOException | PasswordValidationException | UserNotFoundException e) {
             return ResponseEntity.status(e.getStatusCode()).body(new ApiResponse<>(false, e.getMessage()));
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(new ApiResponse<>(false, e.getMessage()));
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ApiResponse<>(false, e.getMessage()));
         }
     }
 }
