@@ -110,9 +110,9 @@ public class TransactionService {
             throw new UserOnlyException("This user is not an employee.");
         }
 
-        if (!user.getUserType().equals(UserType.EMPLOYEE) && transaction.getFromAccount() != null && !transaction.getFromAccount().getUser().getId().equals(user.getId())) {
+        if (user.getUserType().equals(UserType.USER) && transaction.getFromAccount() != null && !transaction.getFromAccount().getUser().getId().equals(user.getId())) {
             throw new TransactionNotOwnedException("This user does not own the specified transaction");
-        } else if (!user.getUserType().equals(UserType.EMPLOYEE) && transaction.getToAccount() != null && !transaction.getToAccount().getUser().getId().equals(user.getId())) {
+        } else if (user.getUserType().equals(UserType.USER) && transaction.getToAccount() != null && !transaction.getToAccount().getUser().getId().equals(user.getId())) {
             throw new TransactionNotOwnedException("This user does not own the specified transaction");
         }
 
