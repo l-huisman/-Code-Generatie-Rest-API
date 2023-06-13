@@ -107,7 +107,7 @@ public class TransactionService {
         Transaction transaction = transactionRepository.findById(id).orElseThrow(() -> new TransactionNotFoundException("This transaction does not exist."));
 
         if (user.getUserType().equals(UserType.EMPLOYEE)) {
-            throw new UserOnlyException("This user is not an employee.");
+            throw new UserOnlyException("This user is not of type USER.");
         }
 
         if (user.getUserType().equals(UserType.USER) && transaction.getFromAccount() != null && !transaction.getFromAccount().getUser().getId().equals(user.getId())) {
