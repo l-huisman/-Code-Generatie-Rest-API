@@ -119,6 +119,7 @@ public class UserService {
 
     public void delete(long id) {
         try {
+            // Soft delete only
             userRepository.deleteById(id);
         } catch (Exception e) {
             throw new UserDeletionException("User with id: " + id + " could not be deleted");
