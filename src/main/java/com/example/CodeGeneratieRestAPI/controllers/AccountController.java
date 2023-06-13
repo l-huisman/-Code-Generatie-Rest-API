@@ -25,10 +25,6 @@ import java.util.List;
 @RequestMapping("/accounts")
 public class AccountController {
     private final ModelMapper modelMapper;
-    // Create an object mapper to map the JSON to a POJO
-    // POJO stands for Plain Old Java Object. It has no restrictions and can be used in any Java project.
-    // It is a Java object that is not bound by any restriction other than those forced by the Java Language Specification.
-    // In short, a POJO is an object that encapsulates data.
     @Autowired
     private final LoggedInUserHelper loggedInUserHelper;
     @Autowired
@@ -64,8 +60,6 @@ public class AccountController {
         } catch (UserNotFoundException | AccountCreationException | IBANGenerationException e) {
             return ResponseEntity.status(e.getStatusCode()).body(new ApiResponse<>(false, e.getMessage()));
         } catch (Exception e) {
-            //TODO: handle exception
-            //System.out.println(e);
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ApiResponse<>(false, e.getMessage()));
         }
     }
@@ -164,8 +158,6 @@ public class AccountController {
                  AccountCannotBeDeletedException e) {
             return ResponseEntity.status(e.getStatusCode()).body(new ApiResponse<>(false, e.getMessage()));
         } catch (Exception e) {
-            //TODO: handle exception
-            //System.out.println(e);
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ApiResponse<>(false, e.getMessage()));
         }
     }
