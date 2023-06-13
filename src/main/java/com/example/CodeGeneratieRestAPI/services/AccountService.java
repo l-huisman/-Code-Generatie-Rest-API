@@ -4,11 +4,13 @@ import com.example.CodeGeneratieRestAPI.dtos.AccountData;
 import com.example.CodeGeneratieRestAPI.dtos.AccountLimitsLeft;
 import com.example.CodeGeneratieRestAPI.dtos.AccountRequestDTO;
 import com.example.CodeGeneratieRestAPI.dtos.AccountResponseDTO;
+import com.example.CodeGeneratieRestAPI.dtos.UserRequestDTO;
 import com.example.CodeGeneratieRestAPI.exceptions.*;
 import com.example.CodeGeneratieRestAPI.helpers.IBANGenerator;
 import com.example.CodeGeneratieRestAPI.helpers.LoggedInUserHelper;
 import com.example.CodeGeneratieRestAPI.helpers.ServiceHelper;
 import com.example.CodeGeneratieRestAPI.models.Account;
+import com.example.CodeGeneratieRestAPI.models.HashedPassword;
 import com.example.CodeGeneratieRestAPI.models.User;
 import com.example.CodeGeneratieRestAPI.models.UserType;
 import com.example.CodeGeneratieRestAPI.repositories.AccountRepository;
@@ -21,6 +23,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 
 @Service
@@ -219,7 +222,7 @@ public class AccountService {
         Account accountToUpdate = checkAndGetAccount(account.getIban(), loggedInUser);
 
         // Update the account
-        Account updatedAccount = getUpdatedAccount(account, accountToUpdate, loggedInUser);
+        Account updatedAccount = getUpdatedAccount(account, accountToUpdate);
 
         // Save the account
         accountRepository.save(updatedAccount);
@@ -227,43 +230,21 @@ public class AccountService {
         // Create a response object and return it
         return updatedAccount;
     }
-
-    private Account getUpdatedAccount(AccountRequestDTO accountWithNewValues, Account accountToUpdate, User loggedInUser) {
-        // Loop through all the fields of the accountWithNewValues object
-        // If the field is not null and the value is different from the one in the accountToUpdate object
-        // Set the new value to the accountToUpdate object
-        try {
-            for (Field field : accountWithNewValues.getClass().getDeclaredFields()) {
-                // Set the field to accessible
-                field.setAccessible(true);
-
-                // Skip the iban and userId fields (they cannot be updated)
-                if (field.getName().equals("iban") || field.getName().equals("userId") || field.get(accountWithNewValues) == null) {
-                    continue;
-                }
-
-                //  Check if the balance field is not null but is different from the one in the accountToUpdate object
-                //  and if so, throw an exception
-                if (field.getName().equals("balance") && field != null && !accountToUpdate.getBalance().equals(accountWithNewValues.getBalance())) {
-                    throw new AccountUpdateException("You cannot update the balance of an account");
-                }
-
-                //  Check if the field exists in the Account class
-                Field accountField = accountToUpdate.getClass().getDeclaredField(field.getName());
-                //  Set the field to accessible
-                accountField.setAccessible(true);
-
-                Object newValue = field.get(accountWithNewValues);
-                Object oldValue = accountField.get(accountToUpdate);
-
-                //  To prevent fields from being set to null, check if the new value is not null and if it is different from the old value
-                if (newValue != null && !newValue.equals(oldValue)) {
-                    accountField.set(accountToUpdate, newValue);
-                }
+    private Account getUpdatedAccount(AccountRequestDTO accountWithNewValues, Account accountToUpdate) {
+        //  Update all the fields unless it's null
+        //  Except for iban, userId and balance
+        if(accountWithNewValues.getBalance() != null){
+            if (!accountWithNewValues.getBalance().equals(accountToUpdate.getBalance())){
+                throw new AccountUpdateException("You cannot update the balance of an account");
             }
-        } catch (NoSuchFieldException | IllegalAccessException e) {
-            throw new AccountUpdateException(e.getMessage());
         }
+
+        Optional.ofNullable(accountWithNewValues.getDailyLimit()).ifPresent(accountToUpdate::setDailyLimit);
+        Optional.ofNullable(accountWithNewValues.getTransactionLimit()).ifPresent(accountToUpdate::setTransactionLimit);
+        Optional.ofNullable(accountWithNewValues.getAbsoluteLimit()).ifPresent(accountToUpdate::setAbsoluteLimit);
+        Optional.ofNullable(accountWithNewValues.getName()).ifPresent(accountToUpdate::setName);
+        Optional.ofNullable(accountWithNewValues.getIsSavings()).ifPresent(accountToUpdate::setIsSavings);
+
         // Return the updated account
         return accountToUpdate;
     }
