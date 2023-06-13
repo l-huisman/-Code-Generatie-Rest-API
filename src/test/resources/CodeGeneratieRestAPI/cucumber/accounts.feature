@@ -33,7 +33,7 @@ Feature: Accounts CRUD operations
   Scenario: Updating an account
     Given I am logged in as "Dewi" with password "Dewi" to do some account stuff
     And The endpoint for "accounts" is available for method "PUT" to do some account stuff
-    When I update an account with IBAN "NL61-INHO-0897-9124-90"
+    When I update an account with IBAN "NL61-INHO-0897-9124-92"
     Then I should receive the updated account
 
   Scenario: Updating an account that I don't own

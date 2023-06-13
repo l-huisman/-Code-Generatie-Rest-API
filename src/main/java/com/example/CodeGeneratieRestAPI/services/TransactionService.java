@@ -60,63 +60,28 @@ public class TransactionService {
         String transactionFromAccount = transactionIn.getFromAccountIban();
         Account fromAccount = transactionFromAccount != null ? accountRepository.findByIban(transactionIn.getFromAccountIban()) : null;
         Account toAccount = transactionToAccount != null ? accountRepository.findByIban(transactionIn.getToAccountIban()) : null;
-
-        TransactionType transactionType = null;
-        try {
-            transactionType = TransactionType.valueOf(transactionIn.getTransactionType());
-        } catch (IllegalArgumentException e) {
-            throw new TransactionTypeNotValidException("The transaction type is not valid.");
-        }
-
+        TransactionType transactionType = getTransactionType(transactionIn.getTransactionType());
         Transaction transaction = new Transaction(fromAccount, toAccount, transactionIn.getAmount(), transactionIn.getLabel(), transactionIn.getDescription(), transactionType);
 
         validateTransactionAmount(transaction);
 
         switch (transaction.getTransactionType()) {
             case DEPOSIT -> {
-                if (toAccount == null) {
-                    throw new TransactionAccountNotValidException("The to account can't be empty.");
-                }
-                validateUserOwnsAccount(user, toAccount);
+                validateDeposit(user, toAccount);
 
                 //Update the account balance
                 toAccount.setBalance(toAccount.getBalance() + transaction.getAmount());
                 accountRepository.save(toAccount);
             }
             case WITHDRAW -> {
-                if (fromAccount == null) {
-                    throw new TransactionAccountNotValidException("The from account can't be empty.");
-                }
-
-                validateUserOwnsAccount(user, fromAccount);
-                validateAbsoluteLimit(fromAccount, transaction);
-                validateTransactionLimit(fromAccount, transaction);
-                validateDailyLimit(fromAccount, transaction);
+                validateWithdraw(user, fromAccount, transaction);
 
                 //Update the account balance
                 fromAccount.setBalance(fromAccount.getBalance() - transaction.getAmount());
                 accountRepository.save(fromAccount);
             }
             case TRANSFER -> {
-                if (toAccount == null || fromAccount == null) {
-                    throw new TransactionAccountNotValidException("The to or from account can't be empty.");
-                }
-
-                //Check if the user owns this account or is an admin
-                validateUserOwnsAccount(user, fromAccount);
-
-                //Check if to account is not a savings account and if the user of from account also owns the to account
-                if (fromAccount.getIsSavings() && !toAccount.getUser().getUsername().equals(fromAccount.getUser().getUsername())) {
-                    throw new TransactionTransferSavingsException("It is not possible to transfer from a savings account to an account that is not your account.");
-                }
-
-                //Check if to account is not a savings account and if the user of from account also owns the to account
-                if (toAccount.getIsSavings() && !fromAccount.getUser().getUsername().equals(toAccount.getUser().getUsername())) {
-                    throw new TransactionTransferSavingsException("It is not possible to transfer to a savings account from an account that is not your account.");
-                }
-                validateAbsoluteLimit(fromAccount, transaction);
-                validateTransactionLimit(fromAccount, transaction);
-                validateDailyLimit(fromAccount, transaction);
+                validateTransfer(user, fromAccount, toAccount, transaction);
 
                 //Update the account balance
                 fromAccount.setBalance(fromAccount.getBalance() - transaction.getAmount());
@@ -154,7 +119,7 @@ public class TransactionService {
         return transaction;
     }
 
-    public List<Transaction> getAllByAccountIban(User user, String iban, Date startDate, Date endDate, String searchIban, String amountRelation, Float amount, Integer pageNumber, Integer pageSize) {
+    public Page<Transaction> getAllByAccountIban(User user, String iban, Date startDate, Date endDate, String searchIban, String amountRelation, Float amount, Integer pageNumber, Integer pageSize) {
         Date startOfDay = getStartOfDay(startDate);
         Date endOfDay = getEndOfDay(endDate);
 
@@ -180,6 +145,36 @@ public class TransactionService {
         Date endOfDay = Date.from(today.atTime(LocalTime.MAX).atZone(ZoneId.systemDefault()).toInstant());
         List<Transaction> transactions = transactionRepository.findAllByCreatedAtBetweenAndFromAccountIban(startOfDay, endOfDay, iban);
         return transactions.stream().mapToDouble(Transaction::getAmount).sum();
+    }
+
+    private void validateDeposit(User user, Account toAccount) {
+        if (toAccount == null) {
+            throw new TransactionAccountNotValidException("The to account can't be empty.");
+        }
+
+        validateUserOwnsAccount(user, toAccount);
+    }
+
+    private void validateWithdraw(User user, Account fromAccount, Transaction transaction) {
+        if (fromAccount == null) {
+            throw new TransactionAccountNotValidException("The from account can't be empty.");
+        }
+
+        validateUserOwnsAccount(user, fromAccount);
+        validateAbsoluteLimit(fromAccount, transaction);
+        validateTransactionLimit(fromAccount, transaction);
+        validateDailyLimit(fromAccount, transaction);
+    }
+
+    private void validateTransfer(User user, Account fromAccount, Account toAccount, Transaction transaction) {
+        if (toAccount == null || fromAccount == null) {
+            throw new TransactionAccountNotValidException("The to or from account can't be empty.");
+        }
+        validateUserOwnsAccount(user, fromAccount);
+        validateSavingsTransfer(fromAccount, toAccount);
+        validateAbsoluteLimit(fromAccount, transaction);
+        validateTransactionLimit(fromAccount, transaction);
+        validateDailyLimit(fromAccount, transaction);
     }
 
     private void validateTransactionAmount(Transaction transaction) {
@@ -232,5 +227,25 @@ public class TransactionService {
         return Date.from(date.toInstant()
                 .atZone(ZoneId.systemDefault())
                 .toLocalDate().atTime(LocalTime.MAX).atZone(ZoneId.systemDefault()).toInstant());
+    }
+
+    private TransactionType getTransactionType(String type){
+        try {
+            return TransactionType.valueOf(type);
+        } catch (IllegalArgumentException e) {
+            throw new TransactionTypeNotValidException("The transaction type is not valid.");
+        }
+    }
+
+    private void validateSavingsTransfer(Account fromAccount, Account toAccount) {
+        //Check if to account is not a savings account and if the user of from account also owns the to account
+        if (fromAccount.getIsSavings() && !toAccount.getUser().getUsername().equals(fromAccount.getUser().getUsername())) {
+            throw new TransactionTransferSavingsException("It is not possible to transfer from a savings account to an account that is not your account.");
+        }
+
+        //Check if to account is not a savings account and if the user of from account also owns the to account
+        if (toAccount.getIsSavings() && !fromAccount.getUser().getUsername().equals(toAccount.getUser().getUsername())) {
+            throw new TransactionTransferSavingsException("It is not possible to transfer to a savings account from an account that is not your account.");
+        }
     }
 }

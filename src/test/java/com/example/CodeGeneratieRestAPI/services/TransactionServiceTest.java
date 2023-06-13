@@ -538,12 +538,14 @@ public class TransactionServiceTest {
 
         Pageable pageableRequest = PageRequest.of(0, 10);
 
-        when(transactionRepository.findAllByIban(endDate, startDate, iban, "", "", 0F, pageableRequest)).thenReturn(transactions);
+        Page<Transaction> pageTransactions = new PageImpl<>(transactions, pageableRequest, transactions.size());
+
+        when(transactionRepository.findAllByIban(endDate, startDate, iban, "", "", 0F, pageableRequest)).thenReturn(pageTransactions);
 
 
-        List<Transaction> result = transactionService.getAllByAccountIban(user, iban, startDate, endDate, "", "", 0F, 0, 10);
+        Page<Transaction> result = transactionService.getAllByAccountIban(user, iban, startDate, endDate, "", "", 0F, 0, 10);
 
-        Assertions.assertEquals(transactions, result);
+        Assertions.assertEquals(pageTransactions, result);
     }
 
     @Test
@@ -569,8 +571,9 @@ public class TransactionServiceTest {
         transactions.add(getMockTransaction(user1, 100F, TransactionType.DEPOSIT, null, account));
 
         Pageable pageableRequest = PageRequest.of(0, 10);
+        Page<Transaction> pageTransactions = new PageImpl<>(transactions, pageableRequest, transactions.size());
 
-        when(transactionRepository.findAllByIban(endDate, startDate, iban, "", "", 0F, pageableRequest)).thenReturn(transactions);
+        when(transactionRepository.findAllByIban(endDate, startDate, iban, "", "", 0F, pageableRequest)).thenReturn(pageTransactions);
 
         Assertions.assertThrows(AccountNotOwnedException.class, () -> transactionService.getAllByAccountIban(user, iban, startDate, endDate, "", "", 0F, 0, 10));
     }
