@@ -26,6 +26,9 @@ public class LoginService {
     JwtService jwtService;
 
     public LoginResponseDTO login(LoginRequestDTO request) {
+        if (!checkDTOValues(request)) {
+            throw new UserNotFoundException("Username or password is empty");
+        }
         User user = loginRepository.findByUsername(request.getUsername())
                 .orElseThrow(() -> new UserNotFoundException("User not found"));
         if (!user.getHashedPassword().validatePassword(request.getPassword())) {
@@ -43,5 +46,9 @@ public class LoginService {
         } else {
             throw new InvalidTokenException("Invalid token");
         }
+    }
+
+    private boolean checkDTOValues(LoginRequestDTO request) {
+        return request.getUsername() != null && request.getPassword() != null;
     }
 }
