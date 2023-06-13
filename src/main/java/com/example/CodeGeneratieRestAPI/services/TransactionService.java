@@ -154,7 +154,7 @@ public class TransactionService {
         return transaction;
     }
 
-    public List<Transaction> getAllByAccountIban(User user, String iban, Date startDate, Date endDate, String searchIban, String amountRelation, Float amount, Integer pageNumber, Integer pageSize) {
+    public Page<Transaction> getAllByAccountIban(User user, String iban, Date startDate, Date endDate, String searchIban, String amountRelation, Float amount, Integer pageNumber, Integer pageSize) {
         Date startOfDay = getStartOfDay(startDate);
         Date endOfDay = getEndOfDay(endDate);
 
