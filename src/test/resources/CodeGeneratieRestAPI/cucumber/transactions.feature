@@ -65,7 +65,7 @@ Feature: Transactions CRUD operations
   Scenario: Add transfer transaction from own savings to other not own account
     Given I am logged in as "Devon" with password "devon"
     And The endpoint for "transactions" is available for method "POST"
-    When I add a transfer transaction of 80 from "NL61-INHO-0897-9124-93" to "NL61-INHO-0897-9124-92"
+    When I add a transfer transaction of 80 from "NL61-INHO-0897-9124-93" to "NL61-INHO-0897-9124-91"
     Then The response status code is 400
     And The message returned is "It is not possible to transfer from a savings account to an account that is not your account."
 
