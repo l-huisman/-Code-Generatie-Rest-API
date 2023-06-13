@@ -203,7 +203,13 @@ class TransactionControllerTest {
         transactions.add(getMockTransaction(1L, user, 60F, TransactionType.WITHDRAW, fromAccount, null));
         transactions.add(getMockTransaction(2L, user, 60F, TransactionType.WITHDRAW, fromAccount, null));
 
-        when(transactionService.getAllByAccountIban(user, fromAccount.getIban(), startDate, endDate, "", "", 0F, 0, 10)).thenReturn(transactions);
+        Integer pageNumber = 0, pageSize = 10;
+
+        Pageable pageableRequest = PageRequest.of(pageNumber, pageSize);
+
+        Page<Transaction> pageTransactions = new PageImpl<>(transactions, pageableRequest, transactions.size());
+
+        when(transactionService.getAllByAccountIban(user, fromAccount.getIban(), startDate, endDate, "", "", 0F, 0, 10)).thenReturn(pageTransactions);
         when(userService.getLoggedInUser()).thenReturn(user);
 
         SimpleDateFormat DateFormat = new SimpleDateFormat("yyyy-MM-dd");
