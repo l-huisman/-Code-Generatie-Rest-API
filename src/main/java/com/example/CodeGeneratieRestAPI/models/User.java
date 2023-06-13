@@ -36,6 +36,7 @@ public class User {
     @Column(name = "user_type")
     private UserType userType;
 
+    private Boolean isActive;
     private String createdAt;
 
     @OneToMany(mappedBy = "user")
