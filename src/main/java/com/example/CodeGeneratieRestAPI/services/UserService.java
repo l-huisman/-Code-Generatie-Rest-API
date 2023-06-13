@@ -5,6 +5,7 @@ import com.example.CodeGeneratieRestAPI.dtos.UserResponseDTO;
 import com.example.CodeGeneratieRestAPI.exceptions.UserCreationException;
 import com.example.CodeGeneratieRestAPI.exceptions.UserDeletionException;
 import com.example.CodeGeneratieRestAPI.exceptions.UserNotFoundException;
+import com.example.CodeGeneratieRestAPI.exceptions.UserUpdateException;
 import com.example.CodeGeneratieRestAPI.models.HashedPassword;
 import com.example.CodeGeneratieRestAPI.models.User;
 import com.example.CodeGeneratieRestAPI.models.UserType;
@@ -80,6 +81,9 @@ public class UserService {
     }
 
     public UserResponseDTO add(UserRequestDTO user) {
+        if (!checkDTOValues(user)) {
+            throw new UserCreationException("Not all required fields are filled in");
+        }
         User userToSave = modelMapper.map(user, User.class);
         userToSave.setPassword(new HashedPassword(user.getPassword()));
         userToSave.setCreatedAt(CreationDate());
@@ -96,6 +100,9 @@ public class UserService {
     }
 
     public UserResponseDTO update(Long id, UserRequestDTO user) {
+        if (!checkDTOValues(user)) {
+            throw new UserUpdateException("Not all required fields are filled in");
+        }
         Optional<User> userToUpdate = userRepository.findById(id);
         if (userToUpdate.isPresent()) {
             User updatedUser = UpdateFilledFields(user, userToUpdate.get());
@@ -126,6 +133,10 @@ public class UserService {
     private String CreationDate() {
         Date date = new Date();
         return date.toString();
+    }
+
+    private boolean checkDTOValues(UserRequestDTO user) {
+        return user.getFirstName() != null && user.getLastName() != null && user.getUsername() != null && user.getEmail() != null && user.getPassword() != null && user.getUserType() != null;
     }
 
     private User UpdateFilledFields(UserRequestDTO user, User userToUpdate) {
