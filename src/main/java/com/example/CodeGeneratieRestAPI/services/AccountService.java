@@ -90,7 +90,6 @@ public class AccountService {
     }
 
     private Date getCurrentDate() {
-        //TODO: Make the ZoneId configurable
         ZoneId zone = ZoneId.of("Europe/Amsterdam");
         return Date.from(LocalDateTime.now(zone).atZone(zone).toInstant());
     }
@@ -103,14 +102,14 @@ public class AccountService {
         //  The balance must always be 0 when creating a new account
         accountRequestDTO.setBalance(0.0F);
 
-        //  Check if all fields other than iban and userId are set, if not, throw an exception because there is nothing to update
+        //  Check if all fields other than iban and userId are set, if not, throw an exception because the required fields are not set
         //  This code can throw an IllegalAccessException, which is why this piece of code is in a try catch block
         try {
             for (Field field : accountRequestDTO.getClass().getDeclaredFields()) {
                 field.setAccessible(true);
                 //  The userId is allowed to be null if the user is adding an account for itself
                 //  If the user is an employee, the userId must be set, but this is checked later
-                //  The IBAN is required to be null, because it will be generated later
+                //  The IBAN is required to be null, because it will be generated later, the exception handling for this is done in the add method
                 if (!field.getName().equals("iban") && !field.getName().equals("userId")) {
                     if (field.get(accountRequestDTO) == null) {
                         throw new AccountCreationException("All fields (other then the IBAN) must be filled out");
@@ -179,7 +178,6 @@ public class AccountService {
             return accountRepository.findAllBySearchTerm(search, active);
         } else {
             //  Get all accounts of the user
-            System.out.println(search + active + loggedInUser.getId());
             return accountRepository.findAllBySearchTermAndUserId(search, active, loggedInUser.getId());
         }
     }
@@ -198,8 +196,8 @@ public class AccountService {
         accountLimitsLeft.setTransactionLimit(account.getTransactionLimit());
 
         //  The amount spendable on the next transaction is the minimum of the daily limit left, the transaction limit and the balance minus the absolute limit
-        accountLimitsLeft.setAmountSpendableOnNextTransaction(Math.min(Math.min(accountLimitsLeft.getDailyLimitLeft(), accountLimitsLeft.getTransactionLimit()), account.getBalance() - account.getAbsoluteLimit()));
         accountLimitsLeft.setDifferenceBalanceAndAbsoluteLimit(account.getBalance() - account.getAbsoluteLimit());
+        accountLimitsLeft.setAmountSpendableOnNextTransaction(Math.min(Math.min(accountLimitsLeft.getDailyLimitLeft(), accountLimitsLeft.getTransactionLimit()), accountLimitsLeft.getDifferenceBalanceAndAbsoluteLimit()));
 
         //  Return an AccountData object which contains the account (converted to an AccountResponseDTO object) and the account limits left
         return new AccountData(new AccountResponseDTO(account), accountLimitsLeft);
@@ -240,7 +238,7 @@ public class AccountService {
                 field.setAccessible(true);
 
                 // Skip the iban and userId fields (they cannot be updated)
-                if (field.getName().equals("iban") || field.getName().equals("userId") || field == null || field.get(accountWithNewValues) == null) {
+                if (field.getName().equals("iban") || field.getName().equals("userId") || field.get(accountWithNewValues) == null) {
                     continue;
                 }
 
@@ -250,7 +248,7 @@ public class AccountService {
                     throw new AccountUpdateException("You cannot update the balance of an account");
                 }
 
-                // Check if the field exists in the Account class
+                //  Check if the field exists in the Account class
                 Field accountField = accountToUpdate.getClass().getDeclaredField(field.getName());
                 //  Set the field to accessible
                 accountField.setAccessible(true);
@@ -258,6 +256,7 @@ public class AccountService {
                 Object newValue = field.get(accountWithNewValues);
                 Object oldValue = accountField.get(accountToUpdate);
 
+                //  To prevent fields from being set to null, check if the new value is not null and if it is different from the old value
                 if (newValue != null && !newValue.equals(oldValue)) {
                     accountField.set(accountToUpdate, newValue);
                 }
