@@ -2,10 +2,7 @@ package com.example.CodeGeneratieRestAPI.controllers;
 
 import com.example.CodeGeneratieRestAPI.dtos.UserRequestDTO;
 import com.example.CodeGeneratieRestAPI.dtos.UserResponseDTO;
-import com.example.CodeGeneratieRestAPI.exceptions.UserAlreadyExistsException;
-import com.example.CodeGeneratieRestAPI.exceptions.UserDeletionException;
-import com.example.CodeGeneratieRestAPI.exceptions.UserNotFoundException;
-import com.example.CodeGeneratieRestAPI.exceptions.UserUpdateException;
+import com.example.CodeGeneratieRestAPI.exceptions.*;
 import com.example.CodeGeneratieRestAPI.models.ApiResponse;
 import com.example.CodeGeneratieRestAPI.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,7 +56,7 @@ public class UserController {
     public ResponseEntity<ApiResponse<UserResponseDTO>> add(@RequestBody UserRequestDTO user) {
         try {
             return ResponseEntity.status(HttpStatus.CREATED).body(new ApiResponse<>(true, "User created!", userService.add(user)));
-        } catch (UserUpdateException | UserAlreadyExistsException e) {
+        } catch (UserDTOException | UserUpdateException | UserAlreadyExistsException e) {
             return ResponseEntity.status(e.getStatusCode()).body(new ApiResponse<>(false, e.getMessage()));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ApiResponse<>(false, e.getMessage()));
@@ -70,7 +67,7 @@ public class UserController {
     public ResponseEntity<ApiResponse<UserResponseDTO>> update(@PathVariable Long id, @RequestBody UserRequestDTO user) {
         try {
             return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse<>(true, "User updated!", userService.update(id, user)));
-        } catch (UserNotFoundException e) {
+        } catch (UserDTOException | UserNotFoundException e) {
             return ResponseEntity.status(e.getStatusCode()).body(new ApiResponse<>(false, e.getMessage()));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ApiResponse<>(false, e.getMessage()));

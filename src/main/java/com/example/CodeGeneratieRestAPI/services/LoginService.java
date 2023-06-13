@@ -4,6 +4,7 @@ import com.example.CodeGeneratieRestAPI.dtos.LoginRequestDTO;
 import com.example.CodeGeneratieRestAPI.dtos.LoginResponseDTO;
 import com.example.CodeGeneratieRestAPI.dtos.UserResponseDTO;
 import com.example.CodeGeneratieRestAPI.exceptions.InvalidTokenException;
+import com.example.CodeGeneratieRestAPI.exceptions.LoginDTOException;
 import com.example.CodeGeneratieRestAPI.exceptions.PasswordValidationException;
 import com.example.CodeGeneratieRestAPI.exceptions.UserNotFoundException;
 import com.example.CodeGeneratieRestAPI.jwt.JwTokenProvider;
@@ -27,7 +28,7 @@ public class LoginService {
 
     public LoginResponseDTO login(LoginRequestDTO request) {
         if (!checkDTOValues(request)) {
-            throw new UserNotFoundException("Username or password is empty");
+            throw new LoginDTOException("Username or password is empty");
         }
         User user = loginRepository.findByUsername(request.getUsername())
                 .orElseThrow(() -> new UserNotFoundException("User not found"));
