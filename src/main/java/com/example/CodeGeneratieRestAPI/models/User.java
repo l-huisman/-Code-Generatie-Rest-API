@@ -42,7 +42,7 @@ public class User {
     @JsonIgnore
     private List<Account> accounts;
 
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "user")
+    @OneToMany( mappedBy = "user")
     private List<Transaction> transactions;
 
     public String getPassword() {
